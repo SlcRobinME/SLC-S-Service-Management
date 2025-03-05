@@ -1,0 +1,26 @@
+<DMSScript options="272" xmlns="http://www.skyline.be/automation">
+	<Name>SLC_SM_Delete Service Item</Name>
+	<Description />
+	<Type>Automation</Type>
+	<Author>rmeuriss</Author>
+	<CheckSets>FALSE</CheckSets>
+	<Folder>Service Management</Folder>
+	<Protocols>
+	</Protocols>
+	<Memory>
+	</Memory>
+	<Parameters>
+		<ScriptParameter id="1" type="string" values="">
+			<Description>Service Item Label</Description>
+		</ScriptParameter>
+		<ScriptParameter id="10" type="string" values="">
+			<Description>DOM ID</Description>
+		</ScriptParameter>
+	</Parameters>
+	<Script>
+		<Exe id="11" type="csharp">
+			<Value><![CDATA[[Project:SLC_SM_Delete Service Item]]]></Value>
+			<Message />
+		</Exe>
+	</Script>
+</DMSScript>

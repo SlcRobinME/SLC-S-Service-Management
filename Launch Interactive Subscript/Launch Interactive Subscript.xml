@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<DMSScript options="272" xmlns="http://www.skyline.be/automation">
+	<Name>Launch Interactive Subscript</Name>
+	<Description />
+	<Type>Automation</Type>
+	<Author>SKYLINE2\JonasKO</Author>
+	<CheckSets>FALSE</CheckSets>
+	<Folder>Service Management</Folder>
+	<Protocols>
+	</Protocols>
+	<Memory>
+	</Memory>
+	<Parameters>
+		<ScriptParameter id="1" type="string" values="">
+			<Description>Script Name</Description>
+		</ScriptParameter>
+		<ScriptParameter id="2" type="string" values="">
+			<Description>Booking Manager Element Name</Description>
+		</ScriptParameter>
+		<ScriptParameter id="3" type="string" values="">
+			<Description>DOM ID</Description>
+		</ScriptParameter>
+		<ScriptParameter id="4" type="string" values="">
+			<Description>Item Label</Description>
+		</ScriptParameter>
+	</Parameters>
+	<Script>
+		<Exe id="10" type="csharp">
+			<Value>
+				<![CDATA[[Project:Launch Interactive Subscript]]]>
+			</Value>
+			<!--<Param type="debug">true</Param>-->
+			<Message />
+		</Exe>
+	</Script>
+</DMSScript>

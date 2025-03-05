@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<DMSScript options="272" xmlns="http://www.skyline.be/automation">
+	<Name>Service-Management-GQI-CustomOperator-HasValue</Name>
+	<Description />
+	<Type>Automation</Type>
+	<Author>SKYLINE2\JonasKO</Author>
+	<CheckSets>FALSE</CheckSets>
+	<Folder>Service Management</Folder>
+
+	<Protocols>
+	</Protocols>
+
+	<Memory>
+	</Memory>
+
+	<Parameters>
+	</Parameters>
+
+	<Script>
+		<Exe id="1" type="csharp">
+			<Value>
+				<![CDATA[[Project:Service-Management-GQI-CustomOperator-HasValue]]]>
+			</Value>
+			<!--<Param type="debug">true</Param>-->
+			<Param type="preCompile">true</Param>
+			<Param type="libraryName">Service-Management-GQI-CustomOperator-HasValue</Param>
+			<Message />
+		</Exe>
+	</Script>
+</DMSScript>
