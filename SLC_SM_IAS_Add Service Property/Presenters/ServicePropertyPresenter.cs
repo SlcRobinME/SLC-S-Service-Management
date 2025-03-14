@@ -1,6 +1,7 @@
 ﻿namespace SLC_SM_IAS_Add_Service_Property_1.Presenters
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Automation;
@@ -40,9 +41,20 @@
 
 		private void OnUpdateServiceProperty(ServicePropertiesInstance servicePropertySelected)
 		{
-			view.DdValue.SetOptions(servicePropertySelected.DiscreteServicePropertyValueOptions.Select(x => x.DiscreteValue));
-			view.TBoxValue.Text = String.Empty;
-			view.TBoxValue.IsEnabled = false;
+			if (servicePropertySelected.ServicePropertyInfo.Type == SlcServicemanagementIds.Enums.TypeEnum.Discrete)
+			{
+				view.TBoxValue.Text = String.Empty;
+				view.TBoxValue.IsEnabled = false;
+				view.DdValue.SetOptions(servicePropertySelected.DiscreteServicePropertyValueOptions.Select(x => x.DiscreteValue));
+				view.DdValue.IsEnabled = true;
+			}
+			else
+			{
+				view.TBoxValue.Text = String.Empty;
+				view.TBoxValue.IsEnabled = true;
+				view.DdValue.SetOptions(new List<string>());
+				view.DdValue.IsEnabled = false;
+			}
 		}
 
 		public void LoadFromModel(ServicePropertyValueSection section)
@@ -50,23 +62,16 @@
 			// Load correct types
 			LoadFromModel();
 
-			view.BtnAdd.Text = "Edit";
+			view.BtnAdd.Text = "Edit Service Property";
 			view.ServiceProperty.Selected = servicePropertiesInstances.FirstOrDefault(x => x.ID.Id == section.Property);
 			OnUpdateServiceProperty(view.ServiceProperty.Selected);
-
-			if (view.ServiceProperty.Selected.ServicePropertyInfo.Type == SlcServicemanagementIds.Enums.TypeEnum.Discrete)
+			if (view.DdValue.IsEnabled)
 			{
-				view.TBoxValue.Text = String.Empty;
-				view.TBoxValue.IsEnabled = false;
 				view.DdValue.Selected = section.Value;
-				view.DdValue.IsEnabled = true;
 			}
 			else
 			{
 				view.TBoxValue.Text = section.Value;
-				view.TBoxValue.IsEnabled = true;
-				view.DdValue.Selected = String.Empty;
-				view.DdValue.IsEnabled = false;
 			}
 		}
 

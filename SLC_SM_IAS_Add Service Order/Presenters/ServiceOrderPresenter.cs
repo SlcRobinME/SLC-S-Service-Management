@@ -15,9 +15,10 @@
 	public class ServiceOrderPresenter
 	{
 		private readonly IEngine engine;
-		private readonly ServiceOrderView view;
 		private readonly List<string> getServiceOrderItemLabels;
+		private readonly ServiceOrderView view;
 		private ServiceOrdersInstance instanceToReturn;
+		private PeopleInstance[] peopleInstances;
 
 		public ServiceOrderPresenter(IEngine engine, ServiceOrderView view, string[] getServiceOrderItemLabels)
 		{
@@ -27,6 +28,7 @@
 			instanceToReturn = new ServiceOrdersInstance();
 
 			view.TboxName.Changed += (sender, args) => ValidateLabel(args.Value);
+			view.Org.Changed += (sender, args) => UpdateContactOnSelectedOrganization(args.Selected);
 		}
 
 		public ServiceOrdersInstance GetData
@@ -51,15 +53,24 @@
 			}
 		}
 
-		public void LoadFromModel()
+		public void LoadFromModel(int nr)
 		{
+			view.TboxName.PlaceHolder = $"Order #{nr + 1:000}";
+
 			// Load correct types
-			view.Priority.SetOptions(new List<Option<SlcServicemanagementIds.Enums.ServiceorderpriorityEnum>>
-			{
-				new Option<SlcServicemanagementIds.Enums.ServiceorderpriorityEnum>(SlcServicemanagementIds.Enums.Serviceorderpriority.High, SlcServicemanagementIds.Enums.ServiceorderpriorityEnum.High),
-				new Option<SlcServicemanagementIds.Enums.ServiceorderpriorityEnum>(SlcServicemanagementIds.Enums.Serviceorderpriority.Medium, SlcServicemanagementIds.Enums.ServiceorderpriorityEnum.Medium),
-				new Option<SlcServicemanagementIds.Enums.ServiceorderpriorityEnum>(SlcServicemanagementIds.Enums.Serviceorderpriority.Low, SlcServicemanagementIds.Enums.ServiceorderpriorityEnum.Low),
-			});
+			view.Priority.SetOptions(
+				new List<Option<SlcServicemanagementIds.Enums.ServiceorderpriorityEnum>>
+				{
+					new Option<SlcServicemanagementIds.Enums.ServiceorderpriorityEnum>(
+						SlcServicemanagementIds.Enums.Serviceorderpriority.High,
+						SlcServicemanagementIds.Enums.ServiceorderpriorityEnum.High),
+					new Option<SlcServicemanagementIds.Enums.ServiceorderpriorityEnum>(
+						SlcServicemanagementIds.Enums.Serviceorderpriority.Medium,
+						SlcServicemanagementIds.Enums.ServiceorderpriorityEnum.Medium),
+					new Option<SlcServicemanagementIds.Enums.ServiceorderpriorityEnum>(
+						SlcServicemanagementIds.Enums.Serviceorderpriority.Low,
+						SlcServicemanagementIds.Enums.ServiceorderpriorityEnum.Low),
+				});
 
 			var orgDomHelper = new DomHelper(engine.SendSLNetMessages, SlcPeople_OrganizationsIds.ModuleId);
 			var orgInstances = orgDomHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.Organizations.Id))
@@ -70,11 +81,11 @@
 			orgOptions.Insert(0, new Option<OrganizationsInstance>("-None-", null));
 			view.Org.SetOptions(orgOptions);
 
-			var peopleInstances = orgDomHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.People.Id))
+			peopleInstances = orgDomHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcPeople_OrganizationsIds.Definitions.People.Id))
 				.Select(x => new PeopleInstance(x))
 				.ToArray();
 
-			view.Contact.SetOptions(peopleInstances.Select(x => new Option<PeopleInstance>(x.Name, x)));
+			UpdateContactOnSelectedOrganization(view.Org.Selected);
 		}
 
 		public void LoadFromModel(ServiceOrdersInstance instance)
@@ -83,9 +94,9 @@
 			getServiceOrderItemLabels.RemoveAll(x => x == instance.ServiceOrderInfo.Name);
 
 			// Load correct types
-			LoadFromModel();
+			LoadFromModel(0);
 
-			view.BtnAdd.Text = "Edit";
+			view.BtnAdd.Text = "Edit Service Order";
 			view.TboxName.Text = instance.ServiceOrderInfo.Name;
 
 			if (instance.ServiceOrderInfo.Priority.HasValue)
@@ -115,6 +126,18 @@
 			ok &= ValidateLabel(view.TboxName.Text);
 
 			return ok;
+		}
+
+		private void UpdateContactOnSelectedOrganization(OrganizationsInstance organizationsInstance)
+		{
+			if (organizationsInstance == null)
+			{
+				view.Contact.SetOptions(new List<Option<PeopleInstance>>());
+				return;
+			}
+
+			view.Contact.SetOptions(
+				peopleInstances.Where(x => x.Organization.Organization_57695f03 == organizationsInstance.ID.Id).OrderBy(x => x.Name).Select(x => new Option<PeopleInstance>(x.Name, x)));
 		}
 
 		private bool ValidateLabel(string newValue)

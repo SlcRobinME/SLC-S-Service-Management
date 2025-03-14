@@ -53,6 +53,6 @@
 
 		public DropDown ScriptSelection { get; } = new DropDown { Width = Defaults.WidgetWidth };
 
-		public Button BtnAdd { get; } = new Button("Add");
+		public Button BtnAdd { get; } = new Button("Create Service Item");
 	}
 }

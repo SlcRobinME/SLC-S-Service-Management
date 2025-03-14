@@ -13,11 +13,11 @@
 
 	public class ServiceOrderItemPresenter
 	{
-		private readonly IEngine engine;
 		private readonly DomHelper domHelper;
-		private readonly ServiceOrderItemView view;
-		private readonly Repo repo;
+		private readonly IEngine engine;
 		private readonly string[] getServiceOrderItemLabels;
+		private readonly Repo repo;
+		private readonly ServiceOrderItemView view;
 		private ServiceOrderItemsInstance instanceToReturn;
 		private bool isEdit;
 
@@ -30,7 +30,9 @@
 			this.getServiceOrderItemLabels = getServiceOrderItemLabels;
 			instanceToReturn = new ServiceOrderItemsInstance();
 
+			view.IndefiniteTime.Changed += (sender, args) => view.End.IsEnabled = !args.IsChecked;
 			view.TboxName.Changed += (sender, args) => ValidateLabel(args.Value);
+			view.ActionType.Changed += (sender, args) => UpdateUiOnActionTypeChange(args.Selected);
 		}
 
 		public ServiceOrderItemsInstance GetData
@@ -39,6 +41,9 @@
 			{
 				instanceToReturn.ServiceOrderItemInfo.Name = view.TboxName.Text;
 				instanceToReturn.ServiceOrderItemInfo.Action = view.ActionType.Selected.ToString();
+				instanceToReturn.ServiceOrderItemInfo.ServiceStartTime = view.Start.DateTime;
+				instanceToReturn.ServiceOrderItemInfo.ServiceEndTime = view.IndefiniteTime.IsChecked ? default(DateTime?) : view.End.DateTime;
+				instanceToReturn.ServiceOrderItemInfo.ServiceIndefiniteRuntime = view.IndefiniteTime.IsChecked;
 				instanceToReturn.ServiceOrderItemServiceInfo.ServiceCategory = view.Category.Selected?.ID.Id;
 				instanceToReturn.ServiceOrderItemServiceInfo.ServiceSpecification = view.Specification.Selected?.ID.Id;
 				instanceToReturn.ServiceOrderItemServiceInfo.Service = view.Service.Selected?.ID.Id;
@@ -60,6 +65,86 @@
 			}
 		}
 
+		public void LoadFromModel(int nr)
+		{
+			view.TboxName.PlaceHolder = $"Service Order Item #{nr + 1:000}";
+
+			// Load correct types
+			var categories = repo.AllCategories.OrderBy(x => x.Name).Select(x => new Option<ServiceCategoryInstance>(x.Name, x)).ToList();
+			categories.Insert(0, new Option<ServiceCategoryInstance>("-None-", null));
+			view.Category.SetOptions(categories);
+
+			var specs = repo.AllSpecs.OrderBy(x => x.Name).Select(x => new Option<ServiceSpecificationsInstance>(x.Name, x)).ToList();
+			specs.Insert(0, new Option<ServiceSpecificationsInstance>("-None-", null));
+			view.Specification.SetOptions(specs);
+
+			var serviceOptions = repo.AllServices.Select(x => new Option<ServicesInstance>(x.Name, x)).ToList();
+			serviceOptions.Insert(0, new Option<ServicesInstance>("-None-", null));
+			view.Service.SetOptions(serviceOptions);
+
+			view.Start.DateTime = DateTime.Now + TimeSpan.FromDays(1);
+			view.End.DateTime = DateTime.Now + TimeSpan.FromDays(8);
+			view.IndefiniteTime.IsChecked = false;
+
+			UpdateUiOnActionTypeChange(view.ActionType.Selected);
+		}
+
+		public void LoadFromModel(ServiceOrderItemsInstance instance)
+		{
+			instanceToReturn = instance;
+			isEdit = true;
+
+			// Load correct types
+			LoadFromModel(0);
+
+			view.BtnAdd.Text = "Edit Service Order Item";
+			view.TboxName.Text = instance.Name;
+			view.ActionType.Selected = Enum.TryParse(instance.ServiceOrderItemInfo.Action, true, out ServiceOrderItemView.ActionTypeEnum action)
+				? action
+				: ServiceOrderItemView.ActionTypeEnum.NoChange;
+
+			view.Start.DateTime = instance.ServiceOrderItemInfo.ServiceStartTime ?? DateTime.Now;
+			view.End.DateTime = instance.ServiceOrderItemInfo.ServiceEndTime ?? DateTime.Now + TimeSpan.FromDays(7);
+			view.IndefiniteTime.IsChecked = instance.ServiceOrderItemInfo.ServiceIndefiniteRuntime ?? false;
+			if (view.IndefiniteTime.IsChecked)
+			{
+				view.End.IsEnabled = false;
+			}
+
+			ServiceCategoryInstance serviceCategoryInstance = repo.AllCategories.FirstOrDefault(x => x.ID.Id == instance.ServiceOrderItemServiceInfo.ServiceCategory);
+			if (serviceCategoryInstance != null && view.Category.Values.Contains(serviceCategoryInstance))
+			{
+				view.Category.Selected = serviceCategoryInstance;
+			}
+
+			ServicesInstance serviceInstance = repo.AllServices.FirstOrDefault(x => x.ID.Id == instance.ServiceOrderItemServiceInfo.Service);
+			if (serviceInstance != null && view.Service.Values.Contains(serviceInstance))
+			{
+				view.Service.Selected = serviceInstance;
+			}
+
+			ServiceSpecificationsInstance serviceSpecificationsInstance = repo.AllSpecs.FirstOrDefault(x => x.ID.Id == instance.ServiceOrderItemServiceInfo.ServiceSpecification);
+			if (serviceSpecificationsInstance != null && view.Specification.Values.Contains(serviceSpecificationsInstance))
+			{
+				view.Specification.Selected = serviceSpecificationsInstance;
+			}
+			else
+			{
+				view.Specification.Selected = view.Specification.Values.FirstOrDefault(x => x.ID.Id == view.Service.Selected?.ServiceInfo.ServiceSpecifcation);
+			}
+
+			UpdateUiOnActionTypeChange(view.ActionType.Selected);
+		}
+
+		public bool Validate()
+		{
+			bool ok = true;
+
+			ok &= ValidateLabel(view.TboxName.Text);
+
+			return ok;
+		}
+
 		private Guid? DuplicateInstance(Guid id)
 		{
 			var instance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(id)).FirstOrDefault();
@@ -73,55 +158,23 @@
 			return instance.ID.Id;
 		}
 
-		public void LoadFromModel()
+		private void UpdateUiOnActionTypeChange(ServiceOrderItemView.ActionTypeEnum actionTypeSelected)
 		{
-			// Load correct types
-			view.Category.SetOptions(repo.AllCategories.Select(x => new Option<ServiceCategoryInstance>(x.Name, x)));
-			view.Specification.SetOptions(repo.AllSpecs.Select(x => new Option<ServiceSpecificationsInstance>(x.Name, x)));
-
-			var serviceOptions = repo.AllServices.Select(x => new Option<ServicesInstance>(x.Name, x)).ToList();
-			serviceOptions.Insert(0, new Option<ServicesInstance>("-None-", null));
-			view.Service.SetOptions(serviceOptions);
-		}
-
-		public void LoadFromModel(ServiceOrderItemsInstance instance)
-		{
-			instanceToReturn = instance;
-			isEdit = true;
-
-			// Load correct types
-			LoadFromModel();
-
-			view.BtnAdd.Text = "Edit";
-			view.TboxName.Text = instance.Name;
-			view.ActionType.Selected = Enum.TryParse(instance.ServiceOrderItemInfo.Action, true, out ServiceOrderItemView.ActionTypeEnum action) ? action : ServiceOrderItemView.ActionTypeEnum.NoChange;
-
-			ServiceCategoryInstance serviceCategoryInstance = repo.AllCategories.FirstOrDefault(x => x.ID.Id == instance.ServiceOrderItemServiceInfo.ServiceCategory);
-			if (serviceCategoryInstance != null && view.Category.Values.Contains(serviceCategoryInstance))
+			if (actionTypeSelected == ServiceOrderItemView.ActionTypeEnum.Add)
 			{
-				view.Category.Selected = serviceCategoryInstance;
+				view.Service.IsEnabled = false;
+				view.Specification.IsEnabled = true;
 			}
-
-			ServiceSpecificationsInstance serviceSpecificationsInstance = repo.AllSpecs.FirstOrDefault(x => x.ID.Id == instance.ServiceOrderItemServiceInfo.ServiceSpecification);
-			if (serviceSpecificationsInstance != null && view.Specification.Values.Contains(serviceSpecificationsInstance))
+			else if (actionTypeSelected == ServiceOrderItemView.ActionTypeEnum.Delete || actionTypeSelected == ServiceOrderItemView.ActionTypeEnum.Modify)
 			{
-				view.Specification.Selected = serviceSpecificationsInstance;
+				view.Service.IsEnabled = true;
+				view.Specification.IsEnabled = false;
 			}
-
-			ServicesInstance serviceInstance = repo.AllServices.FirstOrDefault(x => x.ID.Id == instance.ServiceOrderItemServiceInfo.Service);
-			if (serviceInstance != null && view.Service.Values.Contains(serviceInstance))
+			else
 			{
-				view.Service.Selected = serviceInstance;
+				view.Service.IsEnabled = true;
+				view.Specification.IsEnabled = true;
 			}
-		}
-
-		public bool Validate()
-		{
-			bool ok = true;
-
-			ok &= ValidateLabel(view.TboxName.Text);
-
-			return ok;
 		}
 
 		private bool ValidateLabel(string newValue)

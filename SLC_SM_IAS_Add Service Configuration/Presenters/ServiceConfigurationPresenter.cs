@@ -45,7 +45,7 @@
 			// Load correct types
 			LoadFromModel();
 
-			view.BtnAdd.Text = "Edit";
+			view.BtnAdd.Text = "Edit Service Configuration";
 			view.ValueType.Selected = String.IsNullOrEmpty(section.StringValue) ? ServiceConfigurationView.ValueTypeEnum.Double : ServiceConfigurationView.ValueTypeEnum.String;
 			OnUpdateServiceProperty(view.ValueType.Selected);
 

@@ -1,4 +1,4 @@
-﻿namespace SLC_SM_Create_Service_Inventory_Item_1.Views
+﻿namespace SLC_SM_Create_Service_Inventory_Item.Views
 {
 	using System;
 	using DomHelpers.SlcServicemanagement;
@@ -30,7 +30,7 @@
 			AddWidget(ErrorStart, row, 2);
 			AddWidget(LblEnd, ++row, 0);
 			AddWidget(End, row, 1);
-			AddWidget(ErrorEnd, row, 2);
+			AddWidget(IndefiniteRuntime, row, 2);
 
 			AddWidget(new WhiteSpace(), ++row, 0);
 			AddWidget(BtnCancel, ++row, 0);
@@ -79,8 +79,8 @@
 			AutoCloseCalendar = true,
 		};
 
-		public Label ErrorEnd { get; } = new Label(String.Empty);
+		public CheckBox IndefiniteRuntime { get; } = new CheckBox("Indefinite (no end time)") { IsChecked = false };
 
-		public Button BtnAdd { get; } = new Button("Add");
+		public Button BtnAdd { get; } = new Button("Create Service Inventory Item");
 	}
 }
