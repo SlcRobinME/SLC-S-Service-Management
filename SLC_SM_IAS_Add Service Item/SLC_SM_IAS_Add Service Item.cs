@@ -54,215 +54,236 @@ dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 */
 namespace SLC_SM_IAS_Add_Service_Item_1
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using DomHelpers.SlcServicemanagement;
-    using Library.Views;
-    using Newtonsoft.Json;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-    using SLC_SM_IAS_Add_Service_Item_1.Presenters;
-    using SLC_SM_IAS_Add_Service_Item_1.Views;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using DomHelpers.SlcServicemanagement;
+	using Library.Views;
+	using Newtonsoft.Json;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using SLC_SM_IAS_Add_Service_Item_1.Presenters;
+	using SLC_SM_IAS_Add_Service_Item_1.Views;
 
-    /// <summary>
-    ///     Represents a DataMiner Automation script.
-    /// </summary>
-    public class Script
-    {
-        private InteractiveController _controller;
-        private IEngine _engine;
+	/// <summary>
+	///     Represents a DataMiner Automation script.
+	/// </summary>
+	public class Script
+	{
+		private InteractiveController _controller;
+		private IEngine _engine;
 
-        private enum Action
-        {
-            Add,
-            Edit,
-        }
+		private enum Action
+		{
+			Add,
+			Edit,
+		}
 
-        /// <summary>
-        ///     The script entry point.
-        /// </summary>
-        /// <param name="engine">Link with SLAutomation process.</param>
-        public void Run(IEngine engine)
-        {
-            /*
+		/// <summary>
+		///     The script entry point.
+		/// </summary>
+		/// <param name="engine">Link with SLAutomation process.</param>
+		public void Run(IEngine engine)
+		{
+			/*
             * Note:
             * Do not remove the commented methods below!
             * The lines are needed to execute an interactive automation script from the non-interactive automation script or from Visio!
             *
             * engine.ShowUI();
             */
-            if (engine.IsInteractive)
-            {
-                engine.FindInteractiveClient("Failed to run script in interactive mode", 1);
-            }
+			if (engine.IsInteractive)
+			{
+				engine.FindInteractiveClient("Failed to run script in interactive mode", 1);
+			}
 
-            try
-            {
-                _engine = engine;
-                _controller = new InteractiveController(engine);
-                RunSafe();
-            }
-            catch (ScriptAbortException)
-            {
-                // Catch normal abort exceptions (engine.ExitFail or engine.ExitSuccess)
-            }
-            catch (ScriptForceAbortException)
-            {
-                // Catch forced abort exceptions, caused via external maintenance messages.
-            }
-            catch (ScriptTimeoutException)
-            {
-                // Catch timeout exceptions for when a script has been running for too long.
-            }
-            catch (InteractiveUserDetachedException)
-            {
-                // Catch a user detaching from the interactive script by closing the window.
-                // Only applicable for interactive scripts, can be removed for non-interactive scripts.
-            }
-            catch (Exception e)
-            {
-                var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-                _controller.ShowDialog(errorView);
-            }
-        }
+			try
+			{
+				_engine = engine;
+				_controller = new InteractiveController(engine);
+				RunSafe();
+			}
+			catch (ScriptAbortException)
+			{
+				// Catch normal abort exceptions (engine.ExitFail or engine.ExitSuccess)
+			}
+			catch (ScriptForceAbortException)
+			{
+				// Catch forced abort exceptions, caused via external maintenance messages.
+			}
+			catch (ScriptTimeoutException)
+			{
+				// Catch timeout exceptions for when a script has been running for too long.
+			}
+			catch (InteractiveUserDetachedException)
+			{
+				// Catch a user detaching from the interactive script by closing the window.
+				// Only applicable for interactive scripts, can be removed for non-interactive scripts.
+			}
+			catch (Exception e)
+			{
+				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
+				_controller.ShowDialog(errorView);
+			}
+		}
 
-        private static void AddOrUpdateServiceItemToInstance(DomHelper helper, DomInstance domInstance, ServiceItemsSection newSection, string oldLabel)
-        {
-            if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
-            {
-                var instance = new ServicesInstance(domInstance);
+		private static void AddOrUpdateServiceItemToInstance(DomHelper helper, DomInstance domInstance, ServiceItemsSection newSection, string oldLabel)
+		{
+			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
+			{
+				var instance = new ServicesInstance(domInstance);
 
-                // Remove old instance first in case of edit
-                var oldItem = instance.ServiceItems.FirstOrDefault(x => x.Label == oldLabel);
-                if (oldItem != null)
-                {
-                    instance.ServiceItems.Remove(oldItem);
-                }
-                else
-                {
-                    // Auto assign new ID
-                    long[] ids = instance.ServiceItems.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
-                    newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
-                }
+				// Remove old instance first in case of edit
+				var oldItem = instance.ServiceItems.FirstOrDefault(x => x.Label == oldLabel);
+				if (oldItem != null)
+				{
+					instance.ServiceItems.Remove(oldItem);
+				}
+				else
+				{
+					// Auto assign new ID
+					long[] ids = instance.ServiceItems.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
+					newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
+				}
 
-                instance.ServiceItems.Add(newSection);
-                instance.Save(helper);
-            }
-            else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-            {
-                var instance = new ServiceSpecificationsInstance(domInstance);
+				instance.ServiceItems.Add(newSection);
+				instance.Save(helper);
+			}
+			else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
+			{
+				var instance = new ServiceSpecificationsInstance(domInstance);
 
-                // Remove old instance first in case of edit
-                var oldItem = instance.ServiceItems.FirstOrDefault(x => x.Label == oldLabel);
-                if (oldItem != null)
-                {
-                    instance.ServiceItems.Remove(oldItem);
-                }
-                else
-                {
-                    // Auto assign new ID
-                    long[] ids = instance.ServiceItems.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
-                    newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
-                }
+				// Remove old instance first in case of edit
+				var oldItem = instance.ServiceItems.FirstOrDefault(x => x.Label == oldLabel);
+				if (oldItem != null)
+				{
+					instance.ServiceItems.Remove(oldItem);
+				}
+				else
+				{
+					// Auto assign new ID
+					long[] ids = instance.ServiceItems.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
+					newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
+				}
 
-                instance.ServiceItems.Add(newSection);
-                instance.Save(helper);
-            }
-            else
-            {
-                throw new InvalidOperationException($"DOM definition '{domInstance.DomDefinitionId}' not supported (yet).");
-            }
-        }
+				instance.ServiceItems.Add(newSection);
+				instance.Save(helper);
+			}
+			else
+			{
+				throw new InvalidOperationException($"DOM definition '{domInstance.DomDefinitionId}' not supported (yet).");
+			}
+		}
 
-        private static string[] GetServiceItemLabels(DomInstance domInstance, string oldLbl)
-        {
-            List<string> items = new List<string>();
-            if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
-            {
-                var instance = new ServicesInstance(domInstance);
-                items = instance.ServiceItems.Select(x => x.Label).ToList();
-            }
-            else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-            {
-                var instance = new ServiceSpecificationsInstance(domInstance);
-                items = instance.ServiceItems.Select(x => x.Label).ToList();
-            }
-            else
-            {
-                return items.ToArray();
-            }
+		private static string[] GetServiceItemLabels(DomInstance domInstance, string oldLbl)
+		{
+			List<string> items = new List<string>();
+			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
+			{
+				var instance = new ServicesInstance(domInstance);
+				items = instance.ServiceItems.Select(x => x.Label).ToList();
+			}
+			else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
+			{
+				var instance = new ServiceSpecificationsInstance(domInstance);
+				items = instance.ServiceItems.Select(x => x.Label).ToList();
+			}
+			else
+			{
+				return items.ToArray();
+			}
 
-            items.Remove(oldLbl);
-            return items.ToArray();
-        }
+			items.Remove(oldLbl);
+			return items.ToArray();
+		}
 
-        private static ServiceItemsSection GetServiceItemSection(DomInstance domInstance, string label)
-        {
-            if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
-            {
-                var instance = new ServicesInstance(domInstance);
-                return instance.ServiceItems.FirstOrDefault(x => x.Label == label);
-            }
+		private static ServiceItemsSection GetServiceItemSection(DomInstance domInstance, string label)
+		{
+			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
+			{
+				var instance = new ServicesInstance(domInstance);
+				return instance.ServiceItems.FirstOrDefault(x => x.Label == label);
+			}
 
-            if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-            {
-                var instance = new ServiceSpecificationsInstance(domInstance);
-                return instance.ServiceItems.FirstOrDefault(x => x.Label == label);
-            }
+			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
+			{
+				var instance = new ServiceSpecificationsInstance(domInstance);
+				return instance.ServiceItems.FirstOrDefault(x => x.Label == label);
+			}
 
-            throw new InvalidOperationException($"No Service item found with label '{label}'");
-        }
+			throw new InvalidOperationException($"No Service item found with label '{label}'");
+		}
 
-        private void RunSafe()
-        {
-            string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
-            Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
-            if (domId == Guid.Empty)
-            {
-                throw new InvalidOperationException("No DOM ID provided as input to the script");
-            }
+		private static int GetServiceItemCount(DomInstance domInstance)
+		{
+			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
+			{
+				var instance = new ServicesInstance(domInstance);
+				return instance.ServiceItems.Count;
+			}
 
-            string actionRaw = _engine.GetScriptParam("Action").Value.Trim('"', '[', ']');
-            if (!Enum.TryParse(actionRaw, true, out Action action))
-            {
-                throw new InvalidOperationException("No Action provided as input to the script");
-            }
+			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
+			{
+				var instance = new ServiceSpecificationsInstance(domInstance);
+				return instance.ServiceItems.Count;
+			}
 
-            var domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-            var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
-                              ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
+			return 0;
+		}
 
-            string label = _engine.GetScriptParam("Service Item Label").Value.Trim('"', '[', ']');
+		private void RunSafe()
+		{
+			string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
+			Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
+			if (domId == Guid.Empty)
+			{
+				throw new InvalidOperationException("No DOM ID provided as input to the script");
+			}
 
-            // Init views
-            var view = new ServiceItemView(_engine);
-            var presenter = new ServiceItemPresenter(_engine, view, GetServiceItemLabels(domInstance, label));
+			string actionRaw = _engine.GetScriptParam("Action").Value.Trim('"', '[', ']');
+			if (!Enum.TryParse(actionRaw, true, out Action action))
+			{
+				throw new InvalidOperationException("No Action provided as input to the script");
+			}
 
-            // Events
-            view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");
-            view.BtnAdd.Pressed += (sender, args) =>
-            {
-                if (presenter.Validate())
-                {
-                    AddOrUpdateServiceItemToInstance(domHelper, domInstance, presenter.Section, label);
-                    throw new ScriptAbortException("OK");
-                }
-            };
+			var domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
+			var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
+							  ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
 
-            if (action == Action.Add)
-            {
-                presenter.LoadFromModel();
-            }
-            else
-            {
-                presenter.LoadFromModel(GetServiceItemSection(domInstance, label));
-            }
+			string label = _engine.GetScriptParam("Service Item Label").Value.Trim('"', '[', ']');
 
-            // Run interactive
-            _controller.ShowDialog(view);
-        }
-    }
+			// Init views
+			var view = new ServiceItemView(_engine);
+			var presenter = new ServiceItemPresenter(_engine, view, GetServiceItemLabels(domInstance, label), domInstance);
+
+			// Events
+			view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");
+			view.BtnAdd.Pressed += (sender, args) =>
+			{
+				if (presenter.Validate())
+				{
+					string jobId = presenter.UpdateJobForWorkFlow(label);
+					var section = presenter.Section;
+					section.ImplementationReference = jobId;
+
+					AddOrUpdateServiceItemToInstance(domHelper, domInstance, section, label);
+					throw new ScriptAbortException("OK");
+				}
+			};
+
+			if (action == Action.Add)
+			{
+				presenter.LoadFromModel(GetServiceItemCount(domInstance));
+			}
+			else
+			{
+				presenter.LoadFromModel(GetServiceItemSection(domInstance, label));
+			}
+
+			// Run interactive
+			_controller.ShowDialog(view);
+		}
+	}
 }

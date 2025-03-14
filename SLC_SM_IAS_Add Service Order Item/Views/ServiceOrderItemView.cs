@@ -18,9 +18,13 @@
 			AddWidget(LblName, ++row, 0);
 			AddWidget(TboxName, row, 1);
 			AddWidget(ErrorName, row, 2);
-
 			AddWidget(LblAction, ++row, 0);
 			AddWidget(ActionType, row, 1);
+			AddWidget(LblStartTime, ++row, 0);
+			AddWidget(Start, row, 1);
+			AddWidget(LblEndTime, ++row, 0);
+			AddWidget(End, row, 1);
+			AddWidget(IndefiniteTime, row, 2);
 
 			AddWidget(new Label("Service Order Configuration Details") { Style = TextStyle.Heading }, ++row, 0);
 			AddWidget(LblCategory, ++row, 0);
@@ -29,7 +33,6 @@
 			AddWidget(Specification, row, 1);
 			AddWidget(LblService, ++row, 0);
 			AddWidget(Service, row, 1);
-			AddWidget(BtnCreateNewService, row, 2);
 
 			AddWidget(new WhiteSpace(), ++row, 0);
 			AddWidget(BtnCancel, ++row, 0);
@@ -78,10 +81,34 @@
 
 		public DropDown<ServicesInstance> Service { get; } = new DropDown<ServicesInstance> { Width = Defaults.WidgetWidth };
 
-		public Button BtnAdd { get; } = new Button("Add");
+		public Label LblStartTime { get; } = new Label("Start Time");
+
+		public DateTimePicker Start { get; } = new DateTimePicker
+		{
+			Height = 25,
+			Width = Defaults.WidgetWidth,
+			IsTimePickerVisible = true,
+			Kind = DateTimeKind.Local,
+			HasSpinnerButton = true,
+			AutoCloseCalendar = true,
+		};
+
+		public Label LblEndTime { get; } = new Label("End Time");
+
+		public DateTimePicker End { get; } = new DateTimePicker
+		{
+			Height = 25,
+			Width = Defaults.WidgetWidth,
+			IsTimePickerVisible = true,
+			Kind = DateTimeKind.Local,
+			HasSpinnerButton = true,
+			AutoCloseCalendar = true,
+		};
+
+		public CheckBox IndefiniteTime { get; } = new CheckBox("Indefinite (no end time)") { IsChecked = false };
+
+		public Button BtnAdd { get; } = new Button("Create Service Order Item");
 
 		public Button BtnCancel { get; } = new Button("Cancel");
-
-		public Button BtnCreateNewService { get; } = new Button("Create New Service");
 	}
 }

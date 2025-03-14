@@ -40,7 +40,7 @@
 
 		public Label ErrorValue { get; } = new Label(String.Empty);
 
-		public Button BtnAdd { get; } = new Button("Add");
+		public Button BtnAdd { get; } = new Button("Create Service Property");
 
 		public Button BtnCancel { get; } = new Button("Cancel");
 	}

@@ -198,7 +198,7 @@ namespace SLC_SM_IAS_Add_Service_Order_Item_1
 
             if (action == Action.Add)
             {
-                presenter.LoadFromModel();
+                presenter.LoadFromModel(orderItemInstance.ServiceOrderItems.Where(x => x.ServiceOrderItem.HasValue).Count());
             }
             else
             {

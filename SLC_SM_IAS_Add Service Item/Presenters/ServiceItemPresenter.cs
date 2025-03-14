@@ -4,21 +4,32 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
+	using DomHelpers.SlcWorkflow;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
+	using Skyline.DataMiner.Utils.MediaOps.Helpers.Workflows;
 	using SLC_SM_IAS_Add_Service_Item_1.Views;
 
 	public class ServiceItemPresenter
 	{
+		private readonly DomInstance domInstance;
 		private readonly IEngine engine;
-		private readonly ServiceItemView view;
 		private readonly string[] getServiceItemLabels;
+		private readonly ServiceItemView view;
+		private readonly Workflow[] workflows;
 
-		public ServiceItemPresenter(IEngine engine, ServiceItemView view, string[] getServiceItemLabels)
+		public ServiceItemPresenter(IEngine engine, ServiceItemView view, string[] getServiceItemLabels, DomInstance domInstance)
 		{
 			this.engine = engine;
 			this.view = view;
 			this.getServiceItemLabels = getServiceItemLabels;
+			this.domInstance = domInstance;
+
+			var workflowHelper = new WorkflowHelper(engine);
+			workflows = workflowHelper.GetAllWorkflows().ToArray();
 
 			view.TboxLabel.Changed += (sender, args) => ValidateLabel(args.Value);
 			view.ServiceItemType.Changed += (sender, args) => OnUpdateServiceItemType(args.Selected);
@@ -34,8 +45,41 @@
 			ImplementationReference = String.Empty,
 		};
 
-		public void LoadFromModel()
+		public string UpdateJobForWorkFlow(string label)
 		{
+			if (view.ServiceItemType.Selected != SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+			{
+				return String.Empty;
+			}
+
+			var job = GetJobForOrder(domInstance, label);
+			if (job == null)
+			{
+				return String.Empty;
+			}
+
+			var timings = GetServiceItemTimings(domInstance);
+			var action = new EditJobAction
+			{
+				DomJobId = job.ID.Id,
+				End = timings.Item2,
+			};
+
+			// Only add start update if the job is not already running
+			if (job.JobInfo.JobStart <= DateTime.UtcNow)
+			{
+				action.Start = timings.Item1;
+			}
+
+			action.SendToJobHandler(engine, true);
+
+			return job.ID.Id.ToString();
+		}
+
+		public void LoadFromModel(int serviceItemCount)
+		{
+			view.TboxLabel.PlaceHolder = $"Service Item #{serviceItemCount:000}";
+
 			// Load correct types
 			view.ServiceItemType.SetOptions(
 				new List<Option<SlcServicemanagementIds.Enums.ServiceitemtypesEnum>>
@@ -53,14 +97,15 @@
 		public void LoadFromModel(ServiceItemsSection section)
 		{
 			// Load correct types
-			LoadFromModel();
+			LoadFromModel(0);
 
-			view.BtnAdd.Text = "Edit";
+			view.BtnAdd.Text = "Edit Service Item";
 			view.TboxLabel.Text = section.Label;
 
 			if (section.ServiceItemType.HasValue)
 			{
 				view.ServiceItemType.Selected = section.ServiceItemType.Value;
+				OnUpdateServiceItemType(section.ServiceItemType.Value);
 			}
 
 			if (!String.IsNullOrEmpty(section.DefinitionReference))
@@ -83,22 +128,26 @@
 			return ok;
 		}
 
-		private bool ValidateLabel(string newValue)
+		private static (DateTime?, DateTime?) GetServiceItemTimings(DomInstance domInstance)
 		{
-			if (String.IsNullOrWhiteSpace(newValue))
+			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
 			{
-				view.ErrorLabel.Text = "Please enter a value!";
-				return false;
+				var instance = new ServicesInstance(domInstance);
+				return (instance.ServiceInfo.ServiceStartTime, instance.ServiceInfo.ServiceEndTime);
 			}
 
-			if (getServiceItemLabels.Contains(newValue, StringComparer.InvariantCultureIgnoreCase))
-			{
-				view.ErrorLabel.Text = "Label already exists!";
-				return false;
-			}
+			return (null, null);
+		}
 
-			view.ErrorLabel.Text = String.Empty;
-			return true;
+		private JobsInstance GetJobForOrder(DomInstance instance, string label)
+		{
+			var jobFilter = DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription).Equal($"{instance.ID.Id} | {label}")
+				.OR(DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription).Equal($"{instance.ID.Id}|{label}"));
+
+			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
+			return domHelper.DomInstances.Read(jobFilter)
+				.Select(x => new JobsInstance(x))
+				.FirstOrDefault();
 		}
 
 		private void OnUpdateDefinitionReference(string selected)
@@ -124,9 +173,9 @@
 		{
 			if (serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 			{
-				view.DefinitionReferences.SetOptions(new List<string>());
+				view.DefinitionReferences.SetOptions(workflows.Select(x => x.Name).OrderBy(x => x));
 				view.ScriptSelection.SetOptions(new List<string>());
-				view.ScriptSelection.IsEnabled = true;
+				view.ScriptSelection.IsEnabled = false;
 			}
 			else
 			{
@@ -135,6 +184,24 @@
 				OnUpdateDefinitionReference(view.DefinitionReferences.Selected);
 				view.ScriptSelection.IsEnabled = false;
 			}
+		}
+
+		private bool ValidateLabel(string newValue)
+		{
+			if (String.IsNullOrWhiteSpace(newValue))
+			{
+				view.ErrorLabel.Text = "Please enter a value!";
+				return false;
+			}
+
+			if (getServiceItemLabels.Contains(newValue, StringComparer.InvariantCultureIgnoreCase))
+			{
+				view.ErrorLabel.Text = "Label already exists!";
+				return false;
+			}
+
+			view.ErrorLabel.Text = String.Empty;
+			return true;
 		}
 	}
 }

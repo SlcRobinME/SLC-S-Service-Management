@@ -52,233 +52,228 @@ DATE        VERSION        AUTHOR            COMMENTS
 dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 ****************************************************************************
 */
-namespace SLC_SM_Create_Service_Inventory_Item_1
+namespace SLC_SM_Create_Service_Inventory_Item
 {
-    using System;
-    using System.Linq;
-    using DomHelpers.SlcServicemanagement;
-    using Library;
-    using Library.Views;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-    using SLC_SM_Create_Service_Inventory_Item_1.Presenters;
-    using SLC_SM_Create_Service_Inventory_Item_1.Views;
+	using System;
+	using System.Linq;
+	using DomHelpers.SlcServicemanagement;
+	using Library;
+	using Library.Views;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using SLC_SM_Create_Service_Inventory_Item.Presenters;
+	using SLC_SM_Create_Service_Inventory_Item.Views;
 
-    /// <summary>
-    ///     Represents a DataMiner Automation script.
-    /// </summary>
-    public class Script
-    {
-        private InteractiveController _controller;
-        private IEngine _engine;
-        private DomHelper _domHelper;
+	/// <summary>
+	///     Represents a DataMiner Automation script.
+	/// </summary>
+	public class Script
+	{
+		private InteractiveController _controller;
+		private IEngine _engine;
+		private DomHelper _domHelper;
 
-        private enum Action
-        {
-            Add,
-            Edit,
-        }
+		private enum Action
+		{
+			Add,
+			Edit,
+		}
 
 
-        /// <summary>
-        ///     The script entry point.
-        /// </summary>
-        /// <param name="engine">Link with SLAutomation process.</param>
-        public void Run(IEngine engine)
-        {
-            /*
+		/// <summary>
+		///     The script entry point.
+		/// </summary>
+		/// <param name="engine">Link with SLAutomation process.</param>
+		public void Run(IEngine engine)
+		{
+			/*
             * Note:
             * Do not remove the commented methods below!
             * The lines are needed to execute an interactive automation script from the non-interactive automation script or from Visio!
             *
             * engine.ShowUI();
             */
-            if (engine.IsInteractive)
-            {
-                engine.FindInteractiveClient("Failed to run script in interactive mode", 1);
-            }
+			if (engine.IsInteractive)
+			{
+				engine.FindInteractiveClient("Failed to run script in interactive mode", 1);
+			}
 
-            try
-            {
-                _engine = engine;
-                _controller = new InteractiveController(engine);
-                InitHelpers();
+			try
+			{
+				_engine = engine;
+				_controller = new InteractiveController(engine);
+				InitHelpers();
 
-                RunSafe();
-            }
-            catch (ScriptAbortException)
-            {
-                // Catch normal abort exceptions (engine.ExitFail or engine.ExitSuccess)
-                throw; // Comment if it should be treated as a normal exit of the script.
-            }
-            catch (ScriptForceAbortException)
-            {
-                // Catch forced abort exceptions, caused via external maintenance messages.
-                throw;
-            }
-            catch (ScriptTimeoutException)
-            {
-                // Catch timeout exceptions for when a script has been running for too long.
-                throw;
-            }
-            catch (InteractiveUserDetachedException)
-            {
-                // Catch a user detaching from the interactive script by closing the window.
-                // Only applicable for interactive scripts, can be removed for non-interactive scripts.
-                throw;
-            }
-            catch (Exception e)
-            {
-                var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-                _controller.ShowDialog(errorView);
-            }
-        }
+				RunSafe();
+			}
+			catch (ScriptAbortException)
+			{
+				// Catch normal abort exceptions (engine.ExitFail or engine.ExitSuccess)
+			}
+			catch (ScriptForceAbortException)
+			{
+				// Catch forced abort exceptions, caused via external maintenance messages.
+			}
+			catch (ScriptTimeoutException)
+			{
+				// Catch timeout exceptions for when a script has been running for too long.
+			}
+			catch (InteractiveUserDetachedException)
+			{
+				// Catch a user detaching from the interactive script by closing the window.
+				// Only applicable for interactive scripts, can be removed for non-interactive scripts.
+			}
+			catch (Exception e)
+			{
+				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
+				_controller.ShowDialog(errorView);
+			}
+		}
 
-        private void InitHelpers()
-        {
-            _domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-        }
+		private void InitHelpers()
+		{
+			_domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
+		}
 
-        private void RunSafe()
-        {
-            string actionRaw = _engine.GetScriptParam("Action").Value.Trim('"', '[', ']');
-            if (!Enum.TryParse(actionRaw, true, out Action action))
-            {
-                throw new InvalidOperationException("No Action provided as input to the script");
-            }
+		private void RunSafe()
+		{
+			string actionRaw = _engine.GetScriptParam("Action").Value.Trim('"', '[', ']');
+			if (!Enum.TryParse(actionRaw, true, out Action action))
+			{
+				throw new InvalidOperationException("No Action provided as input to the script");
+			}
 
-            Guid.TryParse(_engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']'), out Guid domId);
+			Guid.TryParse(_engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']'), out Guid domId);
 
-            var repo = new Repo(_domHelper);
+			var repo = new Repo(_domHelper);
 
-            // Init views
-            var view = new ServiceView(_engine);
-            var presenter = new ServicePresenter(_engine, repo, view, repo.AllServices.Select(x => new ServicesInstance(x).Name).ToArray());
+			// Init views
+			var view = new ServiceView(_engine);
+			var presenter = new ServicePresenter(_engine, repo, view, repo.AllServices.Select(x => new ServicesInstance(x).Name).ToArray());
 
-            // Events
-            view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");
-            view.BtnAdd.Pressed += (sender, args) =>
-            {
-                if (presenter.Validate())
-                {
-                    AddOrUpdateService(presenter.Instance);
-                    throw new ScriptAbortException("OK");
-                }
-            };
+			if (action == Action.Add)
+			{
+				var d = new MessageDialog(_engine, "Create Service Inventory Item from the selected service order item?") {Title = "Create Service Inventory Item From Order Item"};
+				d.OkButton.Pressed += (sender, args) =>
+				{
+					CreateNewServiceAndLinkItToServiceOrder(domId);
+					throw new ScriptAbortException("OK");
+				};
+				_controller.ShowDialog(d);
+			}
+			else
+			{
+				view.BtnAdd.Text = "Edit Service";
+				presenter.LoadFromModel(GetServiceItemSection(domId));
+			}
 
-            if (action == Action.Add)
-            {
-                if (domId != Guid.Empty)
-                {
-                    ServicesInstance newServiceInstance = CreateNewServiceAndLinkItToServiceOrder(domId);
-                    presenter.LoadFromModel(newServiceInstance);
-                }
-                else
-                {
-                    presenter.LoadFromModel();
-                }
-            }
-            else
-            {
-                view.Title = "Manage Service";
-                view.BtnAdd.Text = "Edit Service";
-                presenter.LoadFromModel(GetServiceItemSection(domId));
-            }
+			// Events
+			view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");
+			view.BtnAdd.Pressed += (sender, args) =>
+			{
+				if (presenter.Validate())
+				{
+					AddOrUpdateService(presenter.Instance);
+					throw new ScriptAbortException("OK");
+				}
+			};
 
-            // Run interactive
-            _controller.ShowDialog(view);
-        }
+			// Run interactive
+			_controller.ShowDialog(view);
+		}
 
-        private ServicesInstance CreateNewServiceAndLinkItToServiceOrder(Guid domId)
-        {
-            var instance = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
-                ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
+		private ServicesInstance CreateNewServiceAndLinkItToServiceOrder(Guid domId)
+		{
+			var instance = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
+				?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
 
-            if (instance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceOrderItems.Id)
-            {
-                var serviceOrderInstance = new ServiceOrderItemsInstance(instance);
-                if (serviceOrderInstance.ServiceOrderItemServiceInfo.Service.HasValue)
-                {
-                    var inst = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(serviceOrderInstance.ServiceOrderItemServiceInfo.Service.Value)).FirstOrDefault()
-                           ?? throw new InvalidOperationException($"No Dom Instance with ID '{serviceOrderInstance.ServiceOrderItemServiceInfo.Service.Value}' found on the system!");
-                    return new ServicesInstance(inst);
-                }
+			if (instance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceOrderItems.Id)
+			{
+				var serviceOrderInstance = new ServiceOrderItemsInstance(instance);
+				if (serviceOrderInstance.ServiceOrderItemServiceInfo.Service.HasValue)
+				{
+					var inst = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(serviceOrderInstance.ServiceOrderItemServiceInfo.Service.Value)).FirstOrDefault()
+						   ?? throw new InvalidOperationException($"No Dom Instance with ID '{serviceOrderInstance.ServiceOrderItemServiceInfo.Service.Value}' found on the system!");
+					return new ServicesInstance(inst);
+				}
 
-                // Create new service item based on order
-                var newService = new ServicesInstance();
-                newService.ServiceInfo.ServiceName = serviceOrderInstance.ServiceOrderItemInfo.Name;
-                newService.ServiceInfo.Description = serviceOrderInstance.ServiceOrderItemInfo.Name;
-                newService.ServiceInfo.Icon = String.Empty;
-                newService.ServiceInfo.ServiceSpecifcation = serviceOrderInstance.ServiceOrderItemServiceInfo.ServiceSpecification;
-                AddOrUpdateService(newService);
+				// Create new service item based on order
+				var newService = new ServicesInstance();
+				newService.ServiceInfo.ServiceName = serviceOrderInstance.ServiceOrderItemInfo.Name;
+				newService.ServiceInfo.Description = serviceOrderInstance.ServiceOrderItemInfo.Name;
+				newService.ServiceInfo.ServiceStartTime = serviceOrderInstance.ServiceOrderItemInfo.ServiceStartTime;
+				newService.ServiceInfo.ServiceEndTime = serviceOrderInstance.ServiceOrderItemInfo.ServiceEndTime;
+				newService.ServiceInfo.Icon = String.Empty;
+				newService.ServiceInfo.ServiceSpecifcation = serviceOrderInstance.ServiceOrderItemServiceInfo.ServiceSpecification;
+				AddOrUpdateService(newService);
 
-                // Provide link
-                serviceOrderInstance.ServiceOrderItemServiceInfo.Service = newService.ID.Id;
-                serviceOrderInstance.Save(_domHelper);
-                return newService;
-            }
+				// Provide link
+				serviceOrderInstance.ServiceOrderItemServiceInfo.Service = newService.ID.Id;
+				serviceOrderInstance.Save(_domHelper);
+				return newService;
+			}
 
-            throw new InvalidOperationException("Creating Service from this definition not supported yet");
-        }
+			throw new InvalidOperationException("Creating Service from this definition not supported yet");
+		}
 
-        private ServicesInstance GetServiceItemSection(Guid domId)
-        {
-            if (domId == Guid.Empty)
-            {
-                throw new InvalidOperationException("No existing DOM ID was provided as script input!");
-            }
+		private ServicesInstance GetServiceItemSection(Guid domId)
+		{
+			if (domId == Guid.Empty)
+			{
+				throw new InvalidOperationException("No existing DOM ID was provided as script input!");
+			}
 
-            var instance = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
-                           ?? throw new InvalidOperationException($"No Dom Instance with ID '{domId}' found on the system!");
-            return new ServicesInstance(instance);
-        }
+			var instance = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
+						   ?? throw new InvalidOperationException($"No Dom Instance with ID '{domId}' found on the system!");
+			return new ServicesInstance(instance);
+		}
 
-        private void AddOrUpdateService(ServicesInstance instance)
-        {
-            if (!instance.ServiceInfo.ServiceSpecifcation.HasValue || instance.ServiceInfo.ServiceSpecifcation == Guid.Empty)
-            {
-                if (!instance.ServiceItems.Any())
-                {
-                    instance.ServiceItems.Add(new ServiceItemsSection());
-                }
+		private void AddOrUpdateService(ServicesInstance instance)
+		{
+			if (!instance.ServiceInfo.ServiceSpecifcation.HasValue || instance.ServiceInfo.ServiceSpecifcation == Guid.Empty)
+			{
+				if (!instance.ServiceItems.Any())
+				{
+					instance.ServiceItems.Add(new ServiceItemsSection());
+				}
 
-                if (!instance.ServiceItemRelationship.Any())
-                {
-                    instance.ServiceItemRelationship.Add(new ServiceItemRelationshipSection());
-                }
+				if (!instance.ServiceItemRelationship.Any())
+				{
+					instance.ServiceItemRelationship.Add(new ServiceItemRelationshipSection());
+				}
 
-                instance.Save(_domHelper);
-                return;
-            }
+				instance.Save(_domHelper);
+				return;
+			}
 
-            var domInstance = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(instance.ServiceInfo.ServiceSpecifcation.Value)).FirstOrDefault()
-                              ?? throw new InvalidOperationException($"No Service Specification found with ID '{instance.ServiceInfo.ServiceSpecifcation}'.");
-            var serviceSpecificationInstance = new ServiceSpecificationsInstance(domInstance);
+			var domInstance = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(instance.ServiceInfo.ServiceSpecifcation.Value)).FirstOrDefault()
+							  ?? throw new InvalidOperationException($"No Service Specification found with ID '{instance.ServiceInfo.ServiceSpecifcation}'.");
+			var serviceSpecificationInstance = new ServiceSpecificationsInstance(domInstance);
 
-            instance.ServiceInfo.Icon = serviceSpecificationInstance.ServiceSpecificationInfo.Icon;
-            instance.ServiceInfo.Description = serviceSpecificationInstance.ServiceSpecificationInfo.Description;
-            instance.ServiceInfo.ServiceProperties = serviceSpecificationInstance.ServiceSpecificationInfo.ServiceProperties;
-            instance.ServiceInfo.ServiceConfiguration = serviceSpecificationInstance.ServiceSpecificationInfo.ServiceConfiguration;
+			instance.ServiceInfo.Icon = serviceSpecificationInstance.ServiceSpecificationInfo.Icon;
+			instance.ServiceInfo.Description = serviceSpecificationInstance.ServiceSpecificationInfo.Description;
+			instance.ServiceInfo.ServiceProperties = serviceSpecificationInstance.ServiceSpecificationInfo.ServiceProperties;
+			instance.ServiceInfo.ServiceConfiguration = serviceSpecificationInstance.ServiceSpecificationInfo.ServiceConfiguration;
 
-            foreach (var relationship in serviceSpecificationInstance.ServiceItemRelationship)
-            {
-                if (!instance.ServiceItemRelationship.Contains(relationship))
-                {
-                    instance.ServiceItemRelationship.Add(relationship);
-                }
-            }
+			foreach (var relationship in serviceSpecificationInstance.ServiceItemRelationship)
+			{
+				if (!instance.ServiceItemRelationship.Contains(relationship))
+				{
+					instance.ServiceItemRelationship.Add(relationship);
+				}
+			}
 
-            foreach (var item in serviceSpecificationInstance.ServiceItems)
-            {
-                if (!instance.ServiceItems.Contains(item))
-                {
-                    instance.ServiceItems.Add(item);
-                }
-            }
+			foreach (var item in serviceSpecificationInstance.ServiceItems)
+			{
+				if (!instance.ServiceItems.Contains(item))
+				{
+					instance.ServiceItems.Add(item);
+				}
+			}
 
-            instance.Save(_domHelper);
-        }
-    }
+			instance.Save(_domHelper);
+		}
+	}
 }

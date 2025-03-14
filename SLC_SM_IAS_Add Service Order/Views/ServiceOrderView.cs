@@ -66,7 +66,7 @@
 
 		public CheckBoxList<PeopleInstance> Contact { get; } = new CheckBoxList<PeopleInstance> { Width = Defaults.WidgetWidth };
 
-		public Button BtnAdd { get; } = new Button("Add");
+		public Button BtnAdd { get; } = new Button("Create Service Order");
 
 		public Button BtnCancel { get; } = new Button("Cancel");
 	}
