@@ -191,27 +191,58 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			if (instance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceOrderItems.Id)
 			{
-				var serviceOrderInstance = new ServiceOrderItemsInstance(instance);
-				if (serviceOrderInstance.ServiceOrderItemServiceInfo.Service.HasValue)
+				var serviceOrderItemInstance = new ServiceOrderItemsInstance(instance);
+				if (serviceOrderItemInstance.ServiceOrderItemServiceInfo.Service.HasValue)
 				{
-					var inst = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(serviceOrderInstance.ServiceOrderItemServiceInfo.Service.Value)).FirstOrDefault()
-						   ?? throw new InvalidOperationException($"No Dom Instance with ID '{serviceOrderInstance.ServiceOrderItemServiceInfo.Service.Value}' found on the system!");
+					var inst = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(serviceOrderItemInstance.ServiceOrderItemServiceInfo.Service.Value)).FirstOrDefault()
+						   ?? throw new InvalidOperationException($"No Dom Instance with ID '{serviceOrderItemInstance.ServiceOrderItemServiceInfo.Service.Value}' found on the system!");
 					return new ServicesInstance(inst);
 				}
 
 				// Create new service item based on order
 				var newService = new ServicesInstance();
-				newService.ServiceInfo.ServiceName = serviceOrderInstance.ServiceOrderItemInfo.Name;
-				newService.ServiceInfo.Description = serviceOrderInstance.ServiceOrderItemInfo.Name;
-				newService.ServiceInfo.ServiceStartTime = serviceOrderInstance.ServiceOrderItemInfo.ServiceStartTime;
-				newService.ServiceInfo.ServiceEndTime = serviceOrderInstance.ServiceOrderItemInfo.ServiceEndTime;
+				newService.ServiceInfo.ServiceName = serviceOrderItemInstance.ServiceOrderItemInfo.Name;
+				newService.ServiceInfo.Description = serviceOrderItemInstance.ServiceOrderItemInfo.Name;
+				newService.ServiceInfo.ServiceStartTime = serviceOrderItemInstance.ServiceOrderItemInfo.ServiceStartTime;
+				newService.ServiceInfo.ServiceEndTime = serviceOrderItemInstance.ServiceOrderItemInfo.ServiceEndTime;
 				newService.ServiceInfo.Icon = String.Empty;
-				newService.ServiceInfo.ServiceSpecifcation = serviceOrderInstance.ServiceOrderItemServiceInfo.ServiceSpecification;
+				newService.ServiceInfo.ServiceSpecifcation = serviceOrderItemInstance.ServiceOrderItemServiceInfo.ServiceSpecification;
 				AddOrUpdateService(newService);
 
 				// Provide link
-				serviceOrderInstance.ServiceOrderItemServiceInfo.Service = newService.ID.Id;
-				serviceOrderInstance.Save(_domHelper);
+				serviceOrderItemInstance.ServiceOrderItemServiceInfo.Service = newService.ID.Id;
+				serviceOrderItemInstance.Save(_domHelper);
+
+				// Update state
+				if (serviceOrderItemInstance.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.New)
+				{
+					_domHelper.DomInstances.DoStatusTransition(serviceOrderItemInstance.ID, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.New_To_Acknowledged);
+					_domHelper.DomInstances.DoStatusTransition(serviceOrderItemInstance.ID, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
+				}
+
+				if (serviceOrderItemInstance.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.Acknowledged)
+				{
+					_domHelper.DomInstances.DoStatusTransition(serviceOrderItemInstance.ID, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
+				}
+
+				// Update state of main Service Order as well
+				var serviceOrderInstance = _domHelper.DomInstances.Read(
+					DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceOrderItems.ServiceOrderItem).Equal(serviceOrderItemInstance.ID.Id)).FirstOrDefault();
+				if (serviceOrderInstance != null)
+				{
+					var serviceOrderInst = new ServiceOrdersInstance(serviceOrderInstance);
+					if (serviceOrderInst.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.New)
+					{
+						_domHelper.DomInstances.DoStatusTransition(serviceOrderInst.ID, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.New_To_Acknowledged);
+						_domHelper.DomInstances.DoStatusTransition(serviceOrderInst.ID, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
+					}
+
+					if (serviceOrderInst.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Acknowledged)
+					{
+						_domHelper.DomInstances.DoStatusTransition(serviceOrderInst.ID, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
+					}
+				}
+
 				return newService;
 			}
 

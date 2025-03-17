@@ -79,7 +79,7 @@
 
 		public Label LblService { get; } = new Label("Service Reference");
 
-		public DropDown<ServicesInstance> Service { get; } = new DropDown<ServicesInstance> { Width = Defaults.WidgetWidth };
+		public DropDown<ServicesInstance> Service { get; } = new DropDown<ServicesInstance> { Width = Defaults.WidgetWidth, IsDisplayFilterShown = true };
 
 		public Label LblStartTime { get; } = new Label("Start Time");
 
