@@ -12,6 +12,7 @@
     <!-- Do NOT fill in the Organization Token here. This points to either an Environment Variable skyline__sdk__catalogpublishtoken holding the organization token or a Visual Studio User Secret holding the token. -->
     <CatalogPublishKeyName>skyline:sdk:catalogpublishtoken</CatalogPublishKeyName>
     <CatalogDefaultDownloadKeyName>skyline:sdk:catalogdownloadtoken</CatalogDefaultDownloadKeyName>
+    <UserSecretsId>c77184c7-44bc-4fa1-bbac-614d79915f0e</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

@@ -1,3 +1,7 @@
 <CatalogReferences xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.skyline.be/catalogReferences">
-	<!-- Currently not supported -->
+	
+   <CatalogReference id="8ce7d7af-62f6-4cfd-8687-663e24f3c5be">
+      <Name>DOM ImportExport</Name>
+   </CatalogReference>
+	
 </CatalogReferences>
