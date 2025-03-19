@@ -35,7 +35,7 @@
 		{
 			get
 			{
-				instanceToReturn.ServiceOrderInfo.Name = view.TboxName.Text;
+				instanceToReturn.ServiceOrderInfo.Name = Name;
 				instanceToReturn.ServiceOrderInfo.ExternalID = view.ExternalId.Text;
 				instanceToReturn.ServiceOrderInfo.Priority = view.Priority.Selected;
 				instanceToReturn.ServiceOrderInfo.Description = view.Description.Text;
@@ -52,6 +52,8 @@
 				return instanceToReturn;
 			}
 		}
+
+		public string Name => String.IsNullOrWhiteSpace(view.TboxName.Text) ? view.TboxName.PlaceHolder : view.TboxName.Text;
 
 		public void LoadFromModel(int nr)
 		{
@@ -123,7 +125,7 @@
 		{
 			bool ok = true;
 
-			ok &= ValidateLabel(view.TboxName.Text);
+			ok &= ValidateLabel(Name);
 
 			return ok;
 		}
@@ -144,8 +146,8 @@
 		{
 			if (String.IsNullOrWhiteSpace(newValue))
 			{
-				view.ErrorName.Text = "Please enter a value!";
-				return false;
+				view.ErrorName.Text = "Placeholder will be used";
+				return true;
 			}
 
 			if (getServiceOrderItemLabels.Contains(newValue, StringComparer.InvariantCultureIgnoreCase))
