@@ -19,7 +19,7 @@ internal class Script
 	/// <param name="engine">Provides access to the Automation engine.</param>
 	/// <param name="context">Provides access to the installation context.</param>
 	[AutomationEntryPoint(AutomationEntryPointType.Types.InstallAppPackage)]
-    public void Install(IEngine engine, AppInstallContext context)
+    public static void Install(IEngine engine, AppInstallContext context)
     {
         try
         {
