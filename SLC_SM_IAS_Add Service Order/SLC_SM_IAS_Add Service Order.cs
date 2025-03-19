@@ -55,13 +55,9 @@ dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 namespace SLC_SM_IAS_Add_Service_Order_1
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
-	using DomHelpers.SlcWorkflow;
-	using Library;
 	using Library.Views;
-	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
