@@ -31,8 +31,10 @@
 			AddWidget(Category, row, 1);
 			AddWidget(LblSpecification, ++row, 0);
 			AddWidget(Specification, row, 1);
+			AddWidget(ErrorSpecification, row, 2);
 			AddWidget(LblService, ++row, 0);
 			AddWidget(Service, row, 1);
+			AddWidget(ErrorService, row, 2);
 
 			AddWidget(new WhiteSpace(), ++row, 0);
 			AddWidget(BtnCancel, ++row, 0);
@@ -77,9 +79,13 @@
 
 		public DropDown<ServiceSpecificationsInstance> Specification { get; } = new DropDown<ServiceSpecificationsInstance> { Width = Defaults.WidgetWidth };
 
+		public Label ErrorSpecification { get; } = new Label(String.Empty);
+
 		public Label LblService { get; } = new Label("Service Reference");
 
 		public DropDown<ServicesInstance> Service { get; } = new DropDown<ServicesInstance> { Width = Defaults.WidgetWidth, IsDisplayFilterShown = true };
+
+		public Label ErrorService { get; } = new Label(String.Empty);
 
 		public Label LblStartTime { get; } = new Label("Start Time");
 

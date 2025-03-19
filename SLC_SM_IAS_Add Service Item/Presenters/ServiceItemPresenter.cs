@@ -36,9 +36,11 @@
 			view.DefinitionReferences.Changed += (sender, args) => OnUpdateDefinitionReference(args.Selected);
 		}
 
+		public string Name => String.IsNullOrWhiteSpace(view.TboxLabel.Text) ? view.TboxLabel.PlaceHolder : view.TboxLabel.Text;
+
 		public ServiceItemsSection Section => new ServiceItemsSection
 		{
-			Label = view.TboxLabel.Text,
+			Label = Name,
 			ServiceItemType = view.ServiceItemType.Selected,
 			DefinitionReference = view.DefinitionReferences.Selected ?? String.Empty,
 			ServiceItemScript = view.ScriptSelection.Selected ?? String.Empty,
@@ -123,7 +125,7 @@
 		{
 			bool ok = true;
 
-			ok &= ValidateLabel(view.TboxLabel.Text);
+			ok &= ValidateLabel(Name);
 
 			return ok;
 		}
@@ -190,8 +192,8 @@
 		{
 			if (String.IsNullOrWhiteSpace(newValue))
 			{
-				view.ErrorLabel.Text = "Please enter a value!";
-				return false;
+				view.ErrorLabel.Text = "Placeholder will be used";
+				return true;
 			}
 
 			if (getServiceItemLabels.Contains(newValue, StringComparer.InvariantCultureIgnoreCase))

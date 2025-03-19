@@ -54,159 +54,161 @@ dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 */
 namespace SLC_SM_IAS_Add_Service_Order_Item_1
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using DomHelpers.SlcServicemanagement;
-    using Library;
-    using Library.Views;
-    using Newtonsoft.Json;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-    using SLC_SM_IAS_Add_Service_Order_Item_1.Presenters;
-    using SLC_SM_IAS_Add_Service_Order_Item_1.Views;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using DomHelpers.SlcServicemanagement;
+	using Library;
+	using Library.Views;
+	using Newtonsoft.Json;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using SLC_SM_IAS_Add_Service_Order_Item_1.Presenters;
+	using SLC_SM_IAS_Add_Service_Order_Item_1.Views;
 
-    /// <summary>
-    ///     Represents a DataMiner Automation script.
-    /// </summary>
-    public class Script
-    {
-        private InteractiveController _controller;
-        private IEngine _engine;
+	/// <summary>
+	///     Represents a DataMiner Automation script.
+	/// </summary>
+	public class Script
+	{
+		private InteractiveController _controller;
+		private IEngine _engine;
 
-        private enum Action
-        {
-            Add,
-            Edit,
-        }
+		private enum Action
+		{
+			Add,
+			Edit,
+		}
 
-        /// <summary>
-        ///     The script entry point.
-        /// </summary>
-        /// <param name="engine">Link with SLAutomation process.</param>
-        public void Run(IEngine engine)
-        {
-            /*
+		/// <summary>
+		///     The script entry point.
+		/// </summary>
+		/// <param name="engine">Link with SLAutomation process.</param>
+		public void Run(IEngine engine)
+		{
+			/*
             * Note:
             * Do not remove the commented methods below!
             * The lines are needed to execute an interactive automation script from the non-interactive automation script or from Visio!
             *
             * engine.ShowUI();
             */
-            if (engine.IsInteractive)
-            {
-                engine.FindInteractiveClient("Failed to run script in interactive mode", 1);
-            }
+			if (engine.IsInteractive)
+			{
+				engine.FindInteractiveClient("Failed to run script in interactive mode", 1);
+			}
 
-            try
-            {
-                _engine = engine;
-                _controller = new InteractiveController(engine);
-                RunSafe();
-            }
-            catch (ScriptAbortException)
-            {
-                // Catch normal abort exceptions (engine.ExitFail or engine.ExitSuccess)
-            }
-            catch (ScriptForceAbortException)
-            {
-                // Catch forced abort exceptions, caused via external maintenance messages.
-            }
-            catch (ScriptTimeoutException)
-            {
-                // Catch timeout exceptions for when a script has been running for too long.
-            }
-            catch (InteractiveUserDetachedException)
-            {
-                // Catch a user detaching from the interactive script by closing the window.
-                // Only applicable for interactive scripts, can be removed for non-interactive scripts.
-            }
-            catch (Exception e)
-            {
-                var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-                _controller.ShowDialog(errorView);
-            }
-        }
+			try
+			{
+				_engine = engine;
+				_controller = new InteractiveController(engine);
+				RunSafe();
+			}
+			catch (ScriptAbortException)
+			{
+				// Catch normal abort exceptions (engine.ExitFail or engine.ExitSuccess)
+			}
+			catch (ScriptForceAbortException)
+			{
+				// Catch forced abort exceptions, caused via external maintenance messages.
+			}
+			catch (ScriptTimeoutException)
+			{
+				// Catch timeout exceptions for when a script has been running for too long.
+			}
+			catch (InteractiveUserDetachedException)
+			{
+				// Catch a user detaching from the interactive script by closing the window.
+				// Only applicable for interactive scripts, can be removed for non-interactive scripts.
+			}
+			catch (Exception e)
+			{
+				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
+				_controller.ShowDialog(errorView);
+			}
+		}
 
-        private static void AddOrUpdateServiceItemToInstance(DomHelper helper, ServiceOrdersInstance instance, ServiceOrderItemsInstance updatedData)
-        {
-            updatedData.Save(helper);
+		private static void AddOrUpdateServiceItemToInstance(DomHelper helper, ServiceOrdersInstance instance, ServiceOrderItemsInstance updatedData)
+		{
+			updatedData.Save(helper);
 
-            var existingItem = instance.ServiceOrderItems.FirstOrDefault(x => x.ID.Id == updatedData.ID.Id);
-            if (existingItem != null)
-            {
-                // Already linked - nothing to do
-                return;
-            }
+			var existingItem = instance.ServiceOrderItems.FirstOrDefault(x => x.ID.Id == updatedData.ID.Id);
+			if (existingItem != null)
+			{
+				// Already linked - nothing to do
+				return;
+			}
 
-            instance.ServiceOrderItems.Add(new ServiceOrderItemsSection
-            {
-                ServiceOrderItem = updatedData.ID.Id,
-            });
-            instance.Save(helper);
-        }
+			instance.ServiceOrderItems.Add(new ServiceOrderItemsSection
+			{
+				ServiceOrderItem = updatedData.ID.Id,
+			});
+			instance.Save(helper);
+		}
 
-        private static string[] GetServiceItemLabels(Repo repo, string oldLbl)
-        {
-            var items = repo.AllServiceOrderItems.Select(x => x.Name).ToList();
+		private static string[] GetServiceItemLabels(Repo repo, ServiceOrdersInstance serviceOrdersInstance, string oldLbl)
+		{
+			Guid[] existingOrderItems = serviceOrdersInstance.ServiceOrderItems.Where(x => x.ServiceOrderItem.HasValue).Select(x => x.ServiceOrderItem.Value).ToArray();
 
-            items.Remove(oldLbl);
-            return items.ToArray();
-        }
+			var items = repo.AllServiceOrderItems.Where(x => existingOrderItems.Contains(x.ID.Id)).Select(x => x.Name).ToList();
 
-        private void RunSafe()
-        {
-            string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
-            Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
-            if (domId == Guid.Empty)
-            {
-                throw new InvalidOperationException("No DOM ID provided as input to the script");
-            }
+			items.Remove(oldLbl);
+			return items.ToArray();
+		}
 
-            string actionRaw = _engine.GetScriptParam("Action").Value.Trim('"', '[', ']');
-            if (!Enum.TryParse(actionRaw, true, out Action action))
-            {
-                throw new InvalidOperationException("No Action provided as input to the script");
-            }
+		private void RunSafe()
+		{
+			string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
+			Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
+			if (domId == Guid.Empty)
+			{
+				throw new InvalidOperationException("No DOM ID provided as input to the script");
+			}
 
-            var domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-            var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
-                              ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
-            var orderItemInstance = new ServiceOrdersInstance(domInstance);
+			string actionRaw = _engine.GetScriptParam("Action").Value.Trim('"', '[', ']');
+			if (!Enum.TryParse(actionRaw, true, out Action action))
+			{
+				throw new InvalidOperationException("No Action provided as input to the script");
+			}
 
-            Guid.TryParse(_engine.GetScriptParam("Service Order Item ID").Value.Trim('"', '[', ']'), out Guid orderItemid);
+			var domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
+			var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
+							  ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
+			var orderItemInstance = new ServiceOrdersInstance(domInstance);
 
-            var repo = new Repo(domHelper);
-            var orderItem = repo.AllServiceOrderItems.FirstOrDefault(x => x.ID.Id == orderItemid);
+			Guid.TryParse(_engine.GetScriptParam("Service Order Item ID").Value.Trim('"', '[', ']'), out Guid orderItemid);
 
-            // Init views
-            var view = new ServiceOrderItemView(_engine);
-            var presenter = new ServiceOrderItemPresenter(_engine, domHelper, view, repo, GetServiceItemLabels(repo, orderItem?.Name));
+			var repo = new Repo(domHelper);
+			var orderItem = repo.AllServiceOrderItems.FirstOrDefault(x => x.ID.Id == orderItemid);
 
-            // Events
-            view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");
-            view.BtnAdd.Pressed += (sender, args) =>
-            {
-                if (presenter.Validate())
-                {
-                    AddOrUpdateServiceItemToInstance(domHelper, orderItemInstance, presenter.GetData);
-                    throw new ScriptAbortException("OK");
-                }
-            };
+			// Init views
+			var view = new ServiceOrderItemView(_engine);
+			var presenter = new ServiceOrderItemPresenter(_engine, domHelper, view, repo, GetServiceItemLabels(repo, orderItemInstance, orderItem?.Name));
 
-            if (action == Action.Add)
-            {
-                presenter.LoadFromModel(orderItemInstance.ServiceOrderItems.Where(x => x.ServiceOrderItem.HasValue).Count());
-            }
-            else
-            {
-                presenter.LoadFromModel(orderItem);
-            }
+			// Events
+			view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");
+			view.BtnAdd.Pressed += (sender, args) =>
+			{
+				if (presenter.Validate())
+				{
+					AddOrUpdateServiceItemToInstance(domHelper, orderItemInstance, presenter.GetData);
+					throw new ScriptAbortException("OK");
+				}
+			};
 
-            // Run interactive
-            _controller.ShowDialog(view);
-        }
-    }
+			if (action == Action.Add)
+			{
+				presenter.LoadFromModel(orderItemInstance.ServiceOrderItems.Count(x => x.ServiceOrderItem.HasValue));
+			}
+			else
+			{
+				presenter.LoadFromModel(orderItem);
+			}
+
+			// Run interactive
+			_controller.ShowDialog(view);
+		}
+	}
 }

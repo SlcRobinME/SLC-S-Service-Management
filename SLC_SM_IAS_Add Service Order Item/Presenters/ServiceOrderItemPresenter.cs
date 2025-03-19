@@ -32,14 +32,18 @@
 
 			view.IndefiniteTime.Changed += (sender, args) => view.End.IsEnabled = !args.IsChecked;
 			view.TboxName.Changed += (sender, args) => ValidateLabel(args.Value);
-			view.ActionType.Changed += (sender, args) => UpdateUiOnActionTypeChange(args.Selected);
+			view.ActionType.Changed += (sender, args) =>
+			{
+				UpdateUiOnActionTypeChange(args.Selected);
+				Validate();
+			};
 		}
 
 		public ServiceOrderItemsInstance GetData
 		{
 			get
 			{
-				instanceToReturn.ServiceOrderItemInfo.Name = view.TboxName.Text;
+				instanceToReturn.ServiceOrderItemInfo.Name = Name;
 				instanceToReturn.ServiceOrderItemInfo.Action = view.ActionType.Selected.ToString();
 				instanceToReturn.ServiceOrderItemInfo.ServiceStartTime = view.Start.DateTime;
 				instanceToReturn.ServiceOrderItemInfo.ServiceEndTime = view.IndefiniteTime.IsChecked ? default(DateTime?) : view.End.DateTime;
@@ -64,6 +68,8 @@
 				return instanceToReturn;
 			}
 		}
+
+		public string Name => String.IsNullOrWhiteSpace(view.TboxName.Text) ? view.TboxName.PlaceHolder : view.TboxName.Text;
 
 		public void LoadFromModel(int nr)
 		{
@@ -111,7 +117,7 @@
 				view.End.IsEnabled = false;
 			}
 
-			ServiceCategoryInstance serviceCategoryInstance = repo.AllCategories.FirstOrDefault(x => x.ID.Id == instance.ServiceOrderItemServiceInfo.ServiceCategory);
+			ServiceCategoryInstance serviceCategoryInstance = repo.AllCategories.FirstOrDefault(x => x?.ID.Id == instance.ServiceOrderItemServiceInfo.ServiceCategory);
 			if (serviceCategoryInstance != null && view.Category.Values.Contains(serviceCategoryInstance))
 			{
 				view.Category.Selected = serviceCategoryInstance;
@@ -123,14 +129,14 @@
 				view.Service.Selected = serviceInstance;
 			}
 
-			ServiceSpecificationsInstance serviceSpecificationsInstance = repo.AllSpecs.FirstOrDefault(x => x.ID.Id == instance.ServiceOrderItemServiceInfo.ServiceSpecification);
+			ServiceSpecificationsInstance serviceSpecificationsInstance = repo.AllSpecs.FirstOrDefault(x => x?.ID.Id == instance.ServiceOrderItemServiceInfo.ServiceSpecification);
 			if (serviceSpecificationsInstance != null && view.Specification.Values.Contains(serviceSpecificationsInstance))
 			{
 				view.Specification.Selected = serviceSpecificationsInstance;
 			}
 			else
 			{
-				view.Specification.Selected = view.Specification.Values.FirstOrDefault(x => x.ID.Id == view.Service.Selected?.ServiceInfo.ServiceSpecifcation);
+				view.Specification.Selected = view.Specification.Values.FirstOrDefault(x => x?.ID.Id == view.Service.Selected?.ServiceInfo.ServiceSpecifcation);
 			}
 
 			UpdateUiOnActionTypeChange(view.ActionType.Selected);
@@ -140,7 +146,27 @@
 		{
 			bool ok = true;
 
-			ok &= ValidateLabel(view.TboxName.Text);
+			ok &= ValidateLabel(Name);
+
+			if (view.ActionType.Selected == ServiceOrderItemView.ActionTypeEnum.Add && view.Specification.Selected == null)
+			{
+				ok = false;
+				view.ErrorSpecification.Text = "Selection is mandatory!";
+			}
+			else
+			{
+				view.ErrorSpecification.Text = String.Empty;
+			}
+
+			if ((view.ActionType.Selected == ServiceOrderItemView.ActionTypeEnum.Modify || view.ActionType.Selected == ServiceOrderItemView.ActionTypeEnum.Delete) && view.Service.Selected == null)
+			{
+				ok = false;
+				view.ErrorService.Text = "Selection is mandatory!";
+			}
+			else
+			{
+				view.ErrorService.Text = String.Empty;
+			}
 
 			return ok;
 		}
@@ -181,8 +207,8 @@
 		{
 			if (String.IsNullOrWhiteSpace(newValue))
 			{
-				view.ErrorName.Text = "Please enter a value!";
-				return false;
+				view.ErrorName.Text = "Placeholder will be used.";
+				return true;
 			}
 
 			if (getServiceOrderItemLabels.Contains(newValue, StringComparer.InvariantCultureIgnoreCase))
