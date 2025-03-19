@@ -1,7 +1,3 @@
-
-//---------------------------------
-// Get Service Properties_1.cs
-//---------------------------------
 namespace Get_Service_Properties_1
 {
     using System;

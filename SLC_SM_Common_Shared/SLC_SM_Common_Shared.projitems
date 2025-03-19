@@ -13,6 +13,5 @@
     <Compile Include="$(MSBuildThisFileDirectory)peopleorganization.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Repo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)servicemanagement.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SLC_SM_Common.cs" />
   </ItemGroup>
 </Project>

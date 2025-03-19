@@ -4,19 +4,16 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
-	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using SLC_SM_IAS_Add_Service_Property_1.Views;
 
 	public class ServicePropertyPresenter
 	{
-		private readonly IEngine engine;
 		private readonly ServicePropertyView view;
 		private readonly ServicePropertiesInstance[] servicePropertiesInstances;
 
-		public ServicePropertyPresenter(IEngine engine, ServicePropertyView view, ServicePropertiesInstance[] servicePropertiesInstances)
+		public ServicePropertyPresenter(ServicePropertyView view, ServicePropertiesInstance[] servicePropertiesInstances)
 		{
-			this.engine = engine;
 			this.view = view;
 			this.servicePropertiesInstances = servicePropertiesInstances;
 

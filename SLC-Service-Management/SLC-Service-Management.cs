@@ -54,7 +54,7 @@ internal class Script
 
 		try
 		{
-			// Will import all dom modules that are found in this folder 
+			// Will import all dom modules that are found in this folder
 			// ImportDom(engine, @"c:\Skyline DataMiner\DOM\EventManager");
 
 			string path = _setupContentPath + @"\DOMImportExport";

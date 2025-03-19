@@ -1,6 +1,3 @@
-//---------------------------------
-// SLC_SM_GQIDS_Get Service Order Items_1.cs
-//---------------------------------
 namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 {
 	using System;
@@ -21,7 +18,7 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 		private GQIDMS _dms;
 		private DomHelper _domHelper;
 
-		// TO BE removed when we can easily fetch this using the DOM Code Generated code (backlog of Fiber squad, Arne Maes) 
+		// TO BE removed when we can easily fetch this using the DOM Code Generated code (backlog of Fiber squad, Arne Maes)
 		private static List<ServiceOrderItemStatus> serviceOrderItemStatuseList = new List<ServiceOrderItemStatus>() {
 			new ServiceOrderItemStatus {Id = "06df5562-cd9b-4b0b-bd45-c58560a8b22a", Name = "New" },
 			new ServiceOrderItemStatus {Id = "d917fc53-2638-4ab9-9ac6-651ec5312bac", Name = "Acknowledged" },

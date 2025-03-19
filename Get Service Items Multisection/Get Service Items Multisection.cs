@@ -10,7 +10,6 @@ namespace Get_ServiceItemsMultipleSections_1
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.ResourceManager.Objects;
-	using Skyline.DataMiner.Net.SLDataGateway.Messages.ResourceManager;
 	using SLDataGateway.API.Querying;
 
 	// Required to mark the interface as a GQI data source
@@ -55,8 +54,7 @@ namespace Get_ServiceItemsMultipleSections_1
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			//GenerateInformationEvent("GetNextPage started");
-
+			////GenerateInformationEvent("GetNextPage started");
 			return new GQIPage(GetMultiSection())
 			{
 				HasNextPage = false,
@@ -83,8 +81,7 @@ namespace Get_ServiceItemsMultipleSections_1
 
 		private GQIRow[] GetMultiSection()
 		{
-			//GenerateInformationEvent("Get Service Items Multisection started");
-
+			////GenerateInformationEvent("Get Service Items Multisection started");
 			if (instanceDomId == Guid.Empty)
 			{
 				// return th empty list

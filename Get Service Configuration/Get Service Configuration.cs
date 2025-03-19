@@ -1,195 +1,171 @@
-
-//---------------------------------
-// Get Service Configuration_1.cs
-//---------------------------------
 namespace Get_ServiceItemsMultipleSections_1
 {
-    // Used to process the Service Items
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using DomHelpers.SlcServicemanagement;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Helper;
+	using Skyline.DataMiner.Net.Messages;
 
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    // Required to mark the interface as a GQI data source 
-    using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Messages;
-    using Skyline.DataMiner.Net.Sections;
+	// Required to mark the interface as a GQI data source
+	[GQIMetaData(Name = "Get_ServiceItemsMultipleSections")]
+	public class EventManagerGetMultipleSections : IGQIDataSource, IGQIInputArguments, IGQIOnInit
+	{
+		// defining input argument, will be converted to guid by OnArgumentsProcessed
+		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = true };
+		private DomHelper _domHelper;
+		private DomInstance _domInstance;
+		private GQIDMS dms;
 
-    using System.Linq;
+		// variable where input argument will be stored
+		private Guid instanceDomId;
 
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Apps.Sections.Sections;
-    using Skyline.DataMiner.Net.Messages;
-    using Skyline.DataMiner.Net.Sections;
+		public DMSMessage GenerateInformationEvent(string message)
+		{
+			var generateAlarmMessage = new GenerateAlarmMessage(GenerateAlarmMessage.AlarmSeverity.Information, message);
+			return dms.SendMessage(generateAlarmMessage);
+		}
 
-    using DomHelpers;
-    using DomHelpers.SlcServicemanagement;
-    using Skyline.DataMiner.Net.Helper;
+		public GQIColumn[] GetColumns()
+		{
+			////if (sectionName == "Feeds")
+			////{
+			////    return new GQIColumn[]
+			////            {
+			////            new GQIBooleanColumn("Selected"),
+			////            new GQIStringColumn("Feed Role"),
+			////            new GQIStringColumn("Feed Reference"),
+			////            };
+			////}
+			////else
+			////{
+			////    return new GQIColumn[]
+			////    {
+			////        new GQIStringColumn("Not"),
+			////        new GQIStringColumn("Supported"),
+			////    };
+			////}
 
-    [GQIMetaData(Name = "Get_ServiceItemsMultipleSections")]
-    public class EventManagerGetMultipleSections : IGQIDataSource, IGQIInputArguments, IGQIOnInit
-    {
-        // defining input argument, will be converted to guid by OnArgumentsProcessed
-        private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = true };
+			return new GQIColumn[]
+			{
+				new GQIStringColumn("Label"),
+				new GQIStringColumn("Service parameter ID"),
+				new GQIStringColumn("Profile parameter ID"),
+				new GQIBooleanColumn("Mandatory"),
+				new GQIStringColumn("Value"),
+			};
+		}
 
-        // variable where input argument will be stored
-        private Guid instanceDomId;
-        private string sectionName;
+		public GQIArgument[] GetInputArguments()
+		{
+			return new GQIArgument[]
+			{
+				domIdArg,
+			};
+		}
 
-        private GQIDMS dms;
+		public GQIPage GetNextPage(GetNextPageInputArgs args)
+		{
+			////GenerateInformationEvent("GetNextPage started");
+			return new GQIPage(GetMultiSection())
+			{
+				HasNextPage = false,
+			};
+		}
 
-        private DomInstance _domInstance;
+		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
+		{
+			// adds the input argument to private variable
+			if (!Guid.TryParse(args.GetArgumentValue(domIdArg), out instanceDomId))
+			{
+				instanceDomId = Guid.Empty;
+			}
 
-        private DomHelper _DomHelper;
+			return new OnArgumentsProcessedOutputArgs();
+		}
 
+		public OnInitOutputArgs OnInit(OnInitInputArgs args)
+		{
+			dms = args.DMS;
 
-        public GQIColumn[] GetColumns()
-        {
-            //if (sectionName == "Feeds")
-            //{
-            //    return new GQIColumn[]
-            //            {
-            //            new GQIBooleanColumn("Selected"),
-            //            new GQIStringColumn("Feed Role"),
-            //            new GQIStringColumn("Feed Reference"),
-            //            };
-            //}
-            //else
-            //{
-            //    return new GQIColumn[]
-            //    {
-            //        new GQIStringColumn("Not"),
-            //        new GQIStringColumn("Supported"),
-            //    };
-            //}
+			return default;
+		}
 
-            return new GQIColumn[]
-                {
-                    new GQIStringColumn("Label"),
-                    new GQIStringColumn("Service parameter ID"),
-                    new GQIStringColumn("Profile parameter ID"),
-                    new GQIBooleanColumn("Mandatory"),
-                    new GQIStringColumn("Value"),
-                };
-        }
+		private DomInstance FetchDomInstance(Guid instanceDomId)
+		{
+			var domIntanceId = new DomInstanceId(instanceDomId);
 
-        public GQIArgument[] GetInputArguments()
-        {
-            return new GQIArgument[] {
-                domIdArg,
-            };
-        }
+			// create filter to filter event instances with specific dom event ids
+			var filter = DomInstanceExposers.Id.Equal(domIntanceId);
 
-        public GQIPage GetNextPage(GetNextPageInputArgs args)
-        {
-            //GenerateInformationEvent("GetNextPage started");
+			return _domHelper.DomInstances.Read(filter).FirstOrDefault();
+		}
 
-            return new GQIPage(GetMultiSection())
-            {
-                HasNextPage = false,
-            };
-        }
+		private GQIRow[] GetMultiSection()
+		{
+			////GenerateInformationEvent("Get Service Items Multisection started");
 
-        public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
-        {
-            // adds the input argument to private variable
-            if (!Guid.TryParse(args.GetArgumentValue(domIdArg), out instanceDomId))
-            {
-                instanceDomId = Guid.Empty;
-            }
+			// define output list
+			var rows = new List<GQIRow>();
 
-            return new OnArgumentsProcessedOutputArgs();
-        }
+			if (instanceDomId == Guid.Empty)
+			{
+				// return th empty list
+				return rows.ToArray();
+			}
 
-        public OnInitOutputArgs OnInit(OnInitInputArgs args)
-        {
-            dms = args.DMS;
+			// will initiate DomHelper
+			LoadApplicationHandlersAndHelpers();
 
-            return default;
-        }
+			_domInstance = FetchDomInstance(instanceDomId);
+			Guid serviceConfigurationGuid;
 
-        private GQIRow[] GetMultiSection()
-        {
-            //GenerateInformationEvent("Get Service Items Multisection started");
+			if (_domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
+			{
+				var instance = new ServicesInstance(_domInstance);
 
-            // define output list
-            var rows = new List<GQIRow>();
+				serviceConfigurationGuid = instance.ServiceInfo.ServiceConfiguration.Value;
+			}
+			else if (_domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
+			{
+				var instance = new ServiceSpecificationsInstance(_domInstance);
+				serviceConfigurationGuid = instance.ServiceSpecificationInfo.ServiceConfiguration.Value;
+			}
+			else
+			{
+				return rows.ToArray();
+			}
 
-            if (instanceDomId == Guid.Empty)
-            {
-                // return th empty list
-                return rows.ToArray();
-            }
+			var configDomInstance = FetchDomInstance(serviceConfigurationGuid);
 
-            // will initiate DomHelper 
-            LoadApplicationHandlersAndHelpers();
+			var configIntance = new ServiceConfigurationInstance(configDomInstance);
 
-            _domInstance = FetchDomInstance(instanceDomId);
+			var configValues = configIntance.ServiceConfigurationParametersValues;
 
-            // Service item list to fill with either service or service specifiation's service items
-            IList<ServiceItemsSection> serviceItems = new List<ServiceItemsSection>();
+			// GenerateInformationEvent("test");
+			configValues.ForEach(
+				item =>
+				{
+					rows.Add(
+						new GQIRow(
+							new[]
+							{
+								new GQICell { Value = item.Label },
+								new GQICell { Value = item.ServiceParameterID },
+								new GQICell { Value = item.ProfileParameterID },
+								new GQICell { Value = item.Mandatory },
+								new GQICell { Value = item.StringValue ?? item.DoubleValue.ToString() },
+							}));
+				});
 
-            Guid serviceConfigurationGuid = Guid.Empty;
+			return rows.ToArray();
+		}
 
-            if (_domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
-            {
-                var instance = new ServicesInstance(_domInstance);
-
-                serviceConfigurationGuid = instance.ServiceInfo.ServiceConfiguration.Value;
-
-            }
-            else if (_domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-            {
-                var instance = new ServiceSpecificationsInstance(_domInstance);
-                serviceConfigurationGuid = instance.ServiceSpecificationInfo.ServiceConfiguration.Value;
-            }
-
-            var configDomInstance = FetchDomInstance(serviceConfigurationGuid);
-
-            var configIntance = new ServiceConfigurationInstance(configDomInstance);
-
-            var configValues = configIntance.ServiceConfigurationParametersValues;
-
-            // GenerateInformationEvent("test");
-            configValues.ForEach(item =>
-            {
-                rows.Add(
-                    new GQIRow(new[] {
-                                new GQICell{ Value = item.Label },
-                                new GQICell{ Value = item.ServiceParameterID},
-                                new GQICell{ Value = item.ProfileParameterID },
-                                new GQICell{ Value = item.Mandatory },
-                                new GQICell{ Value = item.StringValue ?? item.DoubleValue.ToString()},
-                    })
-                    );
-
-            });
-
-            return rows.ToArray();
-        }
-
-
-        private DomInstance FetchDomInstance(Guid instanceDomId)
-        {
-            var domIntanceId = new DomInstanceId(instanceDomId);
-            // create filter to filter event instances with specific dom event ids
-            var filter = DomInstanceExposers.Id.Equal(domIntanceId);
-
-            DomInstance domInstance = _DomHelper.DomInstances.Read(filter).First<DomInstance>();
-
-            return domInstance;
-        }
-
-        private void LoadApplicationHandlersAndHelpers()
-        {
-            _DomHelper = new DomHelper(dms.SendMessages, SlcServicemanagementIds.ModuleId);
-        }
-
-        public DMSMessage GenerateInformationEvent(string message)
-        {
-            var generateAlarmMessage = new GenerateAlarmMessage(GenerateAlarmMessage.AlarmSeverity.Information, message);
-            return dms.SendMessage(generateAlarmMessage);
-        }
-    }
+		private void LoadApplicationHandlersAndHelpers()
+		{
+			_domHelper = new DomHelper(dms.SendMessages, SlcServicemanagementIds.ModuleId);
+		}
+	}
 }

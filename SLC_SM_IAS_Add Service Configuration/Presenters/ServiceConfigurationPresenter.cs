@@ -3,18 +3,15 @@
 	using System;
 	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
-	using Skyline.DataMiner.Automation;
 	using SLC_SM_IAS_Add_Service_Configuration_1.Views;
 
 	public class ServiceConfigurationPresenter
 	{
-		private readonly IEngine engine;
 		private readonly string[] existingNames;
 		private readonly ServiceConfigurationView view;
 
-		public ServiceConfigurationPresenter(IEngine engine, ServiceConfigurationView view, string[] existingNames)
+		public ServiceConfigurationPresenter(ServiceConfigurationView view, string[] existingNames)
 		{
-			this.engine = engine;
 			this.view = view;
 			this.existingNames = existingNames;
 

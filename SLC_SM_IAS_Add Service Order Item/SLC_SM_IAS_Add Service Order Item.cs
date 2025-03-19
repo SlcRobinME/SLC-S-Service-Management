@@ -1,7 +1,3 @@
-
-//---------------------------------
-// SLC_SM_IAS_Add Service Order Item_1.cs
-//---------------------------------
 /*
 ****************************************************************************
 *  Copyright (c) 2025,  Skyline Communications NV  All Rights Reserved.    *
@@ -185,7 +181,7 @@ namespace SLC_SM_IAS_Add_Service_Order_Item_1
 
 			// Init views
 			var view = new ServiceOrderItemView(_engine);
-			var presenter = new ServiceOrderItemPresenter(_engine, domHelper, view, repo, GetServiceItemLabels(repo, orderItemInstance, orderItem?.Name));
+			var presenter = new ServiceOrderItemPresenter(domHelper, view, repo, GetServiceItemLabels(repo, orderItemInstance, orderItem?.Name));
 
 			// Events
 			view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");
