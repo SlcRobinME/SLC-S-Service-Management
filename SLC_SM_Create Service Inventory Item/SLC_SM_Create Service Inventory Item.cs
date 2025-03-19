@@ -151,7 +151,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			// Init views
 			var view = new ServiceView(_engine);
-			var presenter = new ServicePresenter(_engine, repo, view, repo.AllServices.Select(x => new ServicesInstance(x).Name).ToArray());
+			var presenter = new ServicePresenter(repo, view, repo.AllServices.Select(x => new ServicesInstance(x).Name).ToArray());
 
 			if (action == Action.Add)
 			{

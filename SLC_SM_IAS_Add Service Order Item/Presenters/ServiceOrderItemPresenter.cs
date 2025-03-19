@@ -5,7 +5,6 @@
 	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
 	using Library;
-	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -14,16 +13,14 @@
 	public class ServiceOrderItemPresenter
 	{
 		private readonly DomHelper domHelper;
-		private readonly IEngine engine;
 		private readonly string[] getServiceOrderItemLabels;
 		private readonly Repo repo;
 		private readonly ServiceOrderItemView view;
 		private ServiceOrderItemsInstance instanceToReturn;
 		private bool isEdit;
 
-		public ServiceOrderItemPresenter(IEngine engine, DomHelper domHelper, ServiceOrderItemView view, Repo repo, string[] getServiceOrderItemLabels)
+		public ServiceOrderItemPresenter(DomHelper domHelper, ServiceOrderItemView view, Repo repo, string[] getServiceOrderItemLabels)
 		{
-			this.engine = engine;
 			this.domHelper = domHelper;
 			this.view = view;
 			this.repo = repo;

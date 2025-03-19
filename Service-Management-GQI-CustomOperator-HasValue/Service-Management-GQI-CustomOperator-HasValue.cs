@@ -81,7 +81,7 @@ public class MyCustomOperator : IGQIColumnOperator, IGQIRowOperator, IGQIInputAr
 
     public void HandleRow(GQIEditableRow row)
 	{
-		
+
 
         row.SetValue(_isEmptyColumn, !string.IsNullOrEmpty(row.GetValue(_columnName)?.ToString()));
 

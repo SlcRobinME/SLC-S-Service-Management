@@ -279,7 +279,7 @@ namespace SLC_SM_IAS_Add_Service_Configuration_1
 
             // Init views
             var view = new ServiceConfigurationView(_engine);
-            var presenter = new ServiceConfigurationPresenter(_engine, view, GetServiceConfigurationLabels(domHelper, domInstance, label));
+            var presenter = new ServiceConfigurationPresenter(view, GetServiceConfigurationLabels(domHelper, domInstance, label));
 
             // Events
             view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");

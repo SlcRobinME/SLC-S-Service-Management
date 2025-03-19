@@ -240,7 +240,7 @@ namespace SLC_SM_IAS_Add_Service_Property_1
 
             // Init views
             var view = new ServicePropertyView(_engine);
-            var presenter = new ServicePropertyPresenter(_engine, view, GetAllProperties(domHelper));
+            var presenter = new ServicePropertyPresenter(view, GetAllProperties(domHelper));
 
             // Events
             view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");

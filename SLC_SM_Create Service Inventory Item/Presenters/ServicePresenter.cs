@@ -4,21 +4,18 @@
 	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
 	using Library;
-	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using SLC_SM_Create_Service_Inventory_Item.Views;
 
 	public class ServicePresenter
 	{
-		private readonly IEngine engine;
 		private readonly Repo repo;
 		private readonly ServiceView view;
 		private readonly string[] getServiceLabels;
 		private ServicesInstance instanceToReturn;
 
-		public ServicePresenter(IEngine engine, Repo repo, ServiceView view, string[] getServiceLabels)
+		public ServicePresenter(Repo repo, ServiceView view, string[] getServiceLabels)
 		{
-			this.engine = engine;
 			this.repo = repo;
 			this.view = view;
 			this.getServiceLabels = getServiceLabels;
