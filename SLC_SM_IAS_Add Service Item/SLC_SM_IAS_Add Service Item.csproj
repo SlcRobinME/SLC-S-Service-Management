@@ -6,7 +6,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <DataMinerType>AutomationScript</DataMinerType>
-    <GenerateDataMinerPackage>True</GenerateDataMinerPackage>
+    <GenerateDataMinerPackage>False</GenerateDataMinerPackage>
     <Version>1.0.0</Version>
     <VersionComment>Initial Version</VersionComment>
   </PropertyGroup>
