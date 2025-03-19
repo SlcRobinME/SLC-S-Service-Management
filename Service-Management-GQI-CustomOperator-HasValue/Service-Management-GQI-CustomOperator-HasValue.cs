@@ -51,6 +51,7 @@ dd/mm/2023    1.0.0.1        RCA, Skyline    Initial version
 
 using System;
 using Skyline.DataMiner.Analytics.GenericInterface;
+using Skyline.DataMiner.Net.Helper;
 using Skyline.DataMiner.Net.Messages;
 
 [GQIMetaData(Name = "Service-Management-GQI-CustomOperator-HasValue")]
@@ -79,10 +80,10 @@ public class MyCustomOperator : IGQIColumnOperator, IGQIRowOperator, IGQIInputAr
     }
 
     public void HandleRow(GQIEditableRow row)
-    {
-        bool hasValue = row.TryGetValue(_columnName, out string value);
+	{
+		
 
-        row.SetValue(_isEmptyColumn, value != String.Empty);
+        row.SetValue(_isEmptyColumn, !string.IsNullOrEmpty(row.GetValue(_columnName)?.ToString()));
 
-    }
+	}
 }

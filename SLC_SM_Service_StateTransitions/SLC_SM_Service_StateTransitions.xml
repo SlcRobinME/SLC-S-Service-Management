@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <DMSScript options="272" xmlns="http://www.skyline.be/automation">
-	<Name>SLC_SM_Delete_Service</Name>
-	<Description />
+	<Name>SLC_SM_Service_StateTransitions</Name>
+	<Description></Description>
 	<Type>Automation</Type>
-	<Author>SKYLINE2\RobinME</Author>
+	<Author>JKO</Author>
 	<CheckSets>FALSE</CheckSets>
 	<Folder>Service Management</Folder>
 
@@ -14,18 +14,19 @@
 	</Memory>
 
 	<Parameters>
-		<ScriptParameter id="10" type="string" values="">
-			<Description>DOM ID</Description>
+		<ScriptParameter id="2" type="string" values="">
+			<Description>PreviousState</Description>
+		</ScriptParameter>
+		<ScriptParameter id="3" type="string" values="">
+			<Description>NextState</Description>
 		</ScriptParameter>
 	</Parameters>
 
 	<Script>
 		<Exe id="1" type="csharp">
-			<Value>
-				<![CDATA[[Project:SLC_SM_Delete_Service]]]>
-			</Value>
+			<Value><![CDATA[[Project:SLC_SM_Service_StateTransitions]]]></Value>
 			<!--<Param type="debug">true</Param>-->
-			<Message />
+			<Message></Message>
 		</Exe>
 	</Script>
 </DMSScript>
