@@ -26,14 +26,19 @@ type: Custom Solution
 # If the ID is filled in but does not exist yet, a new Catalog item will be registered with this ID.
 # If the ID is filled in but does exist, properties of the item will be overwritten.
 #   Must be a valid GUID.
-id: 764b5066-b91d-48cb-91df-c356b31ace6f
+# id: 764b5066-b91d-48cb-91df-c356b31ace6f
+id: 97599e37-6da8-4c0a-9c59-11838d130a77
+
 # [Required]
 # The human-friendly name of the Catalog item.
 # Can be changed at any time.
 #   Max length: 100 characters.
 #   Cannot contain newlines.
 #   Cannot contain leading or trailing whitespace characters.
-title: SLC-Service-Management
+# title: SLC-Service-Management
+title: Empower 2025 - Service Ordering & Planning
+
+
 # [Optional]
 # General information about the Catalog item.
 #   Max length: 100,000 characters
