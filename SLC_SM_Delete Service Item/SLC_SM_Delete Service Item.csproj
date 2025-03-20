@@ -19,11 +19,6 @@
     <ProjectReference Include="..\SLC_SM_Common\SLC_SM_Common.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="SLSRMLibrary">
-      <HintPath>..\SLC-Service-Management\Dlls\SLSRMLibrary.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="1.2.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
