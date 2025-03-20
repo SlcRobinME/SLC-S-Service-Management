@@ -61,13 +61,11 @@ namespace SLC_SM_Delete_Service_Item_1
 	using DomHelpers.SlcServicemanagement;
 	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Library.Solutions.SRM;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Scheduling;
-	using JobAction = Skyline.DataMiner.Utils.MediaOps.Helpers.Scheduling.JobAction;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
@@ -203,14 +201,12 @@ namespace SLC_SM_Delete_Service_Item_1
 			else
 			{
 				// Check booking
-				var reservation = SrmManagers.ResourceManager.GetReservationInstance(refId);
+				var rm = new ResourceManagerHelper(_engine.SendSLNetSingleResponseMessage);
+				var reservation = rm.GetReservationInstance(refId);
 				if (reservation.StartTimeUTC > DateTime.UtcNow
 					&& (reservation.Status == ReservationStatus.Pending || reservation.Status == ReservationStatus.Confirmed))
 				{
-					var bkm = reservation.FindBookingManager();
-					bkm.TryCancel((Engine)_engine, ref reservation);
-					bkm.TryDelete((Engine)_engine, reservation);
-
+					rm.RemoveReservationInstances(reservation);
 					return false;
 				}
 
