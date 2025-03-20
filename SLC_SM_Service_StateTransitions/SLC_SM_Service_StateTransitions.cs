@@ -47,7 +47,7 @@ namespace SLCSMServiceStateTransitions
 					{
 						case "designed":
 
-							transitionId = SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.New_To_Acknowledged;
+							transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.New_To_Designed;
 							break;
 
 						default:
@@ -60,7 +60,7 @@ namespace SLCSMServiceStateTransitions
 					switch (nextState)
 					{
 						case "reserved":
-							transitionId = SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress;
+							transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Designed_To_Reserved;
 							break;
 
 						default:
@@ -72,9 +72,24 @@ namespace SLCSMServiceStateTransitions
 				case "reserved":
 					switch (nextState)
 					{
-						case "terminated":
-							transitionId = SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Inprogress_To_Completed;
+						case "active":
+							transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Reserved_To_Active;
 							break;
+
+
+						default:
+							throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");
+					}
+
+					break;
+
+				case "active":
+					switch (nextState)
+					{
+						case "terminated":
+							transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Active_To_Terminated;
+							break;
+
 
 						default:
 							throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");
@@ -86,7 +101,7 @@ namespace SLCSMServiceStateTransitions
 					switch (nextState)
 					{
 						case "retired":
-							transitionId = SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Pending_To_Assesscancellation;
+							transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Terminated_To_Retired;
 							break;
 
 						default:
