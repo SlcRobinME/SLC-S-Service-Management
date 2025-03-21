@@ -208,6 +208,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				newService.ServiceInfo.ServiceSpecifcation = serviceOrderItemInstance.ServiceOrderItemServiceInfo.ServiceSpecification;
 				newService.ServiceInfo.ServiceProperties = serviceOrderItemInstance.ServiceOrderItemServiceInfo.Properties;
 				newService.ServiceInfo.ServiceConfiguration = serviceOrderItemInstance.ServiceOrderItemServiceInfo.Configuration;
+				newService.ServiceInfo.ServiceCategory = serviceOrderItemInstance.ServiceOrderItemServiceInfo.ServiceCategory;
 				AddOrUpdateService(newService, true);
 
 				// Provide link
