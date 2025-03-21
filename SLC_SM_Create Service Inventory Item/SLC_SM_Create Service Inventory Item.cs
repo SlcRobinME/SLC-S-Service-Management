@@ -194,9 +194,8 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				var serviceOrderItemInstance = new ServiceOrderItemsInstance(instance);
 				if (serviceOrderItemInstance.ServiceOrderItemServiceInfo.Service.HasValue)
 				{
-					var inst = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(serviceOrderItemInstance.ServiceOrderItemServiceInfo.Service.Value)).FirstOrDefault()
-						   ?? throw new InvalidOperationException($"No Dom Instance with ID '{serviceOrderItemInstance.ServiceOrderItemServiceInfo.Service.Value}' found on the system!");
-					return new ServicesInstance(inst);
+					var inst = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(serviceOrderItemInstance.ServiceOrderItemServiceInfo.Service.Value)).FirstOrDefault();
+					if (inst != null) return new ServicesInstance(inst);
 				}
 
 				// Create new service item based on order
@@ -207,7 +206,10 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				newService.ServiceInfo.ServiceEndTime = serviceOrderItemInstance.ServiceOrderItemInfo.ServiceEndTime;
 				newService.ServiceInfo.Icon = String.Empty;
 				newService.ServiceInfo.ServiceSpecifcation = serviceOrderItemInstance.ServiceOrderItemServiceInfo.ServiceSpecification;
-				AddOrUpdateService(newService);
+				newService.ServiceInfo.ServiceProperties = serviceOrderItemInstance.ServiceOrderItemServiceInfo.Properties;
+				newService.ServiceInfo.ServiceConfiguration = serviceOrderItemInstance.ServiceOrderItemServiceInfo.Configuration;
+				newService.ServiceInfo.ServiceCategory = serviceOrderItemInstance.ServiceOrderItemServiceInfo.ServiceCategory;
+				AddOrUpdateService(newService, true);
 
 				// Provide link
 				serviceOrderItemInstance.ServiceOrderItemServiceInfo.Service = newService.ID.Id;
@@ -261,7 +263,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			return new ServicesInstance(instance);
 		}
 
-		private void AddOrUpdateService(ServicesInstance instance)
+		private void AddOrUpdateService(ServicesInstance instance, bool isNew = false)
 		{
 			if (!instance.ServiceInfo.ServiceSpecifcation.HasValue || instance.ServiceInfo.ServiceSpecifcation == Guid.Empty)
 			{
@@ -283,10 +285,13 @@ namespace SLC_SM_Create_Service_Inventory_Item
 							  ?? throw new InvalidOperationException($"No Service Specification found with ID '{instance.ServiceInfo.ServiceSpecifcation}'.");
 			var serviceSpecificationInstance = new ServiceSpecificationsInstance(domInstance);
 
-			instance.ServiceInfo.Icon = serviceSpecificationInstance.ServiceSpecificationInfo.Icon;
-			instance.ServiceInfo.Description = serviceSpecificationInstance.ServiceSpecificationInfo.Description;
-			instance.ServiceInfo.ServiceProperties = serviceSpecificationInstance.ServiceSpecificationInfo.ServiceProperties;
-			instance.ServiceInfo.ServiceConfiguration = serviceSpecificationInstance.ServiceSpecificationInfo.ServiceConfiguration;
+			if (!isNew)
+			{
+				instance.ServiceInfo.Icon = serviceSpecificationInstance.ServiceSpecificationInfo.Icon;
+				instance.ServiceInfo.Description = serviceSpecificationInstance.ServiceSpecificationInfo.Description;
+				instance.ServiceInfo.ServiceProperties = serviceSpecificationInstance.ServiceSpecificationInfo.ServiceProperties;
+				instance.ServiceInfo.ServiceConfiguration = serviceSpecificationInstance.ServiceSpecificationInfo.ServiceConfiguration;
+			}
 
 			foreach (var relationship in serviceSpecificationInstance.ServiceItemRelationship)
 			{

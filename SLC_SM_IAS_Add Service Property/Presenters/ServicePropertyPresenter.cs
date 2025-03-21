@@ -38,19 +38,19 @@
 
 		private void OnUpdateServiceProperty(ServicePropertiesInstance servicePropertySelected)
 		{
-			if (servicePropertySelected.ServicePropertyInfo.Type == SlcServicemanagementIds.Enums.TypeEnum.Discrete)
-			{
-				view.TBoxValue.Text = String.Empty;
-				view.TBoxValue.IsEnabled = false;
-				view.DdValue.SetOptions(servicePropertySelected.DiscreteServicePropertyValueOptions.Select(x => x.DiscreteValue));
-				view.DdValue.IsEnabled = true;
-			}
-			else
+			if (servicePropertySelected?.ServicePropertyInfo.Type != SlcServicemanagementIds.Enums.TypeEnum.Discrete)
 			{
 				view.TBoxValue.Text = String.Empty;
 				view.TBoxValue.IsEnabled = true;
 				view.DdValue.SetOptions(new List<string>());
 				view.DdValue.IsEnabled = false;
+			}
+			else
+			{
+				view.TBoxValue.Text = String.Empty;
+				view.TBoxValue.IsEnabled = false;
+				view.DdValue.SetOptions(servicePropertySelected.DiscreteServicePropertyValueOptions.Select(x => x.DiscreteValue));
+				view.DdValue.IsEnabled = true;
 			}
 		}
 
