@@ -65,11 +65,11 @@ namespace SLCSMASAddServiceItem
 	public class Script
 	{
 		private Guid _serviceSpecificationId;
-		private string _label;
+		//private string _label;
 		private string _serviceItemType;
 		private string _definitionReference;
-		private string _serviceItemScript;
-		private string _implementationReference;
+		//private string _serviceItemScript;
+		//private string _implementationReference;
 
 		/// <summary>
 		/// The script entry point.
@@ -108,9 +108,9 @@ namespace SLCSMASAddServiceItem
 				throw new ArgumentException("No DOM ID provided as input to the script");
 			}
 
-			_label = engine.GetScriptParam("Label").Value.Trim('"', '[', ']');
-			_serviceItemScript = engine.GetScriptParam("ServiceItemScript").Value.Trim('"', '[', ']');
-			_implementationReference = engine.GetScriptParam("ImplementationReference").Value.Trim('"', '[', ']');
+			//_label = engine.GetScriptParam("Label").Value.Trim('"', '[', ']');
+			//_serviceItemScript = engine.GetScriptParam("ServiceItemScript").Value.Trim('"', '[', ']');
+			//_implementationReference = engine.GetScriptParam("ImplementationReference").Value.Trim('"', '[', ']');
 
 			_serviceItemType = engine.GetScriptParam("ServiceItemType").Value.Trim('"', '[', ']');
 			if (string.IsNullOrEmpty(_serviceItemType))
