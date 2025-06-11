@@ -74,11 +74,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceOrderItem_StateTrans
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLC_SM_Service_StateTransitions", "SLC_SM_Service_StateTransitions\SLC_SM_Service_StateTransitions.csproj", "{41E720FB-A284-4B5A-973E-8709EBA4D602}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Get Service Item Relationship Multisection", "Get Service Item Relationship Multisection\Get Service Item Relationship Multisection.csproj", "{586FEA8A-3436-49EB-81AA-6D990891544D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Get Service Item Relationship Multisection", "Get Service Item Relationship Multisection\Get Service Item Relationship Multisection.csproj", "{586FEA8A-3436-49EB-81AA-6D990891544D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLC_SM_IAS_PopupMessage", "SLC_SM_PopupMessage\SLC_SM_IAS_PopupMessage.csproj", "{E41B0692-3FDB-493D-A2ED-CA23F2BB246D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLC_SM_IAS_PopupMessage", "SLC_SM_PopupMessage\SLC_SM_IAS_PopupMessage.csproj", "{E41B0692-3FDB-493D-A2ED-CA23F2BB246D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLC_SM_AS_AddServiceItem", "SLC_SM_AS_AddServiceItem\SLC_SM_AS_AddServiceItem.csproj", "{6F3390AB-D042-499A-A77C-8AFFB6487C03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLC_SM_AS_AddServiceItem", "SLC_SM_AS_AddServiceItem\SLC_SM_AS_AddServiceItem.csproj", "{6F3390AB-D042-499A-A77C-8AFFB6487C03}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLC_SM_AS_AddRelationship", "SLC_SM_AS_AddRelationship\SLC_SM_AS_AddRelationship.csproj", "{18639B90-C551-4DB9-ABC3-802B9D1A0C7C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLC_SM_IAS_ManageRelationships", "SLC_SM_IAS_ManageRelationships\SLC_SM_IAS_ManageRelationships.csproj", "{1FDD8CF5-F402-446A-8B52-1173CB5CA576}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -198,6 +202,14 @@ Global
 		{6F3390AB-D042-499A-A77C-8AFFB6487C03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F3390AB-D042-499A-A77C-8AFFB6487C03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F3390AB-D042-499A-A77C-8AFFB6487C03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18639B90-C551-4DB9-ABC3-802B9D1A0C7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18639B90-C551-4DB9-ABC3-802B9D1A0C7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18639B90-C551-4DB9-ABC3-802B9D1A0C7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18639B90-C551-4DB9-ABC3-802B9D1A0C7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FDD8CF5-F402-446A-8B52-1173CB5CA576}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FDD8CF5-F402-446A-8B52-1173CB5CA576}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FDD8CF5-F402-446A-8B52-1173CB5CA576}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FDD8CF5-F402-446A-8B52-1173CB5CA576}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -232,6 +244,8 @@ Global
 		{586FEA8A-3436-49EB-81AA-6D990891544D} = {D44EC38B-25B7-4DDE-AB69-528AE471A88F}
 		{E41B0692-3FDB-493D-A2ED-CA23F2BB246D} = {7B54F701-23CF-40FB-B16E-65F702079BF6}
 		{6F3390AB-D042-499A-A77C-8AFFB6487C03} = {5B35FE04-DC17-46DA-A887-CFCFF55E5058}
+		{18639B90-C551-4DB9-ABC3-802B9D1A0C7C} = {5B35FE04-DC17-46DA-A887-CFCFF55E5058}
+		{1FDD8CF5-F402-446A-8B52-1173CB5CA576} = {7B54F701-23CF-40FB-B16E-65F702079BF6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {38C318B5-7814-41CC-9BA6-DC5069897881}

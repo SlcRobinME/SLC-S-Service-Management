@@ -53,23 +53,23 @@ namespace SLCSMASAddServiceItem
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Globalization;
 	using System.Linq;
-	using System.Text;
+	using DomHelpers.SlcServicemanagement;
 	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
 	/// </summary>
 	public class Script
 	{
-		private Guid _serviceSpecificationId;
-		//private string _label;
+		private Guid _domId;
 		private string _serviceItemType;
 		private string _definitionReference;
-		//private string _serviceItemScript;
-		//private string _implementationReference;
+
+		private DomHelper _domHelper;
 
 		/// <summary>
 		/// The script entry point.
@@ -77,6 +77,13 @@ namespace SLCSMASAddServiceItem
 		/// <param name="engine">Link with SLAutomation process.</param>
 		public void Run(IEngine engine)
 		{
+			// DO NOT REMOVE THIS COMMENTED-OUT CODE OR THE SCRIPT WON'T RUN!
+			// DataMiner evaluates if the script needs to launch in interactive mode.
+			// This is determined by a simple string search looking for "engine.ShowUI" in the source code.
+			// However, because of the toolkit NuGet package, this string cannot be found here.
+			// So this comment is here as a workaround.
+			// engine.ShowUI();
+
 			try
 			{
 				RunSafe(engine);
@@ -96,21 +103,107 @@ namespace SLCSMASAddServiceItem
 		{
 			LoadParameters(engine);
 
-			// TODO
+			_domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
+			var domInstance = LoadDomInstance(_domId);
+
+			var serviceItemSection = CreateServiceItemSection();
+			SaveUpdatedServiceItem(domInstance, serviceItemSection);
+
+			engine.AddOrUpdateScriptOutput("ServiceItemId", serviceItemSection.ServiceItemID.ToString());
+
+			//MakeConnectionIfNeeded(engine, serviceItemSection);
+		}
+
+		private DomInstance LoadDomInstance(Guid domId)
+		{
+			var domInstance = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault();
+			if (domInstance == null)
+				throw new Exception($"Could not find the DOM instance with id {domId}");
+			return domInstance;
+		}
+
+		private void SaveUpdatedServiceItem(DomInstance domInstance, ServiceItemsSection newSection)
+		{
+			var defId = domInstance.DomDefinitionId.Id;
+
+			if (defId == SlcServicemanagementIds.Definitions.Services.Id)
+			{
+				var service = new ServicesInstance(domInstance);
+				HandleServiceItemUpdate(service.ServiceItems, newSection);
+				service.Save(_domHelper);
+			}
+			else if (defId == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
+			{
+				var spec = new ServiceSpecificationsInstance(domInstance);
+				HandleServiceItemUpdate(spec.ServiceItems, newSection);
+				spec.Save(_domHelper);
+			}
+			else
+			{
+				throw new InvalidOperationException($"DOM definition '{domInstance.DomDefinitionId}' not supported.");
+			}
+		}
+
+		//private void MakeConnectionIfNeeded(IEngine engine, ServiceItemsSection newSection)
+		//{
+		//	if (string.IsNullOrEmpty(_selectedServiceItemId))
+		//		return;
+
+		//	try
+		//	{
+		//		var script = engine.PrepareSubScript("SLC_SM_IAS_ManageRelationships");
+		//		script.SelectScriptParam("DomId", _domId.ToString());
+		//		script.SelectScriptParam("ServiceItemIds", $"[\"{_selectedServiceItemId}\",\"{newSection.ServiceItemID.Value}\"]");
+		//		script.Synchronous = true;
+		//		//engine.ShowUI(uib);
+		//		engine.FindInteractiveClient(string.Empty, 15000, string.Empty, Skyline.DataMiner.Net.Messages.AutomationScriptAttachOptions.AttachImmediately);
+		//		script.StartScript();
+		//	}
+		//	catch (Exception e)
+		//	{
+		//		engine.GenerateInformation(e.Message);
+		//		engine.GenerateInformation(e.InnerException.Message);
+		//		engine.GenerateInformation(e.InnerException.StackTrace);
+
+		//		throw new Exception($"{e.Message} - Inner: {e.InnerException.Message}:{e.InnerException.StackTrace}");
+		//	}
+		//}
+
+		private ServiceItemsSection CreateServiceItemSection()
+		{
+			return new ServiceItemsSection
+			{
+				ServiceItemType = (SlcServicemanagementIds.Enums.ServiceitemtypesEnum)Enum.Parse(
+					typeof(SlcServicemanagementIds.Enums.ServiceitemtypesEnum), _serviceItemType),
+				DefinitionReference = _definitionReference,
+				ServiceItemScript = string.Empty,
+				ImplementationReference = string.Empty,
+			};
+		}
+
+		private void HandleServiceItemUpdate(IList<ServiceItemsSection> items, ServiceItemsSection newItem)
+		{
+			var ids = items
+				.Where(x => x.ServiceItemID.HasValue)
+				.Select(x => x.ServiceItemID.Value)
+				.OrderBy(x => x)
+				.ToArray();
+
+			var itemId = ids.Any() ? ids.Max() + 1 : 0;
+			newItem.ServiceItemID = itemId;
+			newItem.Label = $"Service Item #{itemId:000}";
+
+			items.Add(newItem);
 		}
 
 		private void LoadParameters(IEngine engine)
 		{
 			string domIdRaw = engine.GetScriptParam("DOM ID").Value;
-			_serviceSpecificationId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
-			if (_serviceSpecificationId == Guid.Empty)
+			_domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
+			if (_domId == Guid.Empty)
 			{
 				throw new ArgumentException("No DOM ID provided as input to the script");
 			}
-
-			//_label = engine.GetScriptParam("Label").Value.Trim('"', '[', ']');
-			//_serviceItemScript = engine.GetScriptParam("ServiceItemScript").Value.Trim('"', '[', ']');
-			//_implementationReference = engine.GetScriptParam("ImplementationReference").Value.Trim('"', '[', ']');
 
 			_serviceItemType = engine.GetScriptParam("ServiceItemType").Value.Trim('"', '[', ']');
 			if (string.IsNullOrEmpty(_serviceItemType))

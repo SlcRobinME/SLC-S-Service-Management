@@ -45,16 +45,15 @@ Revision History:
 
 DATE		VERSION		AUTHOR			COMMENTS
 
-27/05/2025	1.0.0.1		RCA, Skyline	Initial version
+30/05/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
 
-namespace SLCSMPopupMessage
+namespace SLCSMIASManageRelationships
 {
 	using System;
-	using System.Net.NetworkInformation;
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using SLC_SM_IAS_ManageRelationships.Controller;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
@@ -82,6 +81,11 @@ namespace SLCSMPopupMessage
 				// Catch normal abort exceptions (engine.ExitFail or engine.ExitSuccess)
 				// throw; // Comment if it should be treated as a normal exit of the script.
 			}
+			catch (ScriptForceAbortException)
+			{
+				// Catch forced abort exceptions, caused via external maintenance messages.
+				// throw;
+			}
 			catch (InteractiveUserDetachedException)
 			{
 				// Catch a user detaching from the interactive script by closing the window.
@@ -90,45 +94,25 @@ namespace SLCSMPopupMessage
 			}
 			catch (Exception e)
 			{
-				engine.ExitFail("Run|Something went wrong: " + e);
+				var popup = engine.PrepareSubScript("SLC_SM_IAS_PopupMessage");
+				popup.SelectScriptParam("Title", "Attention!");
+				popup.SelectScriptParam("Message", e.Message);
+				popup.SelectScriptParam("ButtonLabel", "Ok");
+				popup.StartScript();
 			}
 		}
 
 		private void RunSafe(IEngine engine)
 		{
-			var title = engine.GetScriptParam("Title").Value;
-			var message = engine.GetScriptParam("Message").Value;
-			var buttonLabel = engine.GetScriptParam("ButtonLabel").Value;
+			var data = new ScriptData(engine);
+			data.Validate();
 
-			InteractiveController controller = new InteractiveController(engine);
-			PopupDialog dialog = new PopupDialog(engine, title, message, buttonLabel);
-			dialog.ButtonOk.Pressed += (sender, args) => engine.ExitSuccess(string.Empty);
+			var controller = new ManageConnectionsController(engine, data);
+			if (data.HasWorkflowName)
+				controller.CreateServiceItemFromWorkflow();
 
-			controller.ShowDialog(dialog);
+			controller.BuildLinkMap();
+			controller.HandleNext();
 		}
-	}
-
-	public class PopupDialog : Dialog
-	{
-		public PopupDialog(IEngine engine, string title, string message, string button) : base(engine)
-		{
-			Title = title;
-
-			Label label = new Label(message);
-			label.SetWidthAuto();
-
-			ButtonOk = new Button(button);
-			ButtonOk.Style = ButtonStyle.CallToAction;
-
-			int row = 0;
-			AddWidget(label, row++, 0);
-			AddWidget(new WhiteSpace { Height = 25 }, row++, 0);
-			AddWidget(ButtonOk, row++, 1, HorizontalAlignment.Right);
-
-			SetColumnWidth(0, 300);
-			SetColumnWidth(1, 100);
-		}
-
-		public Button ButtonOk { get; private set; }
 	}
 }
