@@ -38,5 +38,10 @@ namespace SLC_SM_Common.API.PeopleAndOrganizationApi
 
 			return CreateOrUpdateInstance(instance);
 		}
+
+		public override bool TryDelete(Models.ExperienceLevel item)
+		{
+			return TryDelete(item.ID);
+		}
 	}
 }

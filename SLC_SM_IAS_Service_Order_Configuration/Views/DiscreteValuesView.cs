@@ -1,4 +1,4 @@
-﻿namespace SLC_SM_IAS_Service_Spec_Configuration.Views
+﻿namespace SLC_SM_IAS_Service_Order_Configuration.Views
 {
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;

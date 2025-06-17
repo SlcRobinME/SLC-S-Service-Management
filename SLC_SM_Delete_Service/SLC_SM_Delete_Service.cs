@@ -56,11 +56,12 @@ namespace SLC_SM_Delete_Service_1
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using DomHelpers.SlcServicemanagement;
+
+	using Library;
+
 	using Newtonsoft.Json;
+
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
@@ -103,57 +104,31 @@ namespace SLC_SM_Delete_Service_1
 			}
 		}
 
-		private static void DeleteLinkedItems(DomHelper domHelper, DomInstance domInstance)
+		private static void DeleteLinkedItems(Repo repo, Guid itemId)
 		{
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
+			var service = repo.Services.Read().Find(x => x.ID == itemId);
+			if (service != null)
 			{
-				var instance = new ServicesInstance(domInstance);
-				DeleteLinkedItem(domHelper, instance.ServiceInfo.ServiceConfiguration);
-				DeleteLinkedItem(domHelper, instance.ServiceInfo.ServiceProperties);
-			}
-
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-			{
-				var instance = new ServiceSpecificationsInstance(domInstance);
-				DeleteLinkedItem(domHelper, instance.ServiceSpecificationInfo.ServiceConfiguration);
-				DeleteLinkedItem(domHelper, instance.ServiceSpecificationInfo.ServiceProperties);
-			}
-
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceOrderItems.Id)
-			{
-				var instance = new ServiceOrderItemsInstance(domInstance);
-				DeleteLinkedItem(domHelper, instance.ServiceOrderItemServiceInfo.Configuration);
-				DeleteLinkedItem(domHelper, instance.ServiceOrderItemServiceInfo.Properties);
-			}
-
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceOrders.Id)
-			{
-				var instance = new ServiceOrdersInstance(domInstance);
-				List<Guid> serviceOrderItems = instance.ServiceOrderItems.Where(x => x.ServiceOrderItem.HasValue).Select(x => x.ServiceOrderItem.Value).ToList();
-				foreach (Guid serviceOrderItemId in serviceOrderItems)
-				{
-					var serviceOrderItemInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(serviceOrderItemId)).FirstOrDefault();
-					if (serviceOrderItemInstance != null)
-					{
-						var serviceOrderItem = new ServiceOrderItemsInstance(serviceOrderItemInstance);
-						DeleteLinkedItem(domHelper, serviceOrderItem.ServiceOrderItemServiceInfo.Configuration);
-						DeleteLinkedItem(domHelper, serviceOrderItem.ServiceOrderItemServiceInfo.Properties);
-					}
-				}
-			}
-		}
-
-		private static void DeleteLinkedItem(DomHelper domHelper, Guid? id)
-		{
-			if (!id.HasValue)
-			{
+				repo.Services.TryDelete(service);
 				return;
 			}
 
-			var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(id.Value)).FirstOrDefault();
-			if (domInstance != null)
+			var spec = repo.ServiceSpecifications.Read().Find(x => x.ID == itemId);
+			if (spec != null)
 			{
-				domHelper.DomInstances.Delete(domInstance);
+				repo.ServiceSpecifications.TryDelete(spec);
+			}
+
+			var orderItem = repo.ServiceOrderItems.Read().Find(x => x.ID == itemId);
+			if (orderItem != null)
+			{
+				repo.ServiceOrderItems.TryDelete(orderItem);
+			}
+
+			var order = repo.ServiceOrders.Read().Find(x => x.ID == itemId);
+			if (order != null)
+			{
+				repo.ServiceOrders.TryDelete(order);
 			}
 		}
 
@@ -166,12 +141,8 @@ namespace SLC_SM_Delete_Service_1
 				throw new InvalidOperationException("No DOM ID provided as input to the script");
 			}
 
-			var domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-			var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
-							  ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
-			DeleteLinkedItems(domHelper, domInstance);
-
-			domHelper.DomInstances.Delete(domInstance);
+			var repo = new Repo(Engine.SLNetRaw);
+			DeleteLinkedItems(repo, domId);
 		}
 	}
 }

@@ -33,8 +33,9 @@ namespace SLC_SM_Common.API.ConfigurationsApi
 						DefaultUnit = units.Find(u => u.ID == x.NumberParameterOptions.DefaultUnit),
 						MinRange = x.NumberParameterOptions.MinRange,
 						MaxRange = x.NumberParameterOptions.MaxRange,
-						Stepsize = x.NumberParameterOptions.StepSize,
+						StepSize = x.NumberParameterOptions.StepSize,
 						Decimals = x.NumberParameterOptions.Decimals,
+						DefaultValue = x.NumberParameterOptions.DefaultValue,
 					})
 				.ToList();
 		}
@@ -44,8 +45,9 @@ namespace SLC_SM_Common.API.ConfigurationsApi
 			var instance = new NumberParameterOptionsInstance(New(item.ID));
 			instance.NumberParameterOptions.MinRange = item.MinRange;
 			instance.NumberParameterOptions.MaxRange = item.MaxRange;
-			instance.NumberParameterOptions.StepSize = item.Stepsize;
+			instance.NumberParameterOptions.StepSize = item.StepSize;
 			instance.NumberParameterOptions.Decimals = item.Decimals;
+			instance.NumberParameterOptions.DefaultValue = item.DefaultValue;
 
 			var dataHelperUnits = new DataHelperConfigurationUnit(_connection);
 			var units = dataHelperUnits.Read();
@@ -85,6 +87,11 @@ namespace SLC_SM_Common.API.ConfigurationsApi
 			}
 
 			return CreateOrUpdateInstance(instance);
+		}
+
+		public override bool TryDelete(Models.NumberParameterOptions item)
+		{
+			return TryDelete(item.ID);
 		}
 	}
 }

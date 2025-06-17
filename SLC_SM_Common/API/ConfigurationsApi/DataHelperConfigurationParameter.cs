@@ -31,7 +31,7 @@ namespace SLC_SM_Common.API.ConfigurationsApi
 					{
 						ID = x.ID.Id,
 						Name = x.ConfigurationParameterInfo.ParameterName,
-						Type = x.ConfigurationParameterInfo.Type ?? SlcConfigurationsIds.Enums.ParameterType.Text,
+						Type = x.ConfigurationParameterInfo.Type ?? SlcConfigurationsIds.Enums.Type.Text,
 						NumberOptions = numberOptions.Find(o => o.ID == x.ConfigurationParameterInfo.NumberOptions),
 						DiscreteOptions = discreteOptions.Find(o => o.ID == x.ConfigurationParameterInfo.DiscreteOptions),
 						TextOptions = textOptions.Find(o => o.ID == x.ConfigurationParameterInfo.TextOptions),
@@ -64,6 +64,11 @@ namespace SLC_SM_Common.API.ConfigurationsApi
 			}
 
 			return CreateOrUpdateInstance(instance);
+		}
+
+		public override bool TryDelete(Models.ConfigurationParameter item)
+		{
+			return TryDelete(item.ID);
 		}
 	}
 }

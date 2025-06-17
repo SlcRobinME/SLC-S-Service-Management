@@ -5,8 +5,6 @@ namespace SLC_SM_Common.API
 
 	using DomHelpers.SlcConfigurations;
 
-	using Skyline.DataMiner.Net.Helper;
-
 	namespace ConfigurationsApi
 	{
 		public static class Models
@@ -17,7 +15,7 @@ namespace SLC_SM_Common.API
 
 				public string Label { get; set; }
 
-				public SlcConfigurationsIds.Enums.ParameterType Type { get; set; }
+				public SlcConfigurationsIds.Enums.Type Type { get; set; }
 
 				public double? DoubleValue { get; set; }
 
@@ -30,6 +28,10 @@ namespace SLC_SM_Common.API
 				public DiscreteParameterOptions DiscreteOptions { get; set; }
 
 				public TextParameterOptions TextOptions { get; set; }
+
+				public string LinkedConfigurationReference { get; set; }
+
+				public bool ValueFixed { get; set; }
 			}
 
 			public class ConfigurationParameter
@@ -38,7 +40,7 @@ namespace SLC_SM_Common.API
 
 				public string Name { get; set; }
 
-				public SlcConfigurationsIds.Enums.ParameterType Type { get; set; }
+				public SlcConfigurationsIds.Enums.Type Type { get; set; }
 
 				public NumberParameterOptions NumberOptions { get; set; }
 
@@ -61,7 +63,9 @@ namespace SLC_SM_Common.API
 
 				public long? Decimals { get; set; }
 
-				public double? Stepsize { get; set; }
+				public double? StepSize { get; set; }
+
+				public double? DefaultValue { get; set; }
 			}
 
 			public class ConfigurationUnit

@@ -15,11 +15,17 @@ namespace SLC_SM_Common.API
 
 				public string Name { get; set; }
 
+				public string Description { get; set; }
+
+				public string Icon { get; set; }
+
 				public ServicePropertyValues Properties { get; set; }
 
 				public List<ServiceSpecificationConfigurationValue> Configurations { get; set; }
 
 				public List<ServiceItem> ServiceItems { get; set; }
+
+				public List<ServiceItemRelationShip> ServiceItemsRelationships { get; set; }
 			}
 
 			public class ServiceItem
@@ -31,11 +37,17 @@ namespace SLC_SM_Common.API
 				public SlcServicemanagementIds.Enums.ServiceitemtypesEnum Type { get; set; }
 
 				public string Script { get; set; }
+
+				public string DefinitionReference { get; set; }
+
+				public string ImplementationReference { get; set; }
 			}
 
 			public class ServiceOrder
 			{
 				public Guid ID { get; set; }
+
+				public string StatusId { get; set; }
 
 				public string Name { get; set; }
 
@@ -62,6 +74,8 @@ namespace SLC_SM_Common.API
 			public class ServiceOrderItem
 			{
 				public Guid ID { get; set; }
+
+				public string StatusId { get; set; }
 
 				public string Name { get; set; }
 
@@ -109,6 +123,15 @@ namespace SLC_SM_Common.API
 				public List<string> DiscreteValues { get; set; }
 			}
 
+			public class ServiceConfigurationValue
+			{
+				public Guid ID { get; set; }
+
+				public ConfigurationsApi.Models.ConfigurationParameterValue ConfigurationParameter { get; set; }
+
+				public bool Mandatory { get; set; }
+			}
+
 			public class ServiceOrderItemConfigurationValue
 			{
 				public Guid ID { get; set; }
@@ -129,6 +152,55 @@ namespace SLC_SM_Common.API
 				public bool MandatoryAtServiceOrder { get; set; }
 
 				public bool ExposeAtServiceOrder { get; set; }
+			}
+
+			public class ServiceCategory
+			{
+				public Guid ID { get; set; }
+
+				public string Name { get; set; }
+
+				public string Type { get; set; }
+			}
+
+			public class Service
+			{
+				public Guid ID { get; set; }
+
+				public string Name { get; set; }
+
+				public string Description { get; set; }
+
+				public string Icon { get; set; }
+
+				public DateTime? StartTime { get; set; }
+
+				public DateTime? EndTime { get; set; }
+
+				public ServiceCategory Category { get; set; }
+
+				public Guid? ServiceSpecificationId { get; set; }
+
+				public ServicePropertyValues Properties { get; set; }
+
+				public List<ServiceConfigurationValue> Configurations { get; set; }
+
+				public List<ServiceItem> ServiceItems { get; set; }
+
+				public List<ServiceItemRelationShip> ServiceItemsRelationships { get; set; }
+			}
+
+			public class ServiceItemRelationShip
+			{
+				public string Type { get; set; }
+
+				public string ParentServiceItem { get; set; }
+
+				public string ParentServiceItemInterfaceId { get; set; }
+
+				public string ChildServiceItem { get; set; }
+
+				public string ChildServiceItemInterfaceId { get; set; }
 			}
 		}
 	}

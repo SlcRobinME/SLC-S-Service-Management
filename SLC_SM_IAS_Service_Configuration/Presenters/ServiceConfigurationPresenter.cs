@@ -1,4 +1,4 @@
-﻿namespace SLC_SM_IAS_Service_Spec_Configuration.Presenters
+﻿namespace SLC_SM_IAS_Service_Configuration.Presenters
 {
 	using System;
 	using System.Collections.Generic;
@@ -14,19 +14,19 @@
 
 	using SLC_SM_Common.API.ServiceManagementApi;
 
-	using SLC_SM_IAS_Service_Spec_Configuration.Views;
+	using SLC_SM_IAS_Service_Configuration.Views;
 
 	public class ServiceConfigurationPresenter
 	{
 		private readonly List<DataRecord> configurations = new List<DataRecord>();
 		private readonly IEngine engine;
 		private readonly InteractiveController controller;
-		private readonly Models.ServiceSpecification instance;
+		private readonly Models.Service instance;
 		private readonly ServiceConfigurationView view;
 		private RepoConfigurations repoConfig;
 		private Repo repoService;
 
-		public ServiceConfigurationPresenter(IEngine engine, InteractiveController controller, ServiceConfigurationView view, Models.ServiceSpecification instance)
+		public ServiceConfigurationPresenter(IEngine engine, InteractiveController controller, ServiceConfigurationView view, Models.Service instance)
 		{
 			this.engine = engine;
 			this.controller = controller;
@@ -78,27 +78,25 @@
 			{
 				if (configuration.State == State.Delete)
 				{
-					repoService.ServiceSpecificationConfigurationValues.TryDelete(configuration.ServiceConfig);
+					repoService.ServiceConfigurationValues.TryDelete(configuration.ServiceConfig);
 				}
 				else
 				{
-					repoService.ServiceSpecificationConfigurationValues.CreateOrUpdate(configuration.ServiceConfig);
+					repoService.ServiceConfigurationValues.CreateOrUpdate(configuration.ServiceConfig);
 					repoConfig.ConfigurationParameterValues.CreateOrUpdate(configuration.ConfigurationParamValue);
 				}
 			}
 
-			repoService.ServiceSpecifications.CreateOrUpdate(instance);
+			repoService.Services.CreateOrUpdate(instance);
 		}
 
 		private void AddConfigModel(SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameter selectedParameter)
 		{
 			var configurationParameterInstance = selectedParameter ?? new SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameter();
-			var config = new Models.ServiceSpecificationConfigurationValue
+			var config = new Models.ServiceConfigurationValue
 			{
 				ID = Guid.NewGuid(),
-				ExposeAtServiceOrder = true,
-				MandatoryAtServiceOrder = false,
-				MandatoryAtService = false,
+				Mandatory = true,
 				ConfigurationParameter = new SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameterValue
 				{
 					Label = String.Empty,
@@ -129,7 +127,7 @@
 			configurations.Add(BuildDataRecord(config, configurationParameterInstance));
 		}
 
-		private DataRecord BuildDataRecord(Models.ServiceSpecificationConfigurationValue currentConfig, SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameter configParam)
+		private DataRecord BuildDataRecord(Models.ServiceConfigurationValue currentConfig, SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameter configParam)
 		{
 			var dataRecord = new DataRecord
 			{
@@ -154,9 +152,7 @@
 			var lblDecimals = new Label("Decimals");
 			var lblValues = new Label("Values");
 			var lblDefault = new Label("Fixed");
-			var lblExposeAtOrder = new Label("Expose\r\nAt Order");
-			var lblMandatoryAtOrder = new Label("Mandatory\r\nAt Order");
-			var lblMandatoryAtService = new Label("Mandatory\r\nAt Service");
+			var lblMandatoryAtService = new Label("Mandatory");
 
 			view.AddWidget(lblLabel, row, 0);
 			view.AddWidget(lblParameter, row, 1);
@@ -169,9 +165,7 @@
 			view.AddWidget(lblDecimals, row, 8);
 			view.AddWidget(lblValues, row, 9);
 			view.AddWidget(lblDefault, row, 10);
-			view.AddWidget(lblExposeAtOrder, row, 11);
-			view.AddWidget(lblMandatoryAtOrder, row, 12);
-			view.AddWidget(lblMandatoryAtService, row, 13);
+			view.AddWidget(lblMandatoryAtService, row, 11);
 		}
 
 		private void BuildUI()
@@ -219,7 +213,7 @@
 				IsEnabled = false,
 				MaxWidth = 200,
 			};
-			var isFixed = new CheckBox { IsChecked = record.ConfigurationParamValue.ValueFixed };
+			var isFixed = new CheckBox { IsChecked = record.ConfigurationParamValue.ValueFixed, IsEnabled = false };
 			var link = new CheckBox { IsChecked = record.ConfigurationParamValue.LinkedConfigurationReference != null };
 			var unit = new Label("-");
 			var start = new Numeric { IsEnabled = false, MaxWidth = 100 };
@@ -227,16 +221,11 @@
 			var step = new Numeric { IsEnabled = false, Minimum = 0, Maximum = 1, MaxWidth = 100 };
 			var decimals = new Numeric { StepSize = 1, Minimum = 0, Maximum = 6, IsEnabled = false, MaxWidth = 80 };
 			var values = new Button("...") { IsEnabled = false };
-			var exposeAtOrder = new CheckBox { IsChecked = record.ServiceConfig.ExposeAtServiceOrder };
-			var mandatoryAtOrder = new CheckBox { IsChecked = record.ServiceConfig.MandatoryAtServiceOrder };
-			var mandatoryAtService = new CheckBox { IsChecked = record.ServiceConfig.MandatoryAtService };
-			var delete = new Button("🚫");
+			var mandatoryAtService = new CheckBox { IsChecked = record.ServiceConfig.Mandatory, IsEnabled = false };
+			var delete = new Button("🚫") { IsEnabled = !record.ServiceConfig.Mandatory };
 
 			label.Changed += (sender, args) => record.ConfigurationParamValue.Label = args.Value;
 			isFixed.Changed += (sender, args) => record.ConfigurationParamValue.ValueFixed = args.IsChecked;
-			exposeAtOrder.Changed += (sender, args) => record.ServiceConfig.ExposeAtServiceOrder = args.IsChecked;
-			mandatoryAtOrder.Changed += (sender, args) => record.ServiceConfig.MandatoryAtServiceOrder = args.IsChecked;
-			mandatoryAtService.Changed += (sender, args) => record.ServiceConfig.MandatoryAtService = args.IsChecked;
 			delete.Pressed += (sender, args) =>
 			{
 				record.State = State.Delete;
@@ -271,6 +260,7 @@
 								StepSize = stepSize,
 								Decimals = decimalVal,
 								MaxWidth = 150,
+								IsEnabled = !isFixed.IsChecked,
 							};
 							unit.Text = GetDefaultUnit(record.ConfigurationParamValue.NumberOptions, parameter.Selected);
 							start.Value = minimum;
@@ -323,7 +313,7 @@
 								.OrderBy(x => x.DisplayValue)
 								.ToList();
 
-							var value = new DropDown<SLC_SM_Common.API.ConfigurationsApi.Models.DiscreteValue>(discretes) { MaxWidth = 150 };
+							var value = new DropDown<SLC_SM_Common.API.ConfigurationsApi.Models.DiscreteValue>(discretes) { MaxWidth = 150, IsEnabled = !isFixed.IsChecked };
 							if (record.ConfigurationParamValue.StringValue != null
 								&& value.Options.Any(x => x.DisplayValue == record.ConfigurationParamValue.StringValue))
 							{
@@ -356,6 +346,7 @@
 							{
 								Tooltip = record.ConfigurationParamValue.TextOptions?.UserMessage ?? String.Empty,
 								MaxWidth = 150,
+								IsEnabled = !isFixed.IsChecked,
 							};
 							value.Changed += (sender, args) =>
 							{
@@ -389,10 +380,8 @@
 			view.AddWidget(decimals, row, 8);
 			view.AddWidget(values, row, 9);
 			view.AddWidget(isFixed, row, 10);
-			view.AddWidget(exposeAtOrder, row, 11);
-			view.AddWidget(mandatoryAtOrder, row, 12);
-			view.AddWidget(mandatoryAtService, row, 13);
-			view.AddWidget(delete, row, 14);
+			view.AddWidget(mandatoryAtService, row, 11);
+			view.AddWidget(delete, row, 12);
 		}
 
 		private string GetDefaultUnit(SLC_SM_Common.API.ConfigurationsApi.Models.NumberParameterOptions numberValueOptions, SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameter parameter)
@@ -414,7 +403,7 @@
 		{
 			public State State { get; set; }
 
-			public Models.ServiceSpecificationConfigurationValue ServiceConfig { get; set; }
+			public Models.ServiceConfigurationValue ServiceConfig { get; set; }
 
 			public SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameterValue ConfigurationParamValue { get; set; }
 

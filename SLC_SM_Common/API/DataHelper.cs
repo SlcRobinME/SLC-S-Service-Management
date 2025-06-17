@@ -26,11 +26,18 @@
 
 		public abstract Guid CreateOrUpdate(T item);
 
+		public abstract bool TryDelete(T item);
+
 		internal Guid CreateOrUpdateInstance(DomInstance instance)
 		{
 			var result = _domHelper.DomInstances.CreateOrUpdate(new List<DomInstance> { instance });
 			return result.SuccessfulIds.FirstOrDefault()?.Id
-			       ?? throw new InvalidOperationException($"Failed to create the item due to: {JsonConvert.SerializeObject(result.TraceDataPerItem)}");
+				   ?? throw new InvalidOperationException($"Failed to create the item due to: {JsonConvert.SerializeObject(result.TraceDataPerItem)}");
+		}
+
+		internal bool TryDelete(Guid id)
+		{
+			return _domHelper.DomInstances.TryDelete(new DomInstance { ID = new DomInstanceId(id) });
 		}
 
 		internal DomInstance New(Guid id)

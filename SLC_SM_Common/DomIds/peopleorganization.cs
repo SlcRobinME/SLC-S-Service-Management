@@ -7,6 +7,7 @@
 namespace DomHelpers.SlcPeople_Organizations
 {
     using System;
+    using System.ComponentModel;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Sections;
 
@@ -15,206 +16,7 @@ namespace DomHelpers.SlcPeople_Organizations
         public const string ModuleId = "(slc)people_organizations";
         public static class Enums
         {
-            public enum Country_1ace7be9
-            {
-                Afghanistan = 0,
-                Albania = 1,
-                Algeria = 2,
-                Andorra = 3,
-                Angola = 4,
-                AntiguaAndBarbuda = 5,
-                Argentina = 6,
-                Armenia = 7,
-                Australia = 8,
-                Austria = 9,
-                Azerbaijan = 10,
-                Bahamas = 11,
-                Bahrain = 12,
-                Bangladesh = 13,
-                Barbados = 14,
-                Belarus = 15,
-                Belgium = 16,
-                Belize = 17,
-                Benin = 18,
-                Bhutan = 19,
-                Bolivia = 20,
-                BosniaAndHerzegovina = 21,
-                Botswana = 22,
-                Brazil = 23,
-                Brunei = 24,
-                Bulgaria = 25,
-                BurkinaFaso = 26,
-                Burundi = 27,
-                CôteDIvoire = 28,
-                CaboVerde = 29,
-                Cambodia = 30,
-                Cameroon = 31,
-                Canada = 32,
-                CentralAfricanRepublic = 33,
-                Chad = 34,
-                Chile = 35,
-                China = 36,
-                Colombia = 37,
-                Comoros = 38,
-                CongoCongoBrazzaville = 39,
-                CostaRica = 40,
-                Croatia = 41,
-                Cuba = 42,
-                Cyprus = 43,
-                CzechiaCzechRepublic = 44,
-                DemocraticRepublicOfTheCongo = 45,
-                Denmark = 46,
-                Djibouti = 47,
-                Dominica = 48,
-                DominicanRepublic = 49,
-                Ecuador = 50,
-                Egypt = 51,
-                ElSalvador = 52,
-                EquatorialGuinea = 53,
-                Eritrea = 54,
-                Estonia = 55,
-                EswatiniFmrSwaziland = 56,
-                Ethiopia = 57,
-                Fiji = 58,
-                Finland = 59,
-                France = 60,
-                Gabon = 61,
-                Gambia = 62,
-                Georgia = 63,
-                Germany = 64,
-                Ghana = 65,
-                Greece = 66,
-                Grenada = 67,
-                Guatemala = 68,
-                Guinea = 69,
-                GuineaBissau = 70,
-                Guyana = 71,
-                Haiti = 72,
-                HolySee = 73,
-                Honduras = 74,
-                Hungary = 75,
-                Iceland = 76,
-                India = 77,
-                Indonesia = 78,
-                Iran = 79,
-                Iraq = 80,
-                Ireland = 81,
-                Israel = 82,
-                Italy = 83,
-                Jamaica = 84,
-                Japan = 85,
-                Jordan = 86,
-                Kazakhstan = 87,
-                Kenya = 88,
-                Kiribati = 89,
-                Kuwait = 90,
-                Kyrgyzstan = 91,
-                Laos = 92,
-                Latvia = 93,
-                Lebanon = 94,
-                Lesotho = 95,
-                Liberia = 96,
-                Libya = 97,
-                Liechtenstein = 98,
-                Lithuania = 99,
-                Luxembourg = 100,
-                Madagascar = 101,
-                Malawi = 102,
-                Malaysia = 103,
-                Maldives = 104,
-                Mali = 105,
-                Malta = 106,
-                MarshallIslands = 107,
-                Mauritania = 108,
-                Mauritius = 109,
-                Mexico = 110,
-                Micronesia = 111,
-                Moldova = 112,
-                Monaco = 113,
-                Mongolia = 114,
-                Montenegro = 115,
-                Morocco = 116,
-                Mozambique = 117,
-                MyanmarFormerlyBurma = 118,
-                Namibia = 119,
-                Nauru = 120,
-                Nepal = 121,
-                Netherlands = 122,
-                NewZealand = 123,
-                Nicaragua = 124,
-                Niger = 125,
-                Nigeria = 126,
-                NorthKorea = 127,
-                NorthMacedonia = 128,
-                Norway = 129,
-                Oman = 130,
-                Pakistan = 131,
-                Palau = 132,
-                PalestineState = 133,
-                Panama = 134,
-                PapuaNewGuinea = 135,
-                Paraguay = 136,
-                Peru = 137,
-                Philippines = 138,
-                Poland = 139,
-                Portugal = 140,
-                Qatar = 141,
-                Romania = 142,
-                Russia = 143,
-                Rwanda = 144,
-                SaintKittsAndNevis = 145,
-                SaintLucia = 146,
-                SaintVincentAndTheGrenadines = 147,
-                Samoa = 148,
-                SanMarino = 149,
-                SaoTomeAndPrincipe = 150,
-                SaudiArabia = 151,
-                Senegal = 152,
-                Serbia = 153,
-                Seychelles = 154,
-                SierraLeone = 155,
-                Singapore = 156,
-                Slovakia = 157,
-                Slovenia = 158,
-                SolomonIslands = 159,
-                Somalia = 160,
-                SouthAfrica = 161,
-                SouthKorea = 162,
-                SouthSudan = 163,
-                Spain = 164,
-                SriLanka = 165,
-                Sudan = 166,
-                Suriname = 167,
-                Sweden = 168,
-                Switzerland = 169,
-                Syria = 170,
-                Tajikistan = 171,
-                Tanzania = 172,
-                Thailand = 173,
-                TimorLeste = 174,
-                Togo = 175,
-                Tonga = 176,
-                TrinidadAndTobago = 177,
-                Tunisia = 178,
-                Turkey = 179,
-                Turkmenistan = 180,
-                Tuvalu = 181,
-                Uganda = 182,
-                Ukraine = 183,
-                UnitedArabEmirates = 184,
-                UnitedKingdom = 185,
-                UnitedStatesOfAmerica = 186,
-                Uruguay = 187,
-                Uzbekistan = 188,
-                Vanuatu = 189,
-                Venezuela = 190,
-                Vietnam = 191,
-                Yemen = 192,
-                Zambia = 193,
-                Zimbabwe = 194
-            }
-
-            public enum Country_7f58452b
+            public enum Country
             {
                 Afghanistan = 0,
                 Albania = 1,
@@ -418,395 +220,130 @@ namespace DomHelpers.SlcPeople_Organizations
         {
             public static class Contracts
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("21ffec53-130a-4a66-9eb3-50194d2c1e43"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("21ffec53-130a-4a66-9eb3-50194d2c1e43"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID Contract
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a12295ee-465e-4b0a-9152-4ed92d4f1508"));
+                public static FieldDescriptorID Contract { get; } = new FieldDescriptorID(new Guid("a12295ee-465e-4b0a-9152-4ed92d4f1508"));
             }
 
             public static class Organization
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("397134f8-19eb-4eec-9021-8b1af51d0c1b"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("397134f8-19eb-4eec-9021-8b1af51d0c1b"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID Organization_57695f03
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("57695f03-2643-4303-82f5-8164291747f3"));
+                public static FieldDescriptorID Organization_57695f03 { get; } = new FieldDescriptorID(new Guid("57695f03-2643-4303-82f5-8164291747f3"));
             }
 
             public static class RoleInformation
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("03ba0fd8-114a-4f97-b392-7ac8a1f76803"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("03ba0fd8-114a-4f97-b392-7ac8a1f76803"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID Role
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4f63fdbd-a40c-482f-b8ff-8b20c701b481"));
+                public static FieldDescriptorID Role { get; } = new FieldDescriptorID(new Guid("4f63fdbd-a40c-482f-b8ff-8b20c701b481"));
             }
 
             public static class ResourcePool
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("8341db0f-59bf-4a71-a124-67f8c5fbbb06"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("8341db0f-59bf-4a71-a124-67f8c5fbbb06"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID LinkedResourcePool
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("73a606b5-fd80-4ea0-819d-5a3b8de60323"));
+                public static FieldDescriptorID LinkedResourcePool { get; } = new FieldDescriptorID(new Guid("73a606b5-fd80-4ea0-819d-5a3b8de60323"));
             }
 
             public static class ContactInfo
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("fcf83fa0-0d38-4fe6-ad55-4d36e4457f91"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("fcf83fa0-0d38-4fe6-ad55-4d36e4457f91"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID Email
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cf8ae3ad-a363-499b-b99c-8ffcabcb5abb"));
-                public static FieldDescriptorID Phone
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("2f683912-7e68-4fa3-862f-5e71ad7d1633"));
-                public static FieldDescriptorID StreetAddress
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("05096697-68b8-4082-b9ec-d77b709377ea"));
-                public static FieldDescriptorID City
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("dd2dcc95-0540-4e01-880b-1d57d5bb9f24"));
-                public static FieldDescriptorID Country
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("1ace7be9-0d34-4d3a-a6f4-fb9c79adc199"));
-                public static FieldDescriptorID ZIP
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("8477ba67-09c2-49af-9743-9e43ce08228a"));
+                public static FieldDescriptorID Email { get; } = new FieldDescriptorID(new Guid("cf8ae3ad-a363-499b-b99c-8ffcabcb5abb"));
+                public static FieldDescriptorID Phone { get; } = new FieldDescriptorID(new Guid("2f683912-7e68-4fa3-862f-5e71ad7d1633"));
+                public static FieldDescriptorID StreetAddress { get; } = new FieldDescriptorID(new Guid("05096697-68b8-4082-b9ec-d77b709377ea"));
+                public static FieldDescriptorID City { get; } = new FieldDescriptorID(new Guid("dd2dcc95-0540-4e01-880b-1d57d5bb9f24"));
+                public static FieldDescriptorID Country { get; } = new FieldDescriptorID(new Guid("1ace7be9-0d34-4d3a-a6f4-fb9c79adc199"));
+                public static FieldDescriptorID ZIP { get; } = new FieldDescriptorID(new Guid("8477ba67-09c2-49af-9743-9e43ce08228a"));
             }
 
             public static class ExperienceInformation
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("5c4be963-44ea-4ae2-911f-164f92534cb1"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("5c4be963-44ea-4ae2-911f-164f92534cb1"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID Experience
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("065992de-67f1-4d34-b470-759e5b64b088"));
+                public static FieldDescriptorID Experience { get; } = new FieldDescriptorID(new Guid("065992de-67f1-4d34-b470-759e5b64b088"));
             }
 
             public static class CategoryInformation
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("e47d729d-1658-41bc-8931-88f4c055b955"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("e47d729d-1658-41bc-8931-88f4c055b955"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID Category
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c86376b4-c309-4d08-8b0e-83ec69809d58"));
+                public static FieldDescriptorID Category { get; } = new FieldDescriptorID(new Guid("c86376b4-c309-4d08-8b0e-83ec69809d58"));
             }
 
             public static class Team
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("30aef0e9-658a-436a-ad71-6a48d88faa0b"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("30aef0e9-658a-436a-ad71-6a48d88faa0b"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID Team_144d3379
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("144d3379-1393-47ca-a35a-0facc9cf4127"));
-                public static FieldDescriptorID TeamRole
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("444f1e2e-4a66-49af-9a94-07d4783324ec"));
+                public static FieldDescriptorID Team_144d3379 { get; } = new FieldDescriptorID(new Guid("144d3379-1393-47ca-a35a-0facc9cf4127"));
+                public static FieldDescriptorID TeamRole { get; } = new FieldDescriptorID(new Guid("444f1e2e-4a66-49af-9a94-07d4783324ec"));
             }
 
             public static class TeamInformation
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("b4abf511-028c-42c1-b0d0-dc750043f1d2"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("b4abf511-028c-42c1-b0d0-dc750043f1d2"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID TeamName
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("33d47f2a-8e2d-4bbf-93e4-d478208f8678"));
-                public static FieldDescriptorID TeamEmail
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7c2bd233-8e15-459b-9f24-55ed80e904b9"));
-                public static FieldDescriptorID TeamDescription
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("25bf4968-ee66-4443-9e8a-8df5d7355b12"));
-                public static FieldDescriptorID Bookable
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9b79a28d-fb4c-4ca4-9a97-ac8b1353ffc3"));
-                public static FieldDescriptorID Icon
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0100b348-bfd0-47df-972c-10f46222e2cc"));
-                public static FieldDescriptorID TeamSkills
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c6a22574-2b96-4cdd-b357-1c7ed221f797"));
+                public static FieldDescriptorID TeamName { get; } = new FieldDescriptorID(new Guid("33d47f2a-8e2d-4bbf-93e4-d478208f8678"));
+                public static FieldDescriptorID TeamEmail { get; } = new FieldDescriptorID(new Guid("7c2bd233-8e15-459b-9f24-55ed80e904b9"));
+                public static FieldDescriptorID TeamDescription { get; } = new FieldDescriptorID(new Guid("25bf4968-ee66-4443-9e8a-8df5d7355b12"));
+                public static FieldDescriptorID Bookable { get; } = new FieldDescriptorID(new Guid("9b79a28d-fb4c-4ca4-9a97-ac8b1353ffc3"));
+                public static FieldDescriptorID Icon { get; } = new FieldDescriptorID(new Guid("0100b348-bfd0-47df-972c-10f46222e2cc"));
+                public static FieldDescriptorID TeamSkills { get; } = new FieldDescriptorID(new Guid("c6a22574-2b96-4cdd-b357-1c7ed221f797"));
             }
 
             public static class OrganizationInformation
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("141a95ca-4b5b-4086-b329-209ffe8f1af8"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("141a95ca-4b5b-4086-b329-209ffe8f1af8"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID OrganizationName
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("88b88d71-b123-4f56-8aae-a40df08ac875"));
-                public static FieldDescriptorID Category
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ff3ed352-de62-4a1f-ad03-303b4778585e"));
-                public static FieldDescriptorID Icon
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b4a4365f-6148-46ac-be62-31a3d49a1a7f"));
+                public static FieldDescriptorID OrganizationName { get; } = new FieldDescriptorID(new Guid("88b88d71-b123-4f56-8aae-a40df08ac875"));
+                public static FieldDescriptorID Category { get; } = new FieldDescriptorID(new Guid("ff3ed352-de62-4a1f-ad03-303b4778585e"));
+                public static FieldDescriptorID Icon { get; } = new FieldDescriptorID(new Guid("b4a4365f-6148-46ac-be62-31a3d49a1a7f"));
             }
 
             public static class Resource
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("ceadbd12-73f7-474e-9d1f-effbc9d81684"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("ceadbd12-73f7-474e-9d1f-effbc9d81684"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID LinkedResource
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("6339a363-ec0f-42bb-86aa-4858e984b7d8"));
+                public static FieldDescriptorID LinkedResource { get; } = new FieldDescriptorID(new Guid("6339a363-ec0f-42bb-86aa-4858e984b7d8"));
             }
 
             public static class Billing
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("0c47b6fe-c60f-4378-a85c-3f98dc431828"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("0c47b6fe-c60f-4378-a85c-3f98dc431828"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID Email
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("2c15790f-bc55-4170-a010-2b04bc0c0477"));
-                public static FieldDescriptorID Phone
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("af20db8c-f972-47eb-8fb2-761cbfce58e9"));
-                public static FieldDescriptorID StreetAddress
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7bb6ce04-3298-4bfa-b70f-0b84735900f8"));
-                public static FieldDescriptorID City
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("d72e8805-d539-42ca-8553-4aaa0b2267e9"));
-                public static FieldDescriptorID Zip
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ba7f898d-80a1-4c2a-a5c0-b7fe591535e2"));
-                public static FieldDescriptorID Country
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7f58452b-df20-4e58-927e-be9533d6f15f"));
+                public static FieldDescriptorID Email { get; } = new FieldDescriptorID(new Guid("2c15790f-bc55-4170-a010-2b04bc0c0477"));
+                public static FieldDescriptorID Phone { get; } = new FieldDescriptorID(new Guid("af20db8c-f972-47eb-8fb2-761cbfce58e9"));
+                public static FieldDescriptorID StreetAddress { get; } = new FieldDescriptorID(new Guid("7bb6ce04-3298-4bfa-b70f-0b84735900f8"));
+                public static FieldDescriptorID City { get; } = new FieldDescriptorID(new Guid("d72e8805-d539-42ca-8553-4aaa0b2267e9"));
+                public static FieldDescriptorID Zip { get; } = new FieldDescriptorID(new Guid("ba7f898d-80a1-4c2a-a5c0-b7fe591535e2"));
+                public static FieldDescriptorID Country { get; } = new FieldDescriptorID(new Guid("7f58452b-df20-4e58-927e-be9533d6f15f"));
             }
 
             public static class PeopleInformation
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("f38e6d21-e481-4348-b639-445a510592ec"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("f38e6d21-e481-4348-b639-445a510592ec"))
                 {ModuleId = "(slc)people_organizations"};
-                public static FieldDescriptorID FullName
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a7fc4201-9af5-4b29-a9b8-df24d6334d08"));
-                public static FieldDescriptorID ExperienceLevel
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("de319ab8-ea47-42cd-a674-c47762ca24f9"));
-                public static FieldDescriptorID ProfileImage
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("aeb3be52-849a-41d6-afc9-c6c53ef38097"));
-                public static FieldDescriptorID PersonalSkills
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("42ffa004-0729-44b3-a864-14cc0fc5fab4"));
+                public static FieldDescriptorID FullName { get; } = new FieldDescriptorID(new Guid("a7fc4201-9af5-4b29-a9b8-df24d6334d08"));
+                public static FieldDescriptorID ExperienceLevel { get; } = new FieldDescriptorID(new Guid("de319ab8-ea47-42cd-a674-c47762ca24f9"));
+                public static FieldDescriptorID ProfileImage { get; } = new FieldDescriptorID(new Guid("aeb3be52-849a-41d6-afc9-c6c53ef38097"));
+                public static FieldDescriptorID PersonalSkills { get; } = new FieldDescriptorID(new Guid("42ffa004-0729-44b3-a864-14cc0fc5fab4"));
             }
         }
 
         public static class Definitions
         {
-            public static DomDefinitionId Experience
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("6474a13e-3de9-42f8-b3d9-aa49a1fcab7d"))
+            public static DomDefinitionId Experience { get; } = new DomDefinitionId(new Guid("6474a13e-3de9-42f8-b3d9-aa49a1fcab7d"))
             {ModuleId = "(slc)people_organizations"};
-            public static DomDefinitionId Category
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("bc1fe15f-a85d-4601-ab26-0329a9acf61a"))
+            public static DomDefinitionId Category { get; } = new DomDefinitionId(new Guid("bc1fe15f-a85d-4601-ab26-0329a9acf61a"))
             {ModuleId = "(slc)people_organizations"};
-            public static DomDefinitionId Role
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("86b3dff8-764e-4378-9d19-de4bc8de05c2"))
+            public static DomDefinitionId Role { get; } = new DomDefinitionId(new Guid("86b3dff8-764e-4378-9d19-de4bc8de05c2"))
             {ModuleId = "(slc)people_organizations"};
-            public static DomDefinitionId Teams
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("5150bc87-7e63-4b41-a839-64da947a1986"))
+            public static DomDefinitionId Teams { get; } = new DomDefinitionId(new Guid("5150bc87-7e63-4b41-a839-64da947a1986"))
             {ModuleId = "(slc)people_organizations"};
-            public static DomDefinitionId People
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("1624a01d-de2e-4c36-849c-3ee048a971ee"))
+            public static DomDefinitionId People { get; } = new DomDefinitionId(new Guid("1624a01d-de2e-4c36-849c-3ee048a971ee"))
             {ModuleId = "(slc)people_organizations"};
-            public static DomDefinitionId Organizations
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("c769a960-e401-4cb6-8099-b0563b270c52"))
+            public static DomDefinitionId Organizations { get; } = new DomDefinitionId(new Guid("c769a960-e401-4cb6-8099-b0563b270c52"))
             {ModuleId = "(slc)people_organizations"};
         }
 
@@ -814,12 +351,7 @@ namespace DomHelpers.SlcPeople_Organizations
         {
             public static class People_Behavior
             {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("1636e21e-f44d-4343-8a09-c09780399c74"))
+                public static DomBehaviorDefinitionId Id { get; } = new DomBehaviorDefinitionId(new Guid("1636e21e-f44d-4343-8a09-c09780399c74"))
                 {ModuleId = "(slc)people_organizations"};
                 public static class Statuses
                 {
@@ -827,6 +359,47 @@ namespace DomHelpers.SlcPeople_Organizations
                     public const string Active = "a24206da-82e0-4d6e-919a-480ecbaf69be";
                     public const string Deprecated = "ac9a7d7c-a7e9-4f95-a901-83011c3e2c32";
                     public const string Edit = "b054b3c5-1b2e-4330-9e05-7229a1940fd3";
+                    public static string ToValue(StatusesEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case StatusesEnum.Draft:
+                                return Draft;
+                            case StatusesEnum.Active:
+                                return Active;
+                            case StatusesEnum.Deprecated:
+                                return Deprecated;
+                            case StatusesEnum.Edit:
+                                return Edit;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static StatusesEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Draft:
+                                return StatusesEnum.Draft;
+                            case Active:
+                                return StatusesEnum.Active;
+                            case Deprecated:
+                                return StatusesEnum.Deprecated;
+                            case Edit:
+                                return StatusesEnum.Edit;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum StatusesEnum
+                {
+                    Draft,
+                    Active,
+                    Deprecated,
+                    Edit
                 }
 
                 public static class Transitions
@@ -835,6 +408,47 @@ namespace DomHelpers.SlcPeople_Organizations
                     public const string Active_To_Deprecated = "active_to_deprecated";
                     public const string Active_To_Edit = "active_to_edit";
                     public const string Edit_To_Active = "edit_to_active";
+                    public static string ToValue(TransitionsEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case TransitionsEnum.Draft_To_Active:
+                                return Draft_To_Active;
+                            case TransitionsEnum.Active_To_Deprecated:
+                                return Active_To_Deprecated;
+                            case TransitionsEnum.Active_To_Edit:
+                                return Active_To_Edit;
+                            case TransitionsEnum.Edit_To_Active:
+                                return Edit_To_Active;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static TransitionsEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Draft_To_Active:
+                                return TransitionsEnum.Draft_To_Active;
+                            case Active_To_Deprecated:
+                                return TransitionsEnum.Active_To_Deprecated;
+                            case Active_To_Edit:
+                                return TransitionsEnum.Active_To_Edit;
+                            case Edit_To_Active:
+                                return TransitionsEnum.Edit_To_Active;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum TransitionsEnum
+                {
+                    Draft_To_Active,
+                    Active_To_Deprecated,
+                    Active_To_Edit,
+                    Edit_To_Active
                 }
 
                 public static class Actions
@@ -842,17 +456,48 @@ namespace DomHelpers.SlcPeople_Organizations
                     public const string Confirm = "confirm";
                     public const string Archive = "archive";
                     public const string Edit = "edit";
+                    public static string ToValue(ActionsEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case ActionsEnum.Confirm:
+                                return Confirm;
+                            case ActionsEnum.Archive:
+                                return Archive;
+                            case ActionsEnum.Edit:
+                                return Edit;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static ActionsEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Confirm:
+                                return ActionsEnum.Confirm;
+                            case Archive:
+                                return ActionsEnum.Archive;
+                            case Edit:
+                                return ActionsEnum.Edit;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum ActionsEnum
+                {
+                    Confirm,
+                    Archive,
+                    Edit
                 }
             }
 
             public static class Team_Behavior
             {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("a7b03edc-0a89-4f02-9fa3-5458cd11d43e"))
+                public static DomBehaviorDefinitionId Id { get; } = new DomBehaviorDefinitionId(new Guid("a7b03edc-0a89-4f02-9fa3-5458cd11d43e"))
                 {ModuleId = "(slc)people_organizations"};
                 public static class Statuses
                 {
@@ -860,6 +505,47 @@ namespace DomHelpers.SlcPeople_Organizations
                     public const string Active = "ee06eef1-8e3a-444d-a0d3-adc44b1993e1";
                     public const string Deprecated = "d9dff92b-4fd2-4e63-b238-2f102d734378";
                     public const string Edit = "e78b3fd0-d82e-4cd2-ae2a-12a9792644fe";
+                    public static string ToValue(StatusesEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case StatusesEnum.Draft:
+                                return Draft;
+                            case StatusesEnum.Active:
+                                return Active;
+                            case StatusesEnum.Deprecated:
+                                return Deprecated;
+                            case StatusesEnum.Edit:
+                                return Edit;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static StatusesEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Draft:
+                                return StatusesEnum.Draft;
+                            case Active:
+                                return StatusesEnum.Active;
+                            case Deprecated:
+                                return StatusesEnum.Deprecated;
+                            case Edit:
+                                return StatusesEnum.Edit;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum StatusesEnum
+                {
+                    Draft,
+                    Active,
+                    Deprecated,
+                    Edit
                 }
 
                 public static class Transitions
@@ -868,6 +554,47 @@ namespace DomHelpers.SlcPeople_Organizations
                     public const string Active_To_Deprecated = "active_to_deprecated";
                     public const string Active_To_Edit = "active_to_edit";
                     public const string Edit_To_Active = "edit_to_active";
+                    public static string ToValue(TransitionsEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case TransitionsEnum.Draft_To_Active:
+                                return Draft_To_Active;
+                            case TransitionsEnum.Active_To_Deprecated:
+                                return Active_To_Deprecated;
+                            case TransitionsEnum.Active_To_Edit:
+                                return Active_To_Edit;
+                            case TransitionsEnum.Edit_To_Active:
+                                return Edit_To_Active;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static TransitionsEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Draft_To_Active:
+                                return TransitionsEnum.Draft_To_Active;
+                            case Active_To_Deprecated:
+                                return TransitionsEnum.Active_To_Deprecated;
+                            case Active_To_Edit:
+                                return TransitionsEnum.Active_To_Edit;
+                            case Edit_To_Active:
+                                return TransitionsEnum.Edit_To_Active;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum TransitionsEnum
+                {
+                    Draft_To_Active,
+                    Active_To_Deprecated,
+                    Active_To_Edit,
+                    Edit_To_Active
                 }
 
                 public static class Actions
@@ -875,17 +602,48 @@ namespace DomHelpers.SlcPeople_Organizations
                     public const string Confirm = "confirm";
                     public const string Edit = "edit";
                     public const string Archive = "archive";
+                    public static string ToValue(ActionsEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case ActionsEnum.Confirm:
+                                return Confirm;
+                            case ActionsEnum.Edit:
+                                return Edit;
+                            case ActionsEnum.Archive:
+                                return Archive;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static ActionsEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Confirm:
+                                return ActionsEnum.Confirm;
+                            case Edit:
+                                return ActionsEnum.Edit;
+                            case Archive:
+                                return ActionsEnum.Archive;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum ActionsEnum
+                {
+                    Confirm,
+                    Edit,
+                    Archive
                 }
             }
 
             public static class Organizations_Behavior
             {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("80136b8f-4c76-4b7c-a1dc-526d3a9bdf5a"))
+                public static DomBehaviorDefinitionId Id { get; } = new DomBehaviorDefinitionId(new Guid("80136b8f-4c76-4b7c-a1dc-526d3a9bdf5a"))
                 {ModuleId = "(slc)people_organizations"};
                 public static class Statuses
                 {
@@ -893,6 +651,47 @@ namespace DomHelpers.SlcPeople_Organizations
                     public const string Active = "1957a4b0-e265-4dca-a304-4c0911f8a4a4";
                     public const string Deprecated = "c2f1fcf9-9697-4b80-8260-4e07fcbdb4a4";
                     public const string Edit = "ff1ad67d-7d01-4f32-8161-724995cc88fe";
+                    public static string ToValue(StatusesEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case StatusesEnum.Draft:
+                                return Draft;
+                            case StatusesEnum.Active:
+                                return Active;
+                            case StatusesEnum.Deprecated:
+                                return Deprecated;
+                            case StatusesEnum.Edit:
+                                return Edit;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static StatusesEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Draft:
+                                return StatusesEnum.Draft;
+                            case Active:
+                                return StatusesEnum.Active;
+                            case Deprecated:
+                                return StatusesEnum.Deprecated;
+                            case Edit:
+                                return StatusesEnum.Edit;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum StatusesEnum
+                {
+                    Draft,
+                    Active,
+                    Deprecated,
+                    Edit
                 }
 
                 public static class Transitions
@@ -901,6 +700,47 @@ namespace DomHelpers.SlcPeople_Organizations
                     public const string Active_To_Deprecated = "active_to_deprecated";
                     public const string Active_To_Edit = "active_to_edit";
                     public const string Edit_To_Active = "edit_to_active";
+                    public static string ToValue(TransitionsEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case TransitionsEnum.Draft_To_Active:
+                                return Draft_To_Active;
+                            case TransitionsEnum.Active_To_Deprecated:
+                                return Active_To_Deprecated;
+                            case TransitionsEnum.Active_To_Edit:
+                                return Active_To_Edit;
+                            case TransitionsEnum.Edit_To_Active:
+                                return Edit_To_Active;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static TransitionsEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Draft_To_Active:
+                                return TransitionsEnum.Draft_To_Active;
+                            case Active_To_Deprecated:
+                                return TransitionsEnum.Active_To_Deprecated;
+                            case Active_To_Edit:
+                                return TransitionsEnum.Active_To_Edit;
+                            case Edit_To_Active:
+                                return TransitionsEnum.Edit_To_Active;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum TransitionsEnum
+                {
+                    Draft_To_Active,
+                    Active_To_Deprecated,
+                    Active_To_Edit,
+                    Edit_To_Active
                 }
 
                 public static class Actions
@@ -908,6 +748,42 @@ namespace DomHelpers.SlcPeople_Organizations
                     public const string Confirm = "confirm";
                     public const string Edit = "edit";
                     public const string Archive = "archive";
+                    public static string ToValue(ActionsEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case ActionsEnum.Confirm:
+                                return Confirm;
+                            case ActionsEnum.Edit:
+                                return Edit;
+                            case ActionsEnum.Archive:
+                                return Archive;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static ActionsEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Confirm:
+                                return ActionsEnum.Confirm;
+                            case Edit:
+                                return ActionsEnum.Edit;
+                            case Archive:
+                                return ActionsEnum.Archive;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum ActionsEnum
+                {
+                    Confirm,
+                    Edit,
+                    Archive
                 }
             }
         }
@@ -939,6 +815,16 @@ namespace DomHelpers.SlcPeople_Organizations
         public ExperienceInstance(): base(SlcPeople_OrganizationsIds.Definitions.Experience)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExperienceInstance"/> class. Creates an empty <see cref="ExperienceInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public ExperienceInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.Experience, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -950,16 +836,13 @@ namespace DomHelpers.SlcPeople_Organizations
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.Experience))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.Experience)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
         /// Gets or sets the ExperienceInformation section of the DOM Instance.
         /// </summary>
-        public ExperienceInformationSection ExperienceInformation
-        {
-            get;
-            set;
-        }
+        public ExperienceInformationSection ExperienceInformation { get; set; }
 
         public static explicit operator ExperienceInstance(DomInstance instance)
         {
@@ -967,7 +850,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(ExperienceInformation.ToSection());
@@ -991,7 +874,15 @@ namespace DomHelpers.SlcPeople_Organizations
 
         protected override void InitializeProperties()
         {
-            ExperienceInformation = new ExperienceInformationSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)));
+            var _experienceInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id));
+            if (_experienceInformation is null)
+            {
+                ExperienceInformation = new ExperienceInformationSection();
+            }
+            else
+            {
+                ExperienceInformation = new ExperienceInformationSection(_experienceInformation);
+            }
         }
     }
 
@@ -1007,6 +898,16 @@ namespace DomHelpers.SlcPeople_Organizations
         public CategoryInstance(): base(SlcPeople_OrganizationsIds.Definitions.Category)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CategoryInstance"/> class. Creates an empty <see cref="CategoryInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public CategoryInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.Category, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -1018,16 +919,13 @@ namespace DomHelpers.SlcPeople_Organizations
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.Category))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.Category)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
         /// Gets or sets the CategoryInformation section of the DOM Instance.
         /// </summary>
-        public CategoryInformationSection CategoryInformation
-        {
-            get;
-            set;
-        }
+        public CategoryInformationSection CategoryInformation { get; set; }
 
         public static explicit operator CategoryInstance(DomInstance instance)
         {
@@ -1035,7 +933,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(CategoryInformation.ToSection());
@@ -1059,7 +957,15 @@ namespace DomHelpers.SlcPeople_Organizations
 
         protected override void InitializeProperties()
         {
-            CategoryInformation = new CategoryInformationSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)));
+            var _categoryInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id));
+            if (_categoryInformation is null)
+            {
+                CategoryInformation = new CategoryInformationSection();
+            }
+            else
+            {
+                CategoryInformation = new CategoryInformationSection(_categoryInformation);
+            }
         }
     }
 
@@ -1075,6 +981,16 @@ namespace DomHelpers.SlcPeople_Organizations
         public RoleInstance(): base(SlcPeople_OrganizationsIds.Definitions.Role)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleInstance"/> class. Creates an empty <see cref="RoleInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public RoleInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.Role, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -1086,16 +1002,13 @@ namespace DomHelpers.SlcPeople_Organizations
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.Role))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.Role)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
         /// Gets or sets the RoleInformation section of the DOM Instance.
         /// </summary>
-        public RoleInformationSection RoleInformation
-        {
-            get;
-            set;
-        }
+        public RoleInformationSection RoleInformation { get; set; }
 
         public static explicit operator RoleInstance(DomInstance instance)
         {
@@ -1103,7 +1016,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(RoleInformation.ToSection());
@@ -1127,7 +1040,15 @@ namespace DomHelpers.SlcPeople_Organizations
 
         protected override void InitializeProperties()
         {
-            RoleInformation = new RoleInformationSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)));
+            var _roleInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.RoleInformation.Id));
+            if (_roleInformation is null)
+            {
+                RoleInformation = new RoleInformationSection();
+            }
+            else
+            {
+                RoleInformation = new RoleInformationSection(_roleInformation);
+            }
         }
     }
 
@@ -1143,6 +1064,16 @@ namespace DomHelpers.SlcPeople_Organizations
         public TeamsInstance(): base(SlcPeople_OrganizationsIds.Definitions.Teams)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TeamsInstance"/> class. Creates an empty <see cref="TeamsInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public TeamsInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.Teams, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -1154,25 +1085,29 @@ namespace DomHelpers.SlcPeople_Organizations
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.Teams))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.Teams)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Gets the Status ID of the DOM Instance.
+        /// </summary>
+        public SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.StatusesEnum Status
+        {
+            get
+            {
+                return SlcPeople_OrganizationsIds.Behaviors.Team_Behavior.Statuses.ToEnum(StatusId);
+            }
         }
 
         /// <summary>
         /// Gets or sets the ResourcePool section of the DOM Instance.
         /// </summary>
-        public ResourcePoolSection ResourcePool
-        {
-            get;
-            set;
-        }
+        public ResourcePoolSection ResourcePool { get; set; }
 
         /// <summary>
         /// Gets or sets the TeamInformation section of the DOM Instance.
         /// </summary>
-        public TeamInformationSection TeamInformation
-        {
-            get;
-            set;
-        }
+        public TeamInformationSection TeamInformation { get; set; }
 
         public static explicit operator TeamsInstance(DomInstance instance)
         {
@@ -1180,7 +1115,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(ResourcePool.ToSection());
@@ -1205,8 +1140,25 @@ namespace DomHelpers.SlcPeople_Organizations
 
         protected override void InitializeProperties()
         {
-            ResourcePool = new ResourcePoolSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)));
-            TeamInformation = new TeamInformationSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.TeamInformation.Id)));
+            var _resourcePool = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id));
+            if (_resourcePool is null)
+            {
+                ResourcePool = new ResourcePoolSection();
+            }
+            else
+            {
+                ResourcePool = new ResourcePoolSection(_resourcePool);
+            }
+
+            var _teamInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.TeamInformation.Id));
+            if (_teamInformation is null)
+            {
+                TeamInformation = new TeamInformationSection();
+            }
+            else
+            {
+                TeamInformation = new TeamInformationSection(_teamInformation);
+            }
         }
     }
 
@@ -1222,6 +1174,16 @@ namespace DomHelpers.SlcPeople_Organizations
         public PeopleInstance(): base(SlcPeople_OrganizationsIds.Definitions.People)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PeopleInstance"/> class. Creates an empty <see cref="PeopleInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public PeopleInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.People, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -1233,52 +1195,44 @@ namespace DomHelpers.SlcPeople_Organizations
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.People))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.People)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Gets the Status ID of the DOM Instance.
+        /// </summary>
+        public SlcPeople_OrganizationsIds.Behaviors.People_Behavior.StatusesEnum Status
+        {
+            get
+            {
+                return SlcPeople_OrganizationsIds.Behaviors.People_Behavior.Statuses.ToEnum(StatusId);
+            }
         }
 
         /// <summary>
         /// Gets or sets the Organization section of the DOM Instance.
         /// </summary>
-        public OrganizationSection Organization
-        {
-            get;
-            set;
-        }
+        public OrganizationSection Organization { get; set; }
 
         /// <summary>
         /// Gets or sets the ContactInfo section of the DOM Instance.
         /// </summary>
-        public ContactInfoSection ContactInfo
-        {
-            get;
-            set;
-        }
+        public ContactInfoSection ContactInfo { get; set; }
 
         /// <summary>
         /// Gets or sets the Team section of the DOM Instance.
         /// </summary>
-        public IList<TeamSection> Team
-        {
-            get;
-            private set;
-        }
+        public IList<TeamSection> Team { get; private set; }
 
         /// <summary>
         /// Gets or sets the Resource section of the DOM Instance.
         /// </summary>
-        public ResourceSection Resource
-        {
-            get;
-            set;
-        }
+        public ResourceSection Resource { get; set; }
 
         /// <summary>
         /// Gets or sets the PeopleInformation section of the DOM Instance.
         /// </summary>
-        public PeopleInformationSection PeopleInformation
-        {
-            get;
-            set;
-        }
+        public PeopleInformationSection PeopleInformation { get; set; }
 
         public static explicit operator PeopleInstance(DomInstance instance)
         {
@@ -1286,7 +1240,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(Organization.ToSection());
@@ -1318,11 +1272,46 @@ namespace DomHelpers.SlcPeople_Organizations
 
         protected override void InitializeProperties()
         {
-            Organization = new OrganizationSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Organization.Id)));
-            ContactInfo = new ContactInfoSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)));
+            var _organization = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Organization.Id));
+            if (_organization is null)
+            {
+                Organization = new OrganizationSection();
+            }
+            else
+            {
+                Organization = new OrganizationSection(_organization);
+            }
+
+            var _contactInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id));
+            if (_contactInfo is null)
+            {
+                ContactInfo = new ContactInfoSection();
+            }
+            else
+            {
+                ContactInfo = new ContactInfoSection(_contactInfo);
+            }
+
             Team = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Team.Id)).Select(section => new TeamSection(section)).ToList();
-            Resource = new ResourceSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Resource.Id)));
-            PeopleInformation = new PeopleInformationSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)));
+            var _resource = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Resource.Id));
+            if (_resource is null)
+            {
+                Resource = new ResourceSection();
+            }
+            else
+            {
+                Resource = new ResourceSection(_resource);
+            }
+
+            var _peopleInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id));
+            if (_peopleInformation is null)
+            {
+                PeopleInformation = new PeopleInformationSection();
+            }
+            else
+            {
+                PeopleInformation = new PeopleInformationSection(_peopleInformation);
+            }
         }
     }
 
@@ -1338,6 +1327,16 @@ namespace DomHelpers.SlcPeople_Organizations
         public OrganizationsInstance(): base(SlcPeople_OrganizationsIds.Definitions.Organizations)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrganizationsInstance"/> class. Creates an empty <see cref="OrganizationsInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public OrganizationsInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.Organizations, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -1349,25 +1348,29 @@ namespace DomHelpers.SlcPeople_Organizations
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.Organizations))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.Organizations)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Gets the Status ID of the DOM Instance.
+        /// </summary>
+        public SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.StatusesEnum Status
+        {
+            get
+            {
+                return SlcPeople_OrganizationsIds.Behaviors.Organizations_Behavior.Statuses.ToEnum(StatusId);
+            }
         }
 
         /// <summary>
         /// Gets or sets the Contracts section of the DOM Instance.
         /// </summary>
-        public IList<ContractsSection> Contracts
-        {
-            get;
-            private set;
-        }
+        public IList<ContractsSection> Contracts { get; private set; }
 
         /// <summary>
         /// Gets or sets the OrganizationInformation section of the DOM Instance.
         /// </summary>
-        public OrganizationInformationSection OrganizationInformation
-        {
-            get;
-            set;
-        }
+        public OrganizationInformationSection OrganizationInformation { get; set; }
 
         public static explicit operator OrganizationsInstance(DomInstance instance)
         {
@@ -1375,7 +1378,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             foreach (var item in Contracts)
@@ -1405,7 +1408,15 @@ namespace DomHelpers.SlcPeople_Organizations
         protected override void InitializeProperties()
         {
             Contracts = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Contracts.Id)).Select(section => new ContractsSection(section)).ToList();
-            OrganizationInformation = new OrganizationInformationSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id)));
+            var _organizationInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id));
+            if (_organizationInformation is null)
+            {
+                OrganizationInformation = new OrganizationInformationSection();
+            }
+            else
+            {
+                OrganizationInformation = new OrganizationInformationSection(_organizationInformation);
+            }
         }
     }
 }
@@ -1443,19 +1454,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ContractsSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ContractsSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ContractsSection(Section section): base(SlcPeople_OrganizationsIds.Sections.Contracts.Id)
+        public ContractsSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.Contracts.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Contracts.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.Contracts.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -1519,19 +1519,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="OrganizationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="OrganizationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public OrganizationSection(Section section): base(SlcPeople_OrganizationsIds.Sections.Organization.Id)
+        public OrganizationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.Organization.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Organization.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.Organization.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -1595,19 +1584,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="RoleInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="RoleInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public RoleInformationSection(Section section): base(SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)
+        public RoleInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.RoleInformation.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -1654,7 +1632,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.RoleInformation.Role) == null)
                 throw new InvalidOperationException("'Role' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -1679,19 +1657,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ResourcePoolSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ResourcePoolSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ResourcePoolSection(Section section): base(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)
+        public ResourcePoolSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -1755,19 +1722,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ContactInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ContactInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ContactInfoSection(Section section): base(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)
+        public ContactInfoSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -1957,14 +1913,14 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <item>If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
-        public SlcPeople_OrganizationsIds.Enums.Country_1ace7be9? Country
+        public SlcPeople_OrganizationsIds.Enums.Country? Country
         {
             get
             {
                 var wrapper = section.GetValue<Int32>(SlcPeople_OrganizationsIds.Sections.ContactInfo.Country);
                 if (wrapper != null)
                 {
-                    return (SlcPeople_OrganizationsIds.Enums.Country_1ace7be9? )wrapper.Value;
+                    return (SlcPeople_OrganizationsIds.Enums.Country? )wrapper.Value;
                 }
                 else
                 {
@@ -2046,19 +2002,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ExperienceInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ExperienceInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ExperienceInformationSection(Section section): base(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)
+        public ExperienceInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -2105,7 +2050,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience) == null)
                 throw new InvalidOperationException("'Experience' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -2130,19 +2075,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="CategoryInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="CategoryInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public CategoryInformationSection(Section section): base(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)
+        public CategoryInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -2189,7 +2123,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category) == null)
                 throw new InvalidOperationException("'Category' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -2214,19 +2148,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="TeamSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="TeamSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public TeamSection(Section section): base(SlcPeople_OrganizationsIds.Sections.Team.Id)
+        public TeamSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.Team.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Team.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.Team.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -2333,19 +2256,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="TeamInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="TeamInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public TeamInformationSection(Section section): base(SlcPeople_OrganizationsIds.Sections.TeamInformation.Id)
+        public TeamInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.TeamInformation.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.TeamInformation.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.TeamInformation.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -2607,7 +2519,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.TeamInformation.TeamName) == null)
                 throw new InvalidOperationException("'TeamName' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -2632,19 +2544,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="OrganizationInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="OrganizationInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public OrganizationInformationSection(Section section): base(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id)
+        public OrganizationInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -2777,7 +2678,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.OrganizationName) == null)
                 throw new InvalidOperationException("'OrganizationName' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -2804,19 +2705,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ResourceSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ResourceSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ResourceSection(Section section): base(SlcPeople_OrganizationsIds.Sections.Resource.Id)
+        public ResourceSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.Resource.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Resource.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.Resource.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -2880,19 +2770,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="BillingSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="BillingSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public BillingSection(Section section): base(SlcPeople_OrganizationsIds.Sections.Billing.Id)
+        public BillingSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.Billing.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Billing.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.Billing.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -3125,14 +3004,14 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <item>If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
-        public SlcPeople_OrganizationsIds.Enums.Country_7f58452b? Country
+        public SlcPeople_OrganizationsIds.Enums.Country? Country
         {
             get
             {
                 var wrapper = section.GetValue<Int32>(SlcPeople_OrganizationsIds.Sections.Billing.Country);
                 if (wrapper != null)
                 {
-                    return (SlcPeople_OrganizationsIds.Enums.Country_7f58452b? )wrapper.Value;
+                    return (SlcPeople_OrganizationsIds.Enums.Country? )wrapper.Value;
                 }
                 else
                 {
@@ -3154,7 +3033,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.Billing.Email) == null)
                 throw new InvalidOperationException("'Email' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -3179,19 +3058,8 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="PeopleInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="PeopleInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public PeopleInformationSection(Section section): base(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)
+        public PeopleInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -3367,7 +3235,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (section.GetValue<String>(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName) == null)
                 throw new InvalidOperationException("'FullName' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");

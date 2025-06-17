@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <DMSScript options="272" xmlns="http://www.skyline.be/automation">
-	<Name>SLC_SM_AS_Ingest_Acquisition_Data</Name>
+	<Name>SLC_SM_IAS_Service_Configuration</Name>
 	<Description></Description>
 	<Type>Automation</Type>
 	<Author>RME</Author>
@@ -15,13 +15,13 @@
 
 	<Parameters>
 		<ScriptParameter id="10" type="string" values="">
-			<Description>Data</Description>
+			<Description>DOM ID</Description>
 		</ScriptParameter>
 	</Parameters>
 
 	<Script>
 		<Exe id="1" type="csharp">
-			<Value><![CDATA[[Project:SLC_SM_AS_Ingest_Acquisition_Data]]]></Value>
+			<Value><![CDATA[[Project:SLC_SM_IAS_Service_Configuration]]]></Value>
 			<!--<Param type="debug">true</Param>-->
 			<Message></Message>
 		</Exe>

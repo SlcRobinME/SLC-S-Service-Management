@@ -55,16 +55,14 @@ namespace SLC_SM_IAS_Service_Spec_Configuration
 	using System.Collections.Generic;
 	using System.Linq;
 
-	using DomHelpers.SlcServicemanagement;
-
 	using Library.Views;
 
 	using Newtonsoft.Json;
 
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+
+	using SLC_SM_Common.API.ServiceManagementApi;
 
 	using SLC_SM_IAS_Service_Spec_Configuration.Presenters;
 	using SLC_SM_IAS_Service_Spec_Configuration.Views;
@@ -90,10 +88,6 @@ namespace SLC_SM_IAS_Service_Spec_Configuration
 			*
 			* engine.ShowUI();
 			*/
-			if (engine.IsInteractive)
-			{
-				engine.FindInteractiveClient("Failed to run script in interactive mode", 1);
-			}
 
 			try
 			{
@@ -135,15 +129,12 @@ namespace SLC_SM_IAS_Service_Spec_Configuration
 				throw new InvalidOperationException("No DOM ID provided as input to the script");
 			}
 
-			var domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-			var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
-							  ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
-
-			var configurationInstance = new ServiceSpecificationsInstance(domInstance);
+			var instance = new DataHelperServiceSpecification(Engine.SLNetRaw).Read().Find(x => x.ID == domId)
+				?? throw new InvalidOperationException($"Instance with ID '{domId}' does not exist");
 
 			// Model-View-Presenter
 			var view = new ServiceConfigurationView(_engine);
-			var presenter = new ServiceConfigurationPresenter(_engine, _controller, view, configurationInstance);
+			var presenter = new ServiceConfigurationPresenter(_engine, _controller, view, instance);
 
 			presenter.LoadFromModel();
 

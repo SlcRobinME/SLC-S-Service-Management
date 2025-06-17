@@ -38,6 +38,7 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 						return new Models.ServiceOrder
 						{
 							ID = x.ID.Id,
+							StatusId = x.StatusId,
 							Name = x.ServiceOrderInfo.Name,
 							Description = x.ServiceOrderInfo.Description,
 							ExternalID = x.ServiceOrderInfo.ExternalID,
@@ -67,21 +68,18 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 
 			instance.ServiceOrderInfo.RelatedOrganization = order.OrganizationId;
 
+			instance.ServiceOrderInfo.OrderContact.Clear();
 			foreach (Guid contactId in order.ContactIds)
 			{
 				instance.ServiceOrderInfo.OrderContact.Add(contactId);
 			}
 
 			var dataHelperServiceOrderItem = new DataHelperServiceOrderItem(_connection);
-			var existingServiceOrderItems = dataHelperServiceOrderItem.Read();
 
+			instance.ServiceOrderItems.Clear();
 			foreach (Models.ServiceOrderItems item in order.OrderItems)
 			{
-				var existing = existingServiceOrderItems.Find(x => x.ID == item.ServiceOrderItem.ID);
-				if (existing == null)
-				{
-					item.ServiceOrderItem.ID = dataHelperServiceOrderItem.CreateOrUpdate(item.ServiceOrderItem);
-				}
+				item.ServiceOrderItem.ID = dataHelperServiceOrderItem.CreateOrUpdate(item.ServiceOrderItem);
 
 				instance.ServiceOrderItems.Add(new ServiceOrderItemsSection
 				{
@@ -91,6 +89,19 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			}
 
 			return CreateOrUpdateInstance(instance);
+		}
+
+		public override bool TryDelete(Models.ServiceOrder item)
+		{
+			bool b = true;
+
+			var helper = new DataHelperServiceOrderItem(_connection);
+			foreach (var orderItem in item.OrderItems)
+			{
+				b &= helper.TryDelete(orderItem.ServiceOrderItem);
+			}
+
+			return TryDelete(item.ID);
 		}
 	}
 }

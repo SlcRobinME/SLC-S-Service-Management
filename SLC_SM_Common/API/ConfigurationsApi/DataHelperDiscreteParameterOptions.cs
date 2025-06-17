@@ -78,5 +78,10 @@ namespace SLC_SM_Common.API.ConfigurationsApi
 
 			return CreateOrUpdateInstance(instance);
 		}
+
+		public override bool TryDelete(Models.DiscreteParameterOptions item)
+		{
+			return TryDelete(item.ID);
+		}
 	}
 }

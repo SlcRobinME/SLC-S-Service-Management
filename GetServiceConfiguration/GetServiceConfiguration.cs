@@ -168,7 +168,7 @@ namespace Get_ServiceConfiguration_1
 						new GQICell { Value = configValueInstance.ServiceSpecificationConfigurationValue.MandatoryAtServiceLevel ?? false },
 						new GQICell { Value = configValueInstance.ServiceSpecificationConfigurationValue.MandatoryAtServiceOrderLevel ?? false },
 						new GQICell { Value = configValueInstance.ServiceSpecificationConfigurationValue.ExposeAtServiceOrderLevel ?? false },
-						new GQICell { Value = item.ConfigurationParameterValue.Type.HasValue ? item.ConfigurationParameterValue.Type.Value.ToString() : SlcConfigurationsIds.Enums.ParameterType.Text.ToString() },
+						new GQICell { Value = item.ConfigurationParameterValue.Type.HasValue ? item.ConfigurationParameterValue.Type.Value.ToString() : SlcConfigurationsIds.Enums.Type.Text.ToString() },
 						new GQICell
 						{
 							Value = !String.IsNullOrWhiteSpace(item.ConfigurationParameterValue.StringValue)

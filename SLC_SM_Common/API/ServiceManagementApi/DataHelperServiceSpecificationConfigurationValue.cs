@@ -10,6 +10,8 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
+	using SLC_SM_Common.API.ConfigurationsApi;
+
 	public class DataHelperServiceSpecificationConfigurationValue : DataHelper<Models.ServiceSpecificationConfigurationValue>
 	{
 		public DataHelperServiceSpecificationConfigurationValue(IConnection connection) : base(connection, SlcServicemanagementIds.Definitions.ServiceSpecificationConfigurationValue)
@@ -50,10 +52,17 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			}
 
 			var dataHelperConfigurationParameters = new ConfigurationsApi.DataHelperConfigurationParameterValue(_connection);
-			dataHelperConfigurationParameters.CreateOrUpdate(item.ConfigurationParameter);
-			instance.ServiceSpecificationConfigurationValue.ConfigurationParameterValue = item.ConfigurationParameter.ID;
+			instance.ServiceSpecificationConfigurationValue.ConfigurationParameterValue = dataHelperConfigurationParameters.CreateOrUpdate(item.ConfigurationParameter);
 
 			return CreateOrUpdateInstance(instance);
+		}
+
+		public override bool TryDelete(Models.ServiceSpecificationConfigurationValue item)
+		{
+			var helper = new DataHelperConfigurationParameterValue(_connection);
+			bool b = item.ConfigurationParameter == null || helper.TryDelete(item.ConfigurationParameter.ID);
+
+			return b && TryDelete(item.ID);
 		}
 	}
 }

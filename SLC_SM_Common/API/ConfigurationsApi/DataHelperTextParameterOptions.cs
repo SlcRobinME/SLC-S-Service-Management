@@ -42,5 +42,10 @@ namespace SLC_SM_Common.API.ConfigurationsApi
 
 			return CreateOrUpdateInstance(instance);
 		}
+
+		public override bool TryDelete(Models.TextParameterOptions item)
+		{
+			return TryDelete(item.ID);
+		}
 	}
 }

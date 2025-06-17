@@ -10,32 +10,37 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
-	public class DataHelperServiceSpecification : DataHelper<Models.ServiceSpecification>
+	using SLDataGateway.API.Querying;
+
+	public class DataHelperService : DataHelper<Models.Service>
 	{
-		public DataHelperServiceSpecification(IConnection connection) : base(connection, SlcServicemanagementIds.Definitions.ServiceSpecifications)
+		public DataHelperService(IConnection connection) : base(connection, SlcServicemanagementIds.Definitions.Services)
 		{
 		}
 
-		public override List<Models.ServiceSpecification> Read()
+		public override List<Models.Service> Read()
 		{
 			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new ServiceSpecificationsInstance(x))
+				.Select(x => new ServicesInstance(x))
 				.ToList();
 
 			var dataHelperServicePropertyValues = new DataHelperServicePropertyValues(_connection);
 			var serviceProperties = dataHelperServicePropertyValues.Read();
-			var dataHelperServiceConfigurations = new DataHelperServiceSpecificationConfigurationValue(_connection);
+			var dataHelperServiceConfigurations = new DataHelperServiceConfigurationValue(_connection);
 			var serviceConfigurations = dataHelperServiceConfigurations.Read();
+			var dataHelperServiceCategory = new DataHelperServiceCategory(_connection);
+			var serviceCategories = dataHelperServiceCategory.Read();
 
 			return instances.Select(
-					x => new Models.ServiceSpecification
+					x => new Models.Service
 					{
 						ID = x.ID.Id,
-						Name = x.ServiceSpecificationInfo.SpecificationName,
-						Description = x.ServiceSpecificationInfo.Description,
-						Icon = x.ServiceSpecificationInfo.Icon,
-						Properties = serviceProperties.Find(p => p.ID == x.ServiceSpecificationInfo.ServiceProperties) ?? new Models.ServicePropertyValues { Values = new List<Models.ServicePropertyValue>() },
-						Configurations = serviceConfigurations.Where(p => x.ServiceSpecificationInfo.ServiceSpecificationConfigurationParameters.Contains(p.ID)).ToList(),
+						Name = x.ServiceInfo.ServiceName,
+						Description = x.ServiceInfo.Description,
+						Category = serviceCategories.Find(c => c.ID == x.ServiceInfo.ServiceCategory),
+						ServiceSpecificationId = x.ServiceInfo.ServiceSpecifcation,
+						Properties = serviceProperties.Find(p => p.ID == x.ServiceInfo.ServiceProperties) ?? new Models.ServicePropertyValues { Values = new List<Models.ServicePropertyValue>() },
+						Configurations = serviceConfigurations.Where(p => x.ServiceInfo.ServiceConfigurationParameters.Contains(p.ID)).ToList(),
 						ServiceItems = x.ServiceItems.Select(s => new Models.ServiceItem
 						{
 							ID = s.ServiceItemID ?? 1,
@@ -57,13 +62,22 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 				.ToList();
 		}
 
-		public override Guid CreateOrUpdate(Models.ServiceSpecification item)
+		public override Guid CreateOrUpdate(Models.Service item)
 		{
-			var instance = new ServiceSpecificationsInstance(New(item.ID));
-			instance.ServiceSpecificationInfo.SpecificationName = item.Name;
-			instance.ServiceSpecificationInfo.Description = item.Description;
-			instance.ServiceSpecificationInfo.Icon = item.Icon;
-			instance.ServiceSpecificationInfo.ServiceProperties = item.Properties?.ID;
+			DomInstance domInstance = New(item.ID);
+			var existingStatusId = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault()?.StatusId;
+			if (existingStatusId != null)
+			{
+				domInstance.StatusId = existingStatusId;
+			}
+
+			var instance = new ServicesInstance(domInstance);
+			instance.ServiceInfo.ServiceName = item.Name;
+			instance.ServiceInfo.Description = item.Description;
+			instance.ServiceInfo.ServiceProperties = item.Properties?.ID;
+			instance.ServiceInfo.ServiceCategory = item.Category?.ID;
+			instance.ServiceInfo.ServiceSpecifcation = item.ServiceSpecificationId;
+			instance.ServiceInfo.Icon = item.Icon;
 
 			if (item.Properties != null)
 			{
@@ -71,6 +85,13 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 				dataHelperProperties.CreateOrUpdate(item.Properties);
 			}
 
+			if (item.Category != null)
+			{
+				var dataHelperServiceCategory = new DataHelperServiceCategory(_connection);
+				dataHelperServiceCategory.CreateOrUpdate(item.Category);
+			}
+
+			instance.ServiceItemRelationship.Clear();
 			if (item.ServiceItemsRelationships != null)
 			{
 				foreach (var relationship in item.ServiceItemsRelationships)
@@ -92,13 +113,15 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 				instance.ServiceItemRelationship.Add(new ServiceItemRelationshipSection());
 			}
 
-			var dataHelperConfigurations = new DataHelperServiceSpecificationConfigurationValue(_connection);
+			var dataHelperConfigurations = new DataHelperServiceConfigurationValue(_connection);
+			instance.ServiceInfo.ServiceConfigurationParameters.Clear();
 			foreach (var config in item.Configurations)
 			{
-				instance.ServiceSpecificationInfo.ServiceSpecificationConfigurationParameters.Add(config.ID);
+				instance.ServiceInfo.ServiceConfigurationParameters.Add(config.ID);
 				dataHelperConfigurations.CreateOrUpdate(config);
 			}
 
+			instance.ServiceItems.Clear();
 			foreach (var si in item.ServiceItems)
 			{
 				instance.ServiceItems.Add(new ServiceItemsSection
@@ -115,7 +138,7 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			return CreateOrUpdateInstance(instance);
 		}
 
-		public override bool TryDelete(Models.ServiceSpecification item)
+		public override bool TryDelete(Models.Service item)
 		{
 			bool b = TryDelete(item.Properties.ID);
 			foreach (var config in item.Configurations)

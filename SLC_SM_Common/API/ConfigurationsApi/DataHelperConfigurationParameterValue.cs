@@ -99,6 +99,8 @@ namespace SLC_SM_Common.API.ConfigurationsApi
 							NumberOptions = numberOption,
 							DiscreteOptions = discreteOption,
 							TextOptions = textOption,
+							LinkedConfigurationReference = x.ConfigurationParameterValue.LinkedInstanceReference,
+							ValueFixed = x.ConfigurationParameterValue.ValueFixed == "true",
 						};
 					})
 				.ToList();
@@ -111,6 +113,8 @@ namespace SLC_SM_Common.API.ConfigurationsApi
 			instance.ConfigurationParameterValue.Type = item.Type;
 			instance.ConfigurationParameterValue.StringValue = item.StringValue;
 			instance.ConfigurationParameterValue.DoubleValue = item.DoubleValue;
+			instance.ConfigurationParameterValue.LinkedInstanceReference = item.LinkedConfigurationReference;
+			instance.ConfigurationParameterValue.ValueFixed = item.ValueFixed.ToString();
 
 			if (item.NumberOptions != null)
 			{
@@ -154,6 +158,27 @@ namespace SLC_SM_Common.API.ConfigurationsApi
 			instance.ConfigurationParameterValue.ConfigurationParameterReference = item.ConfigurationParameterId;
 
 			return CreateOrUpdateInstance(instance);
+		}
+
+		public override bool TryDelete(Models.ConfigurationParameterValue item)
+		{
+			bool b = true;
+			if (item.DiscreteOptions != null)
+			{
+				b &= TryDelete(item.DiscreteOptions.ID);
+			}
+
+			if (item.NumberOptions != null)
+			{
+				b &= TryDelete(item.NumberOptions.ID);
+			}
+
+			if (item.TextOptions != null)
+			{
+				b &= TryDelete(item.TextOptions.ID);
+			}
+
+			return b && TryDelete(item.ID);
 		}
 	}
 }

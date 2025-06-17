@@ -10,6 +10,8 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
+	using SLDataGateway.API.Querying;
+
 	public class DataHelperServiceOrderItem : DataHelper<Models.ServiceOrderItem>
 	{
 		public DataHelperServiceOrderItem(IConnection connection) : base(connection, SlcServicemanagementIds.Definitions.ServiceOrderItems)
@@ -28,6 +30,7 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 					x => new Models.ServiceOrderItem
 					{
 						ID = x.ID.Id,
+						StatusId = x.StatusId,
 						Name = x.ServiceOrderItemInfo.Name,
 						Action = x.ServiceOrderItemInfo.Action,
 						StartTime = x.ServiceOrderItemInfo.ServiceStartTime,
@@ -37,14 +40,21 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 						ServiceCategoryId = x.ServiceOrderItemServiceInfo.ServiceCategory,
 						Properties = helperPropertyValues.Read().Find(p => p.ID == x.ServiceOrderItemServiceInfo.Properties),
 						Configurations = helperConfigurations.Read().Where(c => x.ServiceOrderItemServiceInfo.ServiceOrderItemConfigurations.Contains(c.ID)).ToList(),
-						ServiceId = default, // TODO
+						ServiceId = x.ServiceOrderItemServiceInfo.Service,
 					})
 				.ToList();
 		}
 
 		public override Guid CreateOrUpdate(Models.ServiceOrderItem item)
 		{
-			var instance = new ServiceOrderItemsInstance(New(item.ID));
+			DomInstance domInstance = New(item.ID);
+			var existingStatusId = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault()?.StatusId;
+			if (existingStatusId != null)
+			{
+				domInstance.StatusId = existingStatusId;
+			}
+
+			var instance = new ServiceOrderItemsInstance(domInstance);
 			instance.ServiceOrderItemInfo.Name = item.Name;
 			instance.ServiceOrderItemInfo.Action = item.Action;
 			instance.ServiceOrderItemInfo.ServiceStartTime = item.StartTime;
@@ -54,7 +64,7 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			instance.ServiceOrderItemServiceInfo.ServiceSpecification = item.SpecificationId;
 			instance.ServiceOrderItemServiceInfo.ServiceCategory = item.ServiceCategoryId;
 			instance.ServiceOrderItemServiceInfo.Properties = item.Properties?.ID;
-			instance.ServiceOrderItemServiceInfo.Service = item.ServiceCategoryId;
+			instance.ServiceOrderItemServiceInfo.Service = item.ServiceId;
 
 			if (item.Properties != null)
 			{
@@ -63,13 +73,25 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			}
 
 			var dataHelperConfigurations = new DataHelperServiceOrderItemConfigurationValue(_connection);
+			instance.ServiceOrderItemServiceInfo.ServiceOrderItemConfigurations.Clear();
 			foreach (var configurationValue in item.Configurations)
 			{
-				instance.ServiceOrderItemServiceInfo.ServiceOrderItemConfigurations.Add(configurationValue.ID);
-				dataHelperConfigurations.CreateOrUpdate(configurationValue);
+				var id = dataHelperConfigurations.CreateOrUpdate(configurationValue);
+				instance.ServiceOrderItemServiceInfo.ServiceOrderItemConfigurations.Add(id);
 			}
 
 			return CreateOrUpdateInstance(instance);
+		}
+
+		public override bool TryDelete(Models.ServiceOrderItem item)
+		{
+			bool ok = TryDelete(item.Properties.ID);
+			foreach (var serviceOrderItemConfigurationValue in item.Configurations)
+			{
+				ok &= TryDelete(serviceOrderItemConfigurationValue.ID);
+			}
+
+			return ok && TryDelete(item.ID);
 		}
 	}
 }

@@ -49,5 +49,10 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 
 			return CreateOrUpdateInstance(instance);
 		}
+
+		public override bool TryDelete(Models.ServiceProperty item)
+		{
+			return TryDelete(item.ID);
+		}
 	}
 }

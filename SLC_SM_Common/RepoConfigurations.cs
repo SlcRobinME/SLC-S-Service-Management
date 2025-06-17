@@ -1,33 +1,34 @@
 ﻿namespace Library
 {
-	using System.Collections.Generic;
+	using Skyline.DataMiner.Net;
 
-	using DomHelpers.SlcConfigurations;
-
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using SLC_SM_Common.API.ConfigurationsApi;
 
 	public class RepoConfigurations
 	{
-		public RepoConfigurations(DomHelper helper)
+		public RepoConfigurations(IConnection connection)
 		{
-			ConfigurationParameters = helper.GetConfigurationParameterInstances();
-			NumberParameterOptions = helper.GetNumberParameterOptionsInstances();
-			DiscreteParameterOptions = helper.GetDiscreteParameterOptions();
-			TextParameterOptions = helper.GetTextParameterOptions();
-			DiscreteValues = helper.GetDiscreteValues();
-			ConfigurationUnits = helper.GetConfigurationUnits();
+			ConfigurationParameterValues = new DataHelperConfigurationParameterValue(connection);
+			ConfigurationParameters = new DataHelperConfigurationParameter(connection);
+			NumberParameterOptions = new DataHelperNumberParameterOptions(connection);
+			DiscreteParameterOptions = new DataHelperDiscreteParameterOptions(connection);
+			TextParameterOptions = new DataHelperTextParameterOptions(connection);
+			DiscreteValues = new DataHelperDiscreteValues(connection);
+			ConfigurationUnits = new DataHelperConfigurationUnit(connection);
 		}
 
-		public List<ConfigurationParametersInstance> ConfigurationParameters { get; }
+		public DataHelperConfigurationParameterValue ConfigurationParameterValues { get; }
 
-		public List<NumberParameterOptionsInstance> NumberParameterOptions { get; }
+		public DataHelperConfigurationParameter ConfigurationParameters { get; }
 
-		public List<DiscreteParameterOptionsInstance> DiscreteParameterOptions { get; }
+		public DataHelperNumberParameterOptions NumberParameterOptions { get; }
 
-		public List<TextParameterOptionsInstance> TextParameterOptions { get; }
+		public DataHelperDiscreteParameterOptions DiscreteParameterOptions { get; }
 
-		public List<DiscreteValuesInstance> DiscreteValues { get; }
+		public DataHelperTextParameterOptions TextParameterOptions { get; }
 
-		public List<ConfigurationUnitInstance> ConfigurationUnits { get; }
+		public DataHelperDiscreteValues DiscreteValues { get; }
+
+		public DataHelperConfigurationUnit ConfigurationUnits { get; }
 	}
 }

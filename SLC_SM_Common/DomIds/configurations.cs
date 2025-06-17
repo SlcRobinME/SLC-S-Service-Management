@@ -7,6 +7,8 @@
 namespace DomHelpers.SlcConfigurations
 {
     using System;
+    using System.ComponentModel;
+
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Sections;
 
@@ -15,7 +17,7 @@ namespace DomHelpers.SlcConfigurations
         public const string ModuleId = "(slc)configurations";
         public static class Enums
         {
-            public enum ParameterType
+            public enum Type
             {
                 Number = 0,
                 Discrete = 1,
@@ -27,318 +29,94 @@ namespace DomHelpers.SlcConfigurations
         {
             public static class ConfigurationParameterInfo
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("73d0997f-7268-467e-9540-d37e91ebdac2"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("73d0997f-7268-467e-9540-d37e91ebdac2"))
                 {ModuleId = "(slc)configurations"};
-                public static FieldDescriptorID ParameterName
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0a12c0f7-fe73-4995-85fe-3af4234b22c9"));
-                public static FieldDescriptorID Type
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("2e5aedca-5443-4a1f-a08d-2adf1a8baefa"));
-                public static FieldDescriptorID NumberOptions
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ef760d85-0014-4e7f-b886-d3d33022e764"));
-                public static FieldDescriptorID DiscreteOptions
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("bd0055c6-a665-4224-8be4-a9123756f277"));
-                public static FieldDescriptorID TextOptions
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4b13eb14-c503-4afd-98f2-f94deb8fe90c"));
+                public static FieldDescriptorID ParameterName { get; } = new FieldDescriptorID(new Guid("0a12c0f7-fe73-4995-85fe-3af4234b22c9"));
+                public static FieldDescriptorID Type { get; } = new FieldDescriptorID(new Guid("2e5aedca-5443-4a1f-a08d-2adf1a8baefa"));
+                public static FieldDescriptorID NumberOptions { get; } = new FieldDescriptorID(new Guid("ef760d85-0014-4e7f-b886-d3d33022e764"));
+                public static FieldDescriptorID DiscreteOptions { get; } = new FieldDescriptorID(new Guid("bd0055c6-a665-4224-8be4-a9123756f277"));
+                public static FieldDescriptorID TextOptions { get; } = new FieldDescriptorID(new Guid("4b13eb14-c503-4afd-98f2-f94deb8fe90c"));
             }
 
             public static class ConfigurationParameterValue
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("32879046-c83c-49d8-b6bc-39c77bc7b3b0"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("32879046-c83c-49d8-b6bc-39c77bc7b3b0"))
                 {ModuleId = "(slc)configurations"};
-                public static FieldDescriptorID Label
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("126e4e03-fb84-4785-b8c6-7915d5c813c2"));
-                public static FieldDescriptorID ConfigurationParameterReference
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7b6608cf-93b3-49fd-85d6-710c545c80e3"));
-                public static FieldDescriptorID Type
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9ba1a433-66d5-40aa-889f-db4f859fd6c9"));
-                public static FieldDescriptorID NumberValueOptions
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("49d9d679-0245-4efd-ac30-67da13d8919a"));
-                public static FieldDescriptorID DiscreteValueOptions
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("428e3121-3f51-4e8d-8ff8-00252f4f9c60"));
-                public static FieldDescriptorID TextValueOptions
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b3adb3a8-13ef-4abe-8848-55046a1cac7f"));
-                public static FieldDescriptorID StringValue
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f5c66e83-a5be-4d6a-a525-a8dc128e88fd"));
-                public static FieldDescriptorID DoubleValue
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ec86e76c-4504-499e-98a1-f7ecfe95d951"));
-                public static FieldDescriptorID LinkedConfigurationParameter
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("429acf15-69ab-4ee5-8f34-fec675b09b17"));
-                public static FieldDescriptorID LinkedInstanceReference
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("438b7699-9be3-4737-bb4f-f680efb7b7ee"));
+                public static FieldDescriptorID Label { get; } = new FieldDescriptorID(new Guid("126e4e03-fb84-4785-b8c6-7915d5c813c2"));
+                public static FieldDescriptorID ConfigurationParameterReference { get; } = new FieldDescriptorID(new Guid("7b6608cf-93b3-49fd-85d6-710c545c80e3"));
+                public static FieldDescriptorID Type { get; } = new FieldDescriptorID(new Guid("9ba1a433-66d5-40aa-889f-db4f859fd6c9"));
+                public static FieldDescriptorID NumberValueOptions { get; } = new FieldDescriptorID(new Guid("49d9d679-0245-4efd-ac30-67da13d8919a"));
+                public static FieldDescriptorID DiscreteValueOptions { get; } = new FieldDescriptorID(new Guid("428e3121-3f51-4e8d-8ff8-00252f4f9c60"));
+                public static FieldDescriptorID TextValueOptions { get; } = new FieldDescriptorID(new Guid("b3adb3a8-13ef-4abe-8848-55046a1cac7f"));
+                public static FieldDescriptorID StringValue { get; } = new FieldDescriptorID(new Guid("f5c66e83-a5be-4d6a-a525-a8dc128e88fd"));
+                public static FieldDescriptorID DoubleValue { get; } = new FieldDescriptorID(new Guid("ec86e76c-4504-499e-98a1-f7ecfe95d951"));
+                public static FieldDescriptorID LinkedConfigurationParameter { get; } = new FieldDescriptorID(new Guid("429acf15-69ab-4ee5-8f34-fec675b09b17"));
+                public static FieldDescriptorID LinkedInstanceReference { get; } = new FieldDescriptorID(new Guid("438b7699-9be3-4737-bb4f-f680efb7b7ee"));
+                public static FieldDescriptorID ValueFixed { get; } = new FieldDescriptorID(new Guid("d92f4a69-0d9d-4db1-8135-5ec746dac8a0"));
             }
 
             public static class DiscreteValue
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("16f36d1f-a19e-4c77-bfd4-2c33a723d57f"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("16f36d1f-a19e-4c77-bfd4-2c33a723d57f"))
                 {ModuleId = "(slc)configurations"};
-                public static FieldDescriptorID Value
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("10be0fab-9224-45b6-9a6c-84e801ed2703"));
+                public static FieldDescriptorID Value { get; } = new FieldDescriptorID(new Guid("10be0fab-9224-45b6-9a6c-84e801ed2703"));
             }
 
             public static class ConfigurationUnitInfo
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("318f27dc-a0d6-4cae-9e1f-1c4e97b41577"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("318f27dc-a0d6-4cae-9e1f-1c4e97b41577"))
                 {ModuleId = "(slc)configurations"};
-                public static FieldDescriptorID UnitName
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("44182199-823b-4fb8-84bc-5106bdc5345f"));
-                public static FieldDescriptorID RatioWithRespectToReference
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b26ea0a2-7c5d-4dea-b982-7b8780eecdf7"));
-                public static FieldDescriptorID ReferenceUnit
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("6647c7a2-1538-444b-86b4-94b71cc936cb"));
+                public static FieldDescriptorID UnitName { get; } = new FieldDescriptorID(new Guid("44182199-823b-4fb8-84bc-5106bdc5345f"));
+                public static FieldDescriptorID RatioWithRespectToReference { get; } = new FieldDescriptorID(new Guid("b26ea0a2-7c5d-4dea-b982-7b8780eecdf7"));
+                public static FieldDescriptorID ReferenceUnit { get; } = new FieldDescriptorID(new Guid("6647c7a2-1538-444b-86b4-94b71cc936cb"));
             }
 
             public static class TextParameterOptions
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("d63d2714-b2af-47ea-9569-9da50e3faa0c"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("d63d2714-b2af-47ea-9569-9da50e3faa0c"))
                 {ModuleId = "(slc)configurations"};
-                public static FieldDescriptorID Regex
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7b079ce3-27d7-4a2e-a27b-6b0b510b37bc"));
-                public static FieldDescriptorID UserMessage
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("5050e459-cc37-4439-a82c-f5664edb6afb"));
-                public static FieldDescriptorID Default
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0aefafab-576a-43a4-a638-2f20894ea0f4"));
+                public static FieldDescriptorID Regex { get; } = new FieldDescriptorID(new Guid("7b079ce3-27d7-4a2e-a27b-6b0b510b37bc"));
+                public static FieldDescriptorID UserMessage { get; } = new FieldDescriptorID(new Guid("5050e459-cc37-4439-a82c-f5664edb6afb"));
+                public static FieldDescriptorID Default { get; } = new FieldDescriptorID(new Guid("0aefafab-576a-43a4-a638-2f20894ea0f4"));
             }
 
             public static class NumberParameterOptions
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("fda64a47-ed72-4f4b-a896-3edb8e0009f8"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("fda64a47-ed72-4f4b-a896-3edb8e0009f8"))
                 {ModuleId = "(slc)configurations"};
-                public static FieldDescriptorID Units
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("5b31eaec-83a8-4e67-a6ae-3d641e396584"));
-                public static FieldDescriptorID DefaultUnit
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4a2062fb-1d6c-4b35-9403-b0d1450f1bc7"));
-                public static FieldDescriptorID MinRange
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cc21fc4e-6108-4fbd-8f83-fe9140d750b7"));
-                public static FieldDescriptorID MaxRange
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("08ba79bc-5296-458b-bc88-702051e5ff4f"));
-                public static FieldDescriptorID StepSize
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f221d3b8-fcf6-4f8b-85cf-46a11c9d955f"));
-                public static FieldDescriptorID Decimals
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("8fe44feb-4e8e-4de4-9853-69c791fe0a0b"));
-                public static FieldDescriptorID DefaultValue
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("2c4ab3d6-c9bf-4b07-b30e-56d1e655e3a3"));
+                public static FieldDescriptorID Units { get; } = new FieldDescriptorID(new Guid("5b31eaec-83a8-4e67-a6ae-3d641e396584"));
+                public static FieldDescriptorID DefaultUnit { get; } = new FieldDescriptorID(new Guid("4a2062fb-1d6c-4b35-9403-b0d1450f1bc7"));
+                public static FieldDescriptorID MinRange { get; } = new FieldDescriptorID(new Guid("cc21fc4e-6108-4fbd-8f83-fe9140d750b7"));
+                public static FieldDescriptorID MaxRange { get; } = new FieldDescriptorID(new Guid("08ba79bc-5296-458b-bc88-702051e5ff4f"));
+                public static FieldDescriptorID StepSize { get; } = new FieldDescriptorID(new Guid("f221d3b8-fcf6-4f8b-85cf-46a11c9d955f"));
+                public static FieldDescriptorID Decimals { get; } = new FieldDescriptorID(new Guid("8fe44feb-4e8e-4de4-9853-69c791fe0a0b"));
+                public static FieldDescriptorID DefaultValue { get; } = new FieldDescriptorID(new Guid("2c4ab3d6-c9bf-4b07-b30e-56d1e655e3a3"));
             }
 
             public static class DiscreteParameterOptions
             {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("5ddf7d8b-f99f-4f38-a931-a8c386e0883b"))
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("5ddf7d8b-f99f-4f38-a931-a8c386e0883b"))
                 {ModuleId = "(slc)configurations"};
-                public static FieldDescriptorID DefaultDiscreteValue
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c4806ad6-1797-4316-a168-53a4b03d2590"));
-                public static FieldDescriptorID DiscreteValues
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("85bec10c-6693-468e-937f-bff04f0c869e"));
+                public static FieldDescriptorID DefaultDiscreteValue { get; } = new FieldDescriptorID(new Guid("c4806ad6-1797-4316-a168-53a4b03d2590"));
+                public static FieldDescriptorID DiscreteValues { get; } = new FieldDescriptorID(new Guid("85bec10c-6693-468e-937f-bff04f0c869e"));
             }
         }
 
         public static class Definitions
         {
-            public static DomDefinitionId ConfigurationParameterValue
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("6dd99cdc-9196-4c97-88fc-24fef32dd776"))
+            public static DomDefinitionId ConfigurationParameterValue { get; } = new DomDefinitionId(new Guid("6dd99cdc-9196-4c97-88fc-24fef32dd776"))
             {ModuleId = "(slc)configurations"};
-            public static DomDefinitionId TextParameterOptions
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("95f4bec5-c65b-4441-926b-52c9f42eddb9"))
+            public static DomDefinitionId TextParameterOptions { get; } = new DomDefinitionId(new Guid("95f4bec5-c65b-4441-926b-52c9f42eddb9"))
             {ModuleId = "(slc)configurations"};
-            public static DomDefinitionId ConfigurationParameters
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("277b0f63-9ac2-47ed-9793-705a0091ab8d"))
+            public static DomDefinitionId ConfigurationParameters { get; } = new DomDefinitionId(new Guid("277b0f63-9ac2-47ed-9793-705a0091ab8d"))
             {ModuleId = "(slc)configurations"};
-            public static DomDefinitionId DiscreteValues
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("1fb7b93f-cc9d-46c0-b329-114991f54744"))
+            public static DomDefinitionId DiscreteValues { get; } = new DomDefinitionId(new Guid("1fb7b93f-cc9d-46c0-b329-114991f54744"))
             {ModuleId = "(slc)configurations"};
-            public static DomDefinitionId DiscreteParameterOptions
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("adaa89eb-2453-48a4-b656-e6425855787f"))
+            public static DomDefinitionId DiscreteParameterOptions { get; } = new DomDefinitionId(new Guid("adaa89eb-2453-48a4-b656-e6425855787f"))
             {ModuleId = "(slc)configurations"};
-            public static DomDefinitionId NumberParameterOptions
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("db576703-abd5-4d64-a882-74a49547f076"))
+            public static DomDefinitionId NumberParameterOptions { get; } = new DomDefinitionId(new Guid("db576703-abd5-4d64-a882-74a49547f076"))
             {ModuleId = "(slc)configurations"};
-            public static DomDefinitionId ConfigurationUnit
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("0c6c3c61-689c-4e28-bf4b-0654eca17b21"))
+            public static DomDefinitionId ConfigurationUnit { get; } = new DomDefinitionId(new Guid("0c6c3c61-689c-4e28-bf4b-0654eca17b21"))
             {ModuleId = "(slc)configurations"};
         }
 
@@ -358,6 +136,7 @@ namespace DomHelpers.SlcConfigurations
     using System;
     using System.Collections.Generic;
     using System.Linq;
+
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages;
 
@@ -373,6 +152,16 @@ namespace DomHelpers.SlcConfigurations
         public ConfigurationParameterValueInstance(): base(SlcConfigurationsIds.Definitions.ConfigurationParameterValue)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationParameterValueInstance"/> class. Creates an empty <see cref="ConfigurationParameterValueInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public ConfigurationParameterValueInstance(Guid id): base(SlcConfigurationsIds.Definitions.ConfigurationParameterValue, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -384,16 +173,13 @@ namespace DomHelpers.SlcConfigurations
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.ConfigurationParameterValue))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.ConfigurationParameterValue)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
         /// Gets or sets the ConfigurationParameterValue section of the DOM Instance.
         /// </summary>
-        public ConfigurationParameterValueSection ConfigurationParameterValue
-        {
-            get;
-            set;
-        }
+        public ConfigurationParameterValueSection ConfigurationParameterValue { get; set; }
 
         public static explicit operator ConfigurationParameterValueInstance(DomInstance instance)
         {
@@ -401,7 +187,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(ConfigurationParameterValue.ToSection());
@@ -425,7 +211,15 @@ namespace DomHelpers.SlcConfigurations
 
         protected override void InitializeProperties()
         {
-            ConfigurationParameterValue = new ConfigurationParameterValueSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id)));
+            var _configurationParameterValue = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id));
+            if (_configurationParameterValue is null)
+            {
+                ConfigurationParameterValue = new ConfigurationParameterValueSection();
+            }
+            else
+            {
+                ConfigurationParameterValue = new ConfigurationParameterValueSection(_configurationParameterValue);
+            }
         }
     }
 
@@ -441,6 +235,16 @@ namespace DomHelpers.SlcConfigurations
         public TextParameterOptionsInstance(): base(SlcConfigurationsIds.Definitions.TextParameterOptions)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TextParameterOptionsInstance"/> class. Creates an empty <see cref="TextParameterOptionsInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public TextParameterOptionsInstance(Guid id): base(SlcConfigurationsIds.Definitions.TextParameterOptions, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -452,16 +256,13 @@ namespace DomHelpers.SlcConfigurations
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.TextParameterOptions))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.TextParameterOptions)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
         /// Gets or sets the TextParameterOptions section of the DOM Instance.
         /// </summary>
-        public TextParameterOptionsSection TextParameterOptions
-        {
-            get;
-            set;
-        }
+        public TextParameterOptionsSection TextParameterOptions { get; set; }
 
         public static explicit operator TextParameterOptionsInstance(DomInstance instance)
         {
@@ -469,7 +270,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(TextParameterOptions.ToSection());
@@ -493,7 +294,15 @@ namespace DomHelpers.SlcConfigurations
 
         protected override void InitializeProperties()
         {
-            TextParameterOptions = new TextParameterOptionsSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.TextParameterOptions.Id)));
+            var _textParameterOptions = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.TextParameterOptions.Id));
+            if (_textParameterOptions is null)
+            {
+                TextParameterOptions = new TextParameterOptionsSection();
+            }
+            else
+            {
+                TextParameterOptions = new TextParameterOptionsSection(_textParameterOptions);
+            }
         }
     }
 
@@ -509,6 +318,16 @@ namespace DomHelpers.SlcConfigurations
         public ConfigurationParametersInstance(): base(SlcConfigurationsIds.Definitions.ConfigurationParameters)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationParametersInstance"/> class. Creates an empty <see cref="ConfigurationParametersInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public ConfigurationParametersInstance(Guid id): base(SlcConfigurationsIds.Definitions.ConfigurationParameters, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -520,16 +339,13 @@ namespace DomHelpers.SlcConfigurations
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.ConfigurationParameters))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.ConfigurationParameters)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
         /// Gets or sets the ConfigurationParameterInfo section of the DOM Instance.
         /// </summary>
-        public ConfigurationParameterInfoSection ConfigurationParameterInfo
-        {
-            get;
-            set;
-        }
+        public ConfigurationParameterInfoSection ConfigurationParameterInfo { get; set; }
 
         public static explicit operator ConfigurationParametersInstance(DomInstance instance)
         {
@@ -537,7 +353,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(ConfigurationParameterInfo.ToSection());
@@ -561,7 +377,15 @@ namespace DomHelpers.SlcConfigurations
 
         protected override void InitializeProperties()
         {
-            ConfigurationParameterInfo = new ConfigurationParameterInfoSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id)));
+            var _configurationParameterInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id));
+            if (_configurationParameterInfo is null)
+            {
+                ConfigurationParameterInfo = new ConfigurationParameterInfoSection();
+            }
+            else
+            {
+                ConfigurationParameterInfo = new ConfigurationParameterInfoSection(_configurationParameterInfo);
+            }
         }
     }
 
@@ -577,6 +401,16 @@ namespace DomHelpers.SlcConfigurations
         public DiscreteValuesInstance(): base(SlcConfigurationsIds.Definitions.DiscreteValues)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DiscreteValuesInstance"/> class. Creates an empty <see cref="DiscreteValuesInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public DiscreteValuesInstance(Guid id): base(SlcConfigurationsIds.Definitions.DiscreteValues, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -588,16 +422,13 @@ namespace DomHelpers.SlcConfigurations
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.DiscreteValues))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.DiscreteValues)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
         /// Gets or sets the DiscreteValue section of the DOM Instance.
         /// </summary>
-        public DiscreteValueSection DiscreteValue
-        {
-            get;
-            set;
-        }
+        public DiscreteValueSection DiscreteValue { get; set; }
 
         public static explicit operator DiscreteValuesInstance(DomInstance instance)
         {
@@ -605,7 +436,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(DiscreteValue.ToSection());
@@ -629,7 +460,15 @@ namespace DomHelpers.SlcConfigurations
 
         protected override void InitializeProperties()
         {
-            DiscreteValue = new DiscreteValueSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.DiscreteValue.Id)));
+            var _discreteValue = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.DiscreteValue.Id));
+            if (_discreteValue is null)
+            {
+                DiscreteValue = new DiscreteValueSection();
+            }
+            else
+            {
+                DiscreteValue = new DiscreteValueSection(_discreteValue);
+            }
         }
     }
 
@@ -645,6 +484,16 @@ namespace DomHelpers.SlcConfigurations
         public DiscreteParameterOptionsInstance(): base(SlcConfigurationsIds.Definitions.DiscreteParameterOptions)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DiscreteParameterOptionsInstance"/> class. Creates an empty <see cref="DiscreteParameterOptionsInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public DiscreteParameterOptionsInstance(Guid id): base(SlcConfigurationsIds.Definitions.DiscreteParameterOptions, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -656,16 +505,13 @@ namespace DomHelpers.SlcConfigurations
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.DiscreteParameterOptions))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.DiscreteParameterOptions)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
         /// Gets or sets the DiscreteParameterOptions section of the DOM Instance.
         /// </summary>
-        public DiscreteParameterOptionsSection DiscreteParameterOptions
-        {
-            get;
-            set;
-        }
+        public DiscreteParameterOptionsSection DiscreteParameterOptions { get; set; }
 
         public static explicit operator DiscreteParameterOptionsInstance(DomInstance instance)
         {
@@ -673,7 +519,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(DiscreteParameterOptions.ToSection());
@@ -697,7 +543,15 @@ namespace DomHelpers.SlcConfigurations
 
         protected override void InitializeProperties()
         {
-            DiscreteParameterOptions = new DiscreteParameterOptionsSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id)));
+            var _discreteParameterOptions = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id));
+            if (_discreteParameterOptions is null)
+            {
+                DiscreteParameterOptions = new DiscreteParameterOptionsSection();
+            }
+            else
+            {
+                DiscreteParameterOptions = new DiscreteParameterOptionsSection(_discreteParameterOptions);
+            }
         }
     }
 
@@ -713,6 +567,16 @@ namespace DomHelpers.SlcConfigurations
         public NumberParameterOptionsInstance(): base(SlcConfigurationsIds.Definitions.NumberParameterOptions)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NumberParameterOptionsInstance"/> class. Creates an empty <see cref="NumberParameterOptionsInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public NumberParameterOptionsInstance(Guid id): base(SlcConfigurationsIds.Definitions.NumberParameterOptions, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -724,16 +588,13 @@ namespace DomHelpers.SlcConfigurations
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.NumberParameterOptions))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.NumberParameterOptions)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
         /// Gets or sets the NumberParameterOptions section of the DOM Instance.
         /// </summary>
-        public NumberParameterOptionsSection NumberParameterOptions
-        {
-            get;
-            set;
-        }
+        public NumberParameterOptionsSection NumberParameterOptions { get; set; }
 
         public static explicit operator NumberParameterOptionsInstance(DomInstance instance)
         {
@@ -741,7 +602,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(NumberParameterOptions.ToSection());
@@ -765,7 +626,15 @@ namespace DomHelpers.SlcConfigurations
 
         protected override void InitializeProperties()
         {
-            NumberParameterOptions = new NumberParameterOptionsSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.NumberParameterOptions.Id)));
+            var _numberParameterOptions = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.NumberParameterOptions.Id));
+            if (_numberParameterOptions is null)
+            {
+                NumberParameterOptions = new NumberParameterOptionsSection();
+            }
+            else
+            {
+                NumberParameterOptions = new NumberParameterOptionsSection(_numberParameterOptions);
+            }
         }
     }
 
@@ -781,6 +650,16 @@ namespace DomHelpers.SlcConfigurations
         public ConfigurationUnitInstance(): base(SlcConfigurationsIds.Definitions.ConfigurationUnit)
         {
             InitializeProperties();
+            AfterLoad();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationUnitInstance"/> class. Creates an empty <see cref="ConfigurationUnitInstance"/> instance with default settings and a specific ID.
+        /// </summary>
+        public ConfigurationUnitInstance(Guid id): base(SlcConfigurationsIds.Definitions.ConfigurationUnit, id)
+        {
+            InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
@@ -792,16 +671,13 @@ namespace DomHelpers.SlcConfigurations
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.ConfigurationUnit))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.ConfigurationUnit)}'", nameof(domInstance));
             InitializeProperties();
+            AfterLoad();
         }
 
         /// <summary>
         /// Gets or sets the ConfigurationUnitInfo section of the DOM Instance.
         /// </summary>
-        public ConfigurationUnitInfoSection ConfigurationUnitInfo
-        {
-            get;
-            set;
-        }
+        public ConfigurationUnitInfoSection ConfigurationUnitInfo { get; set; }
 
         public static explicit operator ConfigurationUnitInstance(DomInstance instance)
         {
@@ -809,7 +685,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override DomInstance ToInstance()
+        protected override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(ConfigurationUnitInfo.ToSection());
@@ -833,7 +709,15 @@ namespace DomHelpers.SlcConfigurations
 
         protected override void InitializeProperties()
         {
-            ConfigurationUnitInfo = new ConfigurationUnitInfoSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id)));
+            var _configurationUnitInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id));
+            if (_configurationUnitInfo is null)
+            {
+                ConfigurationUnitInfo = new ConfigurationUnitInfoSection();
+            }
+            else
+            {
+                ConfigurationUnitInfo = new ConfigurationUnitInfoSection(_configurationUnitInfo);
+            }
         }
     }
 }
@@ -849,6 +733,7 @@ namespace DomHelpers.SlcConfigurations
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Messages;
@@ -871,19 +756,8 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="ConfigurationParameterInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ConfigurationParameterInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ConfigurationParameterInfoSection(Section section): base(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id)
+        public ConfigurationParameterInfoSection(Section section): base(section, SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -944,14 +818,14 @@ namespace DomHelpers.SlcConfigurations
         /// <item>If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
-        public SlcConfigurationsIds.Enums.ParameterType? Type
+        public SlcConfigurationsIds.Enums.Type? Type
         {
             get
             {
                 var wrapper = section.GetValue<Int32>(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Type);
                 if (wrapper != null)
                 {
-                    return (SlcConfigurationsIds.Enums.ParameterType?)wrapper.Value;
+                    return (SlcConfigurationsIds.Enums.Type? )wrapper.Value;
                 }
                 else
                 {
@@ -1102,7 +976,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (section.GetValue<String>(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.ParameterName) == null)
                 throw new InvalidOperationException("'ParameterName' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -1129,19 +1003,8 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="ConfigurationParameterValueSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ConfigurationParameterValueSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ConfigurationParameterValueSection(Section section): base(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id)
+        public ConfigurationParameterValueSection(Section section): base(section, SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -1245,14 +1108,14 @@ namespace DomHelpers.SlcConfigurations
         /// <item>If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
-        public SlcConfigurationsIds.Enums.ParameterType? Type
+        public SlcConfigurationsIds.Enums.Type? Type
         {
             get
             {
                 var wrapper = section.GetValue<Int32>(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Type);
                 if (wrapper != null)
                 {
-                    return (SlcConfigurationsIds.Enums.ParameterType?)wrapper.Value;
+                    return (SlcConfigurationsIds.Enums.Type? )wrapper.Value;
                 }
                 else
                 {
@@ -1573,6 +1436,49 @@ namespace DomHelpers.SlcConfigurations
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or sets the ValueFixed field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public String ValueFixed
+        {
+            get
+            {
+                var wrapper = section.GetValue<String>(SlcConfigurationsIds.Sections.ConfigurationParameterValue.ValueFixed);
+                if (wrapper != null)
+                {
+                    return (String)wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcConfigurationsIds.Sections.ConfigurationParameterValue.ValueFixed);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcConfigurationsIds.Sections.ConfigurationParameterValue.ValueFixed, (String)value);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -1592,19 +1498,8 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="DiscreteValueSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="DiscreteValueSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public DiscreteValueSection(Section section): base(SlcConfigurationsIds.Sections.DiscreteValue.Id)
+        public DiscreteValueSection(Section section): base(section, SlcConfigurationsIds.Sections.DiscreteValue.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.DiscreteValue.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcConfigurationsIds.Sections.DiscreteValue.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -1668,19 +1563,8 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="ConfigurationUnitInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ConfigurationUnitInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ConfigurationUnitInfoSection(Section section): base(SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id)
+        public ConfigurationUnitInfoSection(Section section): base(section, SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -1813,7 +1697,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (section.GetValue<String>(SlcConfigurationsIds.Sections.ConfigurationUnitInfo.UnitName) == null)
                 throw new InvalidOperationException("'UnitName' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -1838,19 +1722,8 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="TextParameterOptionsSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="TextParameterOptionsSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public TextParameterOptionsSection(Section section): base(SlcConfigurationsIds.Sections.TextParameterOptions.Id)
+        public TextParameterOptionsSection(Section section): base(section, SlcConfigurationsIds.Sections.TextParameterOptions.Id)
         {
-            if (section == null)
-            {
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.TextParameterOptions.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcConfigurationsIds.Sections.TextParameterOptions.Id)}'", nameof(section));
-            }
-
-            this.section = section;
         }
 
         /// <summary>
@@ -2001,20 +1874,8 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="NumberParameterOptionsSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="NumberParameterOptionsSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public NumberParameterOptionsSection(Section section): base(SlcConfigurationsIds.Sections.NumberParameterOptions.Id)
+        public NumberParameterOptionsSection(Section section): base(section, SlcConfigurationsIds.Sections.NumberParameterOptions.Id)
         {
-            if (section == null)
-            {
-                Units = new List<Guid>();
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.NumberParameterOptions.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcConfigurationsIds.Sections.NumberParameterOptions.Id)}'", nameof(section));
-            }
-
-            this.section = section;
             var units = section.GetListValue<Guid>(SlcConfigurationsIds.Sections.NumberParameterOptions.Units);
             Units = units != null ? units.Values : new List<Guid>();
         }
@@ -2034,11 +1895,7 @@ namespace DomHelpers.SlcConfigurations
         /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
-        public IList<Guid> Units
-        {
-            get;
-            private set;
-        }
+        public IList<Guid> Units { get; private set; }
 
         /// <summary>
         /// Gets or sets the DefaultUnit field of the DOM Instance.
@@ -2299,7 +2156,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (Units.Count == 0)
                 section.RemoveFieldValueById(SlcConfigurationsIds.Sections.NumberParameterOptions.Units);
@@ -2327,20 +2184,8 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="DiscreteParameterOptionsSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="DiscreteParameterOptionsSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public DiscreteParameterOptionsSection(Section section): base(SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id)
+        public DiscreteParameterOptionsSection(Section section): base(section, SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id)
         {
-            if (section == null)
-            {
-                DiscreteValues = new List<Guid>();
-                return;
-            }
-
-            if (!section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id))
-            {
-                throw new ArgumentException($"The given section, is not of type '{nameof(SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id)}'", nameof(section));
-            }
-
-            this.section = section;
             var discreteValues = section.GetListValue<Guid>(SlcConfigurationsIds.Sections.DiscreteParameterOptions.DiscreteValues);
             DiscreteValues = discreteValues != null ? discreteValues.Values : new List<Guid>();
         }
@@ -2403,14 +2248,10 @@ namespace DomHelpers.SlcConfigurations
         /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
-        public IList<Guid> DiscreteValues
-        {
-            get;
-            private set;
-        }
+        public IList<Guid> DiscreteValues { get; private set; }
 
         /// <inheritdoc />
-        public override Section ToSection()
+        protected override Section InternalToSection()
         {
             if (DiscreteValues.Count == 0)
                 section.RemoveFieldValueById(SlcConfigurationsIds.Sections.DiscreteParameterOptions.DiscreteValues);

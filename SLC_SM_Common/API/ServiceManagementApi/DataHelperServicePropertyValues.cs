@@ -48,7 +48,17 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 				});
 			}
 
+			if (!instance.ServicePropertyValue.Any())
+			{
+				instance.ServicePropertyValue.Add(new ServicePropertyValueSection());
+			}
+
 			return CreateOrUpdateInstance(instance);
+		}
+
+		public override bool TryDelete(Models.ServicePropertyValues item)
+		{
+			return TryDelete(item.ID);
 		}
 	}
 }

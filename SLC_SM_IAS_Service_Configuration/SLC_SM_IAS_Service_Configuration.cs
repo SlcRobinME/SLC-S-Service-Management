@@ -1,6 +1,3 @@
-//---------------------------------
-// SLC_SM_Delete Service Order Item_1.cs
-//---------------------------------
 /*
 ****************************************************************************
 *  Copyright (c) 2025,  Skyline Communications NV  All Rights Reserved.    *
@@ -33,51 +30,69 @@ Skyline Communications.
 
 Any inquiries can be addressed to:
 
-    Skyline Communications NV
-    Ambachtenstraat 33
-    B-8870 Izegem
-    Belgium
-    Tel.    : +32 51 31 35 69
-    Fax.    : +32 51 31 01 29
-    E-mail    : info@skyline.be
-    Web        : www.skyline.be
-    Contact    : Ben Vandenberghe
+	Skyline Communications NV
+	Ambachtenstraat 33
+	B-8870 Izegem
+	Belgium
+	Tel.	: +32 51 31 35 69
+	Fax.	: +32 51 31 01 29
+	E-mail	: info@skyline.be
+	Web		: www.skyline.be
+	Contact	: Ben Vandenberghe
 
 ****************************************************************************
 Revision History:
 
-DATE        VERSION        AUTHOR            COMMENTS
+DATE		VERSION		AUTHOR			COMMENTS
 
-dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
+28/05/2025	1.0.0.1		RME, Skyline	Initial version
 ****************************************************************************
 */
-namespace SLC_SM_Delete_Service_Order_Item_1
+
+namespace SLC_SM_IAS_Service_Configuration
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 
-	using Library;
+	using Library.Views;
+
+	using Newtonsoft.Json;
 
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
 	using SLC_SM_Common.API.ServiceManagementApi;
 
+	using SLC_SM_IAS_Service_Configuration.Presenters;
+	using SLC_SM_IAS_Service_Configuration.Views;
+
 	/// <summary>
-	///     Represents a DataMiner Automation script.
+	/// Represents a DataMiner Automation script.
 	/// </summary>
 	public class Script
 	{
+		private InteractiveController _controller;
 		private IEngine _engine;
 
 		/// <summary>
-		///     The script entry point.
+		/// The script entry point.
 		/// </summary>
 		/// <param name="engine">Link with SLAutomation process.</param>
 		public void Run(IEngine engine)
 		{
+			/*
+			* Note:
+			* Do not remove the commented methods below!
+			* The lines are needed to execute an interactive automation script from the non-interactive automation script or from Visio!
+			*
+			* engine.ShowUI();
+			*/
+
 			try
 			{
 				_engine = engine;
+				_controller = new InteractiveController(engine);
 				RunSafe();
 			}
 			catch (ScriptAbortException)
@@ -99,40 +114,32 @@ namespace SLC_SM_Delete_Service_Order_Item_1
 			}
 			catch (Exception e)
 			{
-				engine.ExitFail(e.Message);
+				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
+				_controller.ShowDialog(errorView);
 			}
-		}
-
-		private static void DeleteServiceItemFromInstance(Repo repo, Models.ServiceOrder domInstance, Guid serviceOrderItemId)
-		{
-			var itemToRemove = domInstance.OrderItems.FirstOrDefault(x => x.ServiceOrderItem.ID == serviceOrderItemId);
-			if (itemToRemove == null)
-			{
-				throw new InvalidOperationException($"No Service order item exists with ID '{serviceOrderItemId}' to remove");
-			}
-
-			repo.ServiceOrderItems.TryDelete(itemToRemove.ServiceOrderItem);
-
-			domInstance.OrderItems.Remove(itemToRemove);
-			repo.ServiceOrders.CreateOrUpdate(domInstance);
 		}
 
 		private void RunSafe()
 		{
-			if (!Guid.TryParse(_engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']'), out Guid domId))
+			// Input
+			string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
+			Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
+			if (domId == Guid.Empty)
 			{
 				throw new InvalidOperationException("No DOM ID provided as input to the script");
 			}
 
-			if (!Guid.TryParse(_engine.GetScriptParam("Service Order Item ID").Value.Trim('"', '[', ']'), out Guid serviceOrderItemId))
-			{
-				throw new InvalidOperationException("No Service Order Item ID provided as input to the script");
-			}
+			var instance = new DataHelperService(Engine.SLNetRaw).Read().Find(x => x.ID == domId)
+				?? throw new InvalidOperationException($"Instance with ID '{domId}' does not exist");
 
-			var repo = new Repo(Engine.SLNetRaw);
-			var orderItemInstance = repo.ServiceOrders.Read().Find(x => x.ID == domId);
+			// Model-View-Presenter
+			var view = new ServiceConfigurationView(_engine);
+			var presenter = new ServiceConfigurationPresenter(_engine, _controller, view, instance);
 
-			DeleteServiceItemFromInstance(repo, orderItemInstance, serviceOrderItemId);
+			presenter.LoadFromModel();
+
+			// Run Interactive
+			_controller.ShowDialog(view);
 		}
 	}
 }

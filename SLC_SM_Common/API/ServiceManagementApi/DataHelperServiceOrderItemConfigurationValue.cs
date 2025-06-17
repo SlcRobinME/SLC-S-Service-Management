@@ -46,10 +46,15 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			}
 
 			var dataHelperConfigurationParameters = new ConfigurationsApi.DataHelperConfigurationParameterValue(_connection);
-			dataHelperConfigurationParameters.CreateOrUpdate(item.ConfigurationParameter);
-			instance.ServiceOrderItemConfigurationValue.ConfigurationParameterValue = item.ConfigurationParameter.ID;
+			instance.ServiceOrderItemConfigurationValue.ConfigurationParameterValue = dataHelperConfigurationParameters.CreateOrUpdate(item.ConfigurationParameter);
 
 			return CreateOrUpdateInstance(instance);
+		}
+
+		public override bool TryDelete(Models.ServiceOrderItemConfigurationValue item)
+		{
+			bool ok = TryDelete(item.ConfigurationParameter.ID);
+			return ok && TryDelete(item.ID);
 		}
 	}
 }

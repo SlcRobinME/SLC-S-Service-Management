@@ -43,13 +43,18 @@ namespace SLC_SM_Common.API.PeopleAndOrganizationApi
 			instance.ContactInfo.Phone = item.Phone ?? String.Empty;
 			instance.ContactInfo.StreetAddress = "";
 			instance.ContactInfo.City = "";
-			instance.ContactInfo.Country = SlcPeople_OrganizationsIds.Enums.Country_1ace7be9.Belgium;
+			instance.ContactInfo.Country = SlcPeople_OrganizationsIds.Enums.Country.Belgium;
 			instance.ContactInfo.ZIP = "";
 			instance.Organization.Organization_57695f03 = item.OrganizationId;
 
 			var id = CreateOrUpdateInstance(instance);
 			_domHelper.DomInstances.DoStatusTransition(instance.ID, SlcPeople_OrganizationsIds.Behaviors.People_Behavior.Transitions.Draft_To_Active);
 			return id;
+		}
+
+		public override bool TryDelete(Models.People item)
+		{
+			return TryDelete(item.ID);
 		}
 	}
 }
