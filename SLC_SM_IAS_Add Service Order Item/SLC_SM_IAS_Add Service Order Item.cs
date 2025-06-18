@@ -53,13 +53,13 @@ namespace SLC_SM_IAS_Add_Service_Order_Item_1
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using DomHelpers.SlcServicemanagement;
+
 	using Library;
 	using Library.Views;
+
 	using Newtonsoft.Json;
+
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
 	using SLC_SM_Common.API.ServiceManagementApi;
@@ -133,7 +133,7 @@ namespace SLC_SM_IAS_Add_Service_Order_Item_1
 		{
 			helper.ServiceOrderItems.CreateOrUpdate(updatedData.ServiceOrderItem);
 
-			var existingItem = instance.OrderItems.FirstOrDefault(x => x.ServiceOrderItem.ID == updatedData.ServiceOrderItem.ID);
+			var existingItem = instance.OrderItems.FirstOrDefault(x => x?.ServiceOrderItem?.ID == updatedData.ServiceOrderItem.ID);
 			if (existingItem != null)
 			{
 				// Already linked - nothing to do
@@ -146,7 +146,7 @@ namespace SLC_SM_IAS_Add_Service_Order_Item_1
 
 		private static string[] GetServiceItemLabels(Models.ServiceOrder serviceOrdersInstance, string oldLbl)
 		{
-			var items = serviceOrdersInstance.OrderItems.Select(x => x.ServiceOrderItem.Name).ToList();
+			var items = serviceOrdersInstance.OrderItems.Where(x => x?.ServiceOrderItem != null).Select(x => x.ServiceOrderItem.Name).ToList();
 
 			items.Remove(oldLbl);
 			return items.ToArray();
@@ -168,16 +168,16 @@ namespace SLC_SM_IAS_Add_Service_Order_Item_1
 			}
 
 			var repo = new Repo(Engine.SLNetRaw);
-			var orderItemInstance = repo.ServiceOrders.Read().Find(x => x.ID == domId)
+			var order = repo.ServiceOrders.Read().Find(x => x.ID == domId)
 				?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system.");
 
 			Guid.TryParse(_engine.GetScriptParam("Service Order Item ID").Value.Trim('"', '[', ']'), out Guid orderItemid);
 
-			var orderItem = orderItemInstance.OrderItems.FirstOrDefault(x => x.ServiceOrderItem?.ID == orderItemid);
+			var orderItem = order.OrderItems.FirstOrDefault(x => x.ServiceOrderItem?.ID == orderItemid);
 
 			// Init views
 			var view = new ServiceOrderItemView(_engine);
-			var presenter = new ServiceOrderItemPresenter(view, repo, GetServiceItemLabels(orderItemInstance, orderItem?.ServiceOrderItem.Name));
+			var presenter = new ServiceOrderItemPresenter(view, repo, GetServiceItemLabels(order, orderItem?.ServiceOrderItem.Name));
 
 			// Events
 			view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");
@@ -185,14 +185,14 @@ namespace SLC_SM_IAS_Add_Service_Order_Item_1
 			{
 				if (presenter.Validate())
 				{
-					AddOrUpdateServiceItemToInstance(repo, orderItemInstance, presenter.GetData);
+					AddOrUpdateServiceItemToInstance(repo, order, presenter.GetData);
 					throw new ScriptAbortException("OK");
 				}
 			};
 
 			if (action == Action.Add)
 			{
-				presenter.LoadFromModel(orderItemInstance.OrderItems.Count(x => x.ServiceOrderItem != null));
+				presenter.LoadFromModel(order.OrderItems.Count(x => x.ServiceOrderItem != null));
 			}
 			else
 			{

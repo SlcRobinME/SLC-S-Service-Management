@@ -3,9 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using DomHelpers.SlcServicemanagement;
+
 	using Library;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
@@ -26,7 +26,14 @@
 			this.view = view;
 			this.repo = repo;
 			this.getServiceOrderItemLabels = getServiceOrderItemLabels;
-			instanceToReturn = new Models.ServiceOrderItems();
+			instanceToReturn = new Models.ServiceOrderItems
+			{
+				ServiceOrderItem = new Models.ServiceOrderItem
+				{
+					ID = Guid.NewGuid(),
+					Configurations = new List<Models.ServiceOrderItemConfigurationValue>(),
+				},
+			};
 
 			view.IndefiniteTime.Changed += (sender, args) => view.End.IsEnabled = !args.IsChecked;
 			view.TboxName.Changed += (sender, args) => ValidateLabel(args.Value);
@@ -52,7 +59,7 @@
 
 				if (!isEdit && view.Specification.Selected != null)
 				{
-					instanceToReturn.ServiceOrderItem.Configurations = view.Specification.Selected.Configurations.Select(x => new Models.ServiceOrderItemConfigurationValue
+					instanceToReturn.ServiceOrderItem.Configurations = view.Specification.Selected.Configurations.Where(x => x?.ConfigurationParameter != null).Select(x => new Models.ServiceOrderItemConfigurationValue
 					{
 						ConfigurationParameter = x.ConfigurationParameter,
 						Mandatory = x.MandatoryAtServiceOrder,

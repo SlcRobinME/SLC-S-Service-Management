@@ -110,25 +110,6 @@ namespace SLC_SM_Delete_Service_1
 			if (service != null)
 			{
 				repo.Services.TryDelete(service);
-				return;
-			}
-
-			var spec = repo.ServiceSpecifications.Read().Find(x => x.ID == itemId);
-			if (spec != null)
-			{
-				repo.ServiceSpecifications.TryDelete(spec);
-			}
-
-			var orderItem = repo.ServiceOrderItems.Read().Find(x => x.ID == itemId);
-			if (orderItem != null)
-			{
-				repo.ServiceOrderItems.TryDelete(orderItem);
-			}
-
-			var order = repo.ServiceOrders.Read().Find(x => x.ID == itemId);
-			if (order != null)
-			{
-				repo.ServiceOrders.TryDelete(order);
 			}
 		}
 

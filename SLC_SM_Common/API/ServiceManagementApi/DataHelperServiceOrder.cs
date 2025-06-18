@@ -33,7 +33,8 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 							{
 								Priority = serviceOrderItemsSection.PriorityOrder,
 								ServiceOrderItem = serviceOrderItems.Find(o => o.ID == serviceOrderItemsSection.ServiceOrderItem),
-							}).ToList();
+							})
+							.Where(soi => soi.ServiceOrderItem != null).ToList();
 
 						return new Models.ServiceOrder
 						{

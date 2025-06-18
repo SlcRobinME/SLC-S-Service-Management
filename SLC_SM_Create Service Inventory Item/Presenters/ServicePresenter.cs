@@ -23,17 +23,26 @@
 			this.repo = repo;
 			this.view = view;
 			this.getServiceLabels = getServiceLabels;
-			instanceToReturn = new Models.Service();
+			instanceToReturn = new Models.Service
+			{
+				ID = Guid.NewGuid(),
+				Name = $"Service Inventory Item #{getServiceLabels.Length:000}",
+				Description = $"Service Inventory Item #{getServiceLabels.Length:000}",
+			};
+			view.TboxName.PlaceHolder = instanceToReturn.Name;
 
 			view.IndefiniteRuntime.Changed += (sender, args) => view.End.IsEnabled = !args.IsChecked;
 			view.TboxName.Changed += (sender, args) => ValidateLabel(args.Value);
 		}
 
+		public string Name => String.IsNullOrWhiteSpace(view.TboxName.Text) ? view.TboxName.PlaceHolder : view.TboxName.Text;
+
 		public Models.Service Instance
 		{
 			get
 			{
-				instanceToReturn.Name = view.TboxName.Text;
+				instanceToReturn.Name = Name;
+				instanceToReturn.Description = instanceToReturn.Description ?? String.Empty;
 				instanceToReturn.StartTime = view.Start.DateTime.ToUniversalTime();
 				instanceToReturn.EndTime = view.IndefiniteRuntime.IsChecked ? default(DateTime?) : view.End.DateTime.ToUniversalTime();
 				instanceToReturn.Icon = instanceToReturn.Icon ?? String.Empty;
@@ -91,6 +100,7 @@
 			if (instance.ServiceSpecificationId.HasValue && view.Specs.Options.Any(x => x.Value?.ID == instance.ServiceSpecificationId))
 			{
 				view.Specs.SelectedOption = view.Specs.Options.First(x => x.Value?.ID == instance.ServiceSpecificationId);
+				view.Specs.IsEnabled = false;
 			}
 		}
 
@@ -122,8 +132,8 @@
 		{
 			if (String.IsNullOrWhiteSpace(newValue))
 			{
-				view.ErrorName.Text = "Please enter a value!";
-				return false;
+				view.ErrorName.Text = "Placeholder will be used";
+				return true;
 			}
 
 			if (getServiceLabels.Contains(newValue, StringComparer.InvariantCultureIgnoreCase))

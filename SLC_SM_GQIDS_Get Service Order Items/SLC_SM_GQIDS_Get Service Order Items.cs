@@ -37,7 +37,6 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = false };
 		private GQIDMS _dms;
-		private DomHelper _domHelper;
 
 		// variable where input argument will be stored
 		private Guid _instanceDomId;
@@ -155,9 +154,6 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 				return Array.Empty<GQIRow>();
 			}
 
-			// will initiate DomHelper
-			LoadApplicationHandlersAndHelpers();
-
 			var repo = new Repo(_dms.GetConnection());
 
 			// create filter to filter event instances with specific dom event ids
@@ -167,12 +163,7 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 				return Array.Empty<GQIRow>();
 			}
 
-			return instance.OrderItems.Select(item => BuildRow(item, repo)).ToArray();
-		}
-
-		private void LoadApplicationHandlersAndHelpers()
-		{
-			_domHelper = new DomHelper(_dms.SendMessages, SlcServicemanagementIds.ModuleId);
+			return instance.OrderItems.Where(x => x?.ServiceOrderItem != null).Select(item => BuildRow(item, repo)).ToArray();
 		}
 
 		public class ServiceOrderItemStatus

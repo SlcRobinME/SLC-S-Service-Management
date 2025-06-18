@@ -10,8 +10,6 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
-	using SLDataGateway.API.Querying;
-
 	public class DataHelperService : DataHelper<Models.Service>
 	{
 		public DataHelperService(IConnection connection) : base(connection, SlcServicemanagementIds.Definitions.Services)
@@ -37,6 +35,9 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 						ID = x.ID.Id,
 						Name = x.ServiceInfo.ServiceName,
 						Description = x.ServiceInfo.Description,
+						StartTime = x.ServiceInfo.ServiceStartTime,
+						EndTime = x.ServiceInfo.ServiceEndTime,
+						Icon = x.ServiceInfo.Icon,
 						Category = serviceCategories.Find(c => c.ID == x.ServiceInfo.ServiceCategory),
 						ServiceSpecificationId = x.ServiceInfo.ServiceSpecifcation,
 						Properties = serviceProperties.Find(p => p.ID == x.ServiceInfo.ServiceProperties) ?? new Models.ServicePropertyValues { Values = new List<Models.ServicePropertyValue>() },
@@ -74,6 +75,8 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			var instance = new ServicesInstance(domInstance);
 			instance.ServiceInfo.ServiceName = item.Name;
 			instance.ServiceInfo.Description = item.Description;
+			instance.ServiceInfo.ServiceStartTime = item.StartTime;
+			instance.ServiceInfo.ServiceEndTime = item.EndTime;
 			instance.ServiceInfo.ServiceProperties = item.Properties?.ID;
 			instance.ServiceInfo.ServiceCategory = item.Category?.ID;
 			instance.ServiceInfo.ServiceSpecifcation = item.ServiceSpecificationId;
@@ -115,24 +118,35 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 
 			var dataHelperConfigurations = new DataHelperServiceConfigurationValue(_connection);
 			instance.ServiceInfo.ServiceConfigurationParameters.Clear();
-			foreach (var config in item.Configurations)
+			if (item.Configurations != null)
 			{
-				instance.ServiceInfo.ServiceConfigurationParameters.Add(config.ID);
-				dataHelperConfigurations.CreateOrUpdate(config);
+				foreach (var config in item.Configurations)
+				{
+					instance.ServiceInfo.ServiceConfigurationParameters.Add(dataHelperConfigurations.CreateOrUpdate(config));
+				}
 			}
 
 			instance.ServiceItems.Clear();
-			foreach (var si in item.ServiceItems)
+			if (item.ServiceItems != null)
 			{
-				instance.ServiceItems.Add(new ServiceItemsSection
+				foreach (var si in item.ServiceItems)
 				{
-					ServiceItemID = si.ID,
-					Label = si.Label,
-					ServiceItemScript = si.Script,
-					ServiceItemType = si.Type,
-					DefinitionReference = si.DefinitionReference,
-					ImplementationReference = si.ImplementationReference,
-				});
+					instance.ServiceItems.Add(
+						new ServiceItemsSection
+						{
+							ServiceItemID = si.ID,
+							Label = si.Label,
+							ServiceItemScript = si.Script,
+							ServiceItemType = si.Type,
+							DefinitionReference = si.DefinitionReference,
+							ImplementationReference = si.ImplementationReference,
+						});
+				}
+			}
+
+			if (!instance.ServiceItems.Any())
+			{
+				instance.ServiceItems.Add(new ServiceItemsSection());
 			}
 
 			return CreateOrUpdateInstance(instance);

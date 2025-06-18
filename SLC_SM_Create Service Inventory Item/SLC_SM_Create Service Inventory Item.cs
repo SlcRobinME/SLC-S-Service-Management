@@ -1,4 +1,3 @@
-
 //---------------------------------
 // SLC_SM_Create Service Inventory Item_1.cs
 //---------------------------------
@@ -55,6 +54,7 @@ dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 namespace SLC_SM_Create_Service_Inventory_Item
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 
 	using DomHelpers.SlcServicemanagement;
@@ -83,9 +83,9 @@ namespace SLC_SM_Create_Service_Inventory_Item
 		private enum Action
 		{
 			Add,
+			AddItem,
 			Edit,
 		}
-
 
 		/// <summary>
 		///     The script entry point.
@@ -150,7 +150,8 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				throw new InvalidOperationException("No Action provided as input to the script");
 			}
 
-			Guid.TryParse(_engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']'), out Guid domId);
+			string domIdRaw = _engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']');
+			Guid.TryParse(domIdRaw, out Guid domId);
 
 			var repo = new Repo(Engine.SLNetRaw);
 
@@ -158,33 +159,50 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			var view = new ServiceView(_engine);
 			var presenter = new ServicePresenter(repo, view, repo.Services.Read().Select(x => x.Name).ToArray());
 
-			if (action == Action.Add)
+			if (action == Action.AddItem)
 			{
 				var d = new MessageDialog(_engine, "Create Service Inventory Item from the selected service order item?") { Title = "Create Service Inventory Item From Order Item" };
 				d.OkButton.Pressed += (sender, args) =>
 				{
 					var serviceOrderItem = repo.ServiceOrderItems.Read().Find(x => x.ID == domId);
+					if (domId != Guid.Empty && serviceOrderItem != null)
+					{
+						throw new InvalidOperationException($"No Service Order Item with ID '{domId}' found on the system!");
+					}
+
 					CreateNewServiceAndLinkItToServiceOrder(repo, serviceOrderItem);
 					throw new ScriptAbortException("OK");
 				};
 				_controller.ShowDialog(d);
 			}
+			else if (action == Action.Add)
+			{
+				presenter.LoadFromModel();
+				view.BtnAdd.Pressed += (sender, args) =>
+				{
+					if (presenter.Validate())
+					{
+						AddOrUpdateService(repo, presenter.Instance);
+						throw new ScriptAbortException("OK");
+					}
+				};
+			}
 			else
 			{
 				view.BtnAdd.Text = "Edit Service";
 				presenter.LoadFromModel(GetService(repo, domId));
+				view.BtnAdd.Pressed += (sender, args) =>
+				{
+					if (presenter.Validate())
+					{
+						repo.Services.CreateOrUpdate(presenter.Instance); // Only update service info
+						throw new ScriptAbortException("OK");
+					}
+				};
 			}
 
 			// Events
 			view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");
-			view.BtnAdd.Pressed += (sender, args) =>
-			{
-				if (presenter.Validate())
-				{
-					AddOrUpdateService(repo, presenter.Instance);
-					throw new ScriptAbortException("OK");
-				}
-			};
 
 			// Run interactive
 			_controller.ShowDialog(view);
@@ -213,7 +231,14 @@ namespace SLC_SM_Create_Service_Inventory_Item
 					Mandatory = x.Mandatory,
 				}).ToList(),
 				Category = repo.ServiceCategories.Read().Find(x => x.ID == serviceOrder.ServiceCategoryId),
+				ServiceItems = new List<Models.ServiceItem>(),
 			};
+
+			var spec = repo.ServiceSpecifications.Read().Find(x => x.ID == serviceOrder.SpecificationId);
+			if (spec != null)
+			{
+				newService.ServiceItems = spec.ServiceItems;
+			}
 
 			var dataHelperService = new DataHelperService(Engine.SLNetRaw);
 			Guid newServiceId = dataHelperService.CreateOrUpdate(newService);
@@ -272,12 +297,11 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				return;
 			}
 
-			var serviceSpecificationInstance = repo.ServiceSpecifications.Read().Find(x => x.ID == instance.ServiceSpecificationId);
-			var serviceOrder = repo.ServiceOrderItems.Read().Find(x => x.ServiceId == instance.ID);
+			var serviceSpecificationInstance = repo.ServiceSpecifications.Read().First(x => x.ID == instance.ServiceSpecificationId);
 
 			instance.Icon = serviceSpecificationInstance.Icon;
 			instance.Description = serviceSpecificationInstance.Description;
-			instance.Properties = serviceOrder.Properties;
+			instance.Properties = serviceSpecificationInstance.Properties;
 			instance.Properties.ID = Guid.NewGuid();
 			instance.Configurations = serviceSpecificationInstance.Configurations.Select(x => new Models.ServiceConfigurationValue
 			{

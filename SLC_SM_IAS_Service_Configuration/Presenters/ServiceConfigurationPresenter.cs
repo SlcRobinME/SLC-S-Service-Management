@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Runtime.InteropServices.WindowsRuntime;
 	using System.Text.RegularExpressions;
 
 	using DomHelpers.SlcConfigurations;
@@ -96,7 +97,7 @@
 			var config = new Models.ServiceConfigurationValue
 			{
 				ID = Guid.NewGuid(),
-				Mandatory = true,
+				Mandatory = false,
 				ConfigurationParameter = new SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameterValue
 				{
 					Label = String.Empty,
@@ -151,7 +152,6 @@
 			var lblStop = new Label("Step Size");
 			var lblDecimals = new Label("Decimals");
 			var lblValues = new Label("Values");
-			var lblDefault = new Label("Fixed");
 			var lblMandatoryAtService = new Label("Mandatory");
 
 			view.AddWidget(lblLabel, row, 0);
@@ -164,8 +164,7 @@
 			view.AddWidget(lblStop, row, 7);
 			view.AddWidget(lblDecimals, row, 8);
 			view.AddWidget(lblValues, row, 9);
-			view.AddWidget(lblDefault, row, 10);
-			view.AddWidget(lblMandatoryAtService, row, 11);
+			view.AddWidget(lblMandatoryAtService, row, 10);
 		}
 
 		private void BuildUI()
@@ -213,9 +212,8 @@
 				IsEnabled = false,
 				MaxWidth = 200,
 			};
-			var isFixed = new CheckBox { IsChecked = record.ConfigurationParamValue.ValueFixed, IsEnabled = false };
 			var link = new CheckBox { IsChecked = record.ConfigurationParamValue.LinkedConfigurationReference != null };
-			var unit = new Label("-");
+			var unit = new DropDown<SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationUnit>(new[] { new Option<SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationUnit>("-", null) }) { IsEnabled = false, MaxWidth = 80 };
 			var start = new Numeric { IsEnabled = false, MaxWidth = 100 };
 			var end = new Numeric { IsEnabled = false, MaxWidth = 100 };
 			var step = new Numeric { IsEnabled = false, Minimum = 0, Maximum = 1, MaxWidth = 100 };
@@ -225,7 +223,6 @@
 			var delete = new Button("🚫") { IsEnabled = !record.ServiceConfig.Mandatory };
 
 			label.Changed += (sender, args) => record.ConfigurationParamValue.Label = args.Value;
-			isFixed.Changed += (sender, args) => record.ConfigurationParamValue.ValueFixed = args.IsChecked;
 			delete.Pressed += (sender, args) =>
 			{
 				record.State = State.Delete;
@@ -260,9 +257,10 @@
 								StepSize = stepSize,
 								Decimals = decimalVal,
 								MaxWidth = 150,
-								IsEnabled = !isFixed.IsChecked,
 							};
-							unit.Text = GetDefaultUnit(record.ConfigurationParamValue.NumberOptions, parameter.Selected);
+							unit.SetOptions(GetUnits(record.ConfigurationParamValue.NumberOptions, parameter.Selected));
+							unit.Selected = GetDefaultUnit(record.ConfigurationParamValue.NumberOptions, parameter.Selected);
+							unit.IsEnabled = true;
 							start.Value = minimum;
 							start.IsEnabled = true;
 							end.Value = maximum;
@@ -300,6 +298,7 @@
 								value.StepSize = args.Value;
 								record.ConfigurationParamValue.NumberOptions.StepSize = args.Value;
 							};
+							unit.Changed += (sender, args) => record.ConfigurationParamValue.NumberOptions.DefaultUnit = args.Selected;
 							value.Changed += (sender, args) => { record.ConfigurationParamValue.DoubleValue = args.Value; };
 							view.AddWidget(value, row, 3);
 						}
@@ -313,7 +312,7 @@
 								.OrderBy(x => x.DisplayValue)
 								.ToList();
 
-							var value = new DropDown<SLC_SM_Common.API.ConfigurationsApi.Models.DiscreteValue>(discretes) { MaxWidth = 150, IsEnabled = !isFixed.IsChecked };
+							var value = new DropDown<SLC_SM_Common.API.ConfigurationsApi.Models.DiscreteValue>(discretes) { MaxWidth = 150 };
 							if (record.ConfigurationParamValue.StringValue != null
 								&& value.Options.Any(x => x.DisplayValue == record.ConfigurationParamValue.StringValue))
 							{
@@ -346,7 +345,6 @@
 							{
 								Tooltip = record.ConfigurationParamValue.TextOptions?.UserMessage ?? String.Empty,
 								MaxWidth = 150,
-								IsEnabled = !isFixed.IsChecked,
 							};
 							value.Changed += (sender, args) =>
 							{
@@ -379,24 +377,41 @@
 			view.AddWidget(step, row, 7);
 			view.AddWidget(decimals, row, 8);
 			view.AddWidget(values, row, 9);
-			view.AddWidget(isFixed, row, 10);
-			view.AddWidget(mandatoryAtService, row, 11);
-			view.AddWidget(delete, row, 12);
+			view.AddWidget(mandatoryAtService, row, 10);
+			view.AddWidget(delete, row, 11);
 		}
 
-		private string GetDefaultUnit(SLC_SM_Common.API.ConfigurationsApi.Models.NumberParameterOptions numberValueOptions, SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameter parameter)
+		private List<Option<SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationUnit>> GetUnits(SLC_SM_Common.API.ConfigurationsApi.Models.NumberParameterOptions numberValueOptions, SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameter parameter)
 		{
+			var units = new List<Option<SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationUnit>>();
 			if (numberValueOptions?.DefaultUnit != null)
 			{
-				return numberValueOptions.DefaultUnit.Name;
+				units.AddRange(numberValueOptions.Units.Select(x => new Option<SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationUnit>(x.Name, x)));
 			}
-
-			if (parameter.NumberOptions?.DefaultUnit != null)
+			else if (parameter.NumberOptions?.DefaultUnit != null)
 			{
-				return parameter.NumberOptions.DefaultUnit.Name;
+				units.AddRange(parameter.NumberOptions.Units.Select(x => new Option<SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationUnit>(x.Name, x)));
 			}
 
-			return "-";
+			units = units.OrderBy(x => x.DisplayValue).ToList();
+
+			units.Insert(0, new Option<SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationUnit>("-", null));
+			return units;
+		}
+
+		private SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationUnit GetDefaultUnit(SLC_SM_Common.API.ConfigurationsApi.Models.NumberParameterOptions numberValueOptions, SLC_SM_Common.API.ConfigurationsApi.Models.ConfigurationParameter parameter)
+		{
+			if (numberValueOptions != null)
+			{
+				return numberValueOptions.DefaultUnit;
+			}
+
+			if (parameter.NumberOptions != null)
+			{
+				return parameter.NumberOptions.DefaultUnit;
+			}
+
+			return null;
 		}
 
 		private sealed class DataRecord
