@@ -95,6 +95,7 @@ namespace SLCSMASAddServiceItem
 			}
 			catch (Exception e)
 			{
+				engine.AddError(e.Message);
 				engine.ExitFail("Run|Something went wrong: " + e);
 			}
 		}
@@ -110,8 +111,6 @@ namespace SLCSMASAddServiceItem
 			SaveUpdatedServiceItem(domInstance, serviceItemSection);
 
 			engine.AddOrUpdateScriptOutput("ServiceItemId", serviceItemSection.ServiceItemID.ToString());
-
-			//MakeConnectionIfNeeded(engine, serviceItemSection);
 		}
 
 		private DomInstance LoadDomInstance(Guid domId)
@@ -143,31 +142,6 @@ namespace SLCSMASAddServiceItem
 				throw new InvalidOperationException($"DOM definition '{domInstance.DomDefinitionId}' not supported.");
 			}
 		}
-
-		//private void MakeConnectionIfNeeded(IEngine engine, ServiceItemsSection newSection)
-		//{
-		//	if (string.IsNullOrEmpty(_selectedServiceItemId))
-		//		return;
-
-		//	try
-		//	{
-		//		var script = engine.PrepareSubScript("SLC_SM_IAS_ManageRelationships");
-		//		script.SelectScriptParam("DomId", _domId.ToString());
-		//		script.SelectScriptParam("ServiceItemIds", $"[\"{_selectedServiceItemId}\",\"{newSection.ServiceItemID.Value}\"]");
-		//		script.Synchronous = true;
-		//		//engine.ShowUI(uib);
-		//		engine.FindInteractiveClient(string.Empty, 15000, string.Empty, Skyline.DataMiner.Net.Messages.AutomationScriptAttachOptions.AttachImmediately);
-		//		script.StartScript();
-		//	}
-		//	catch (Exception e)
-		//	{
-		//		engine.GenerateInformation(e.Message);
-		//		engine.GenerateInformation(e.InnerException.Message);
-		//		engine.GenerateInformation(e.InnerException.StackTrace);
-
-		//		throw new Exception($"{e.Message} - Inner: {e.InnerException.Message}:{e.InnerException.StackTrace}");
-		//	}
-		//}
 
 		private ServiceItemsSection CreateServiceItemSection()
 		{

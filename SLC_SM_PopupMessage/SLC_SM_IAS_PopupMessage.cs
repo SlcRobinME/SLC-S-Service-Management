@@ -100,7 +100,7 @@ namespace SLCSMPopupMessage
 			var message = engine.GetScriptParam("Message").Value;
 			var buttonLabel = engine.GetScriptParam("ButtonLabel").Value;
 
-			InteractiveController controller = new InteractiveController(engine);
+			InteractiveController controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 			PopupDialog dialog = new PopupDialog(engine, title, message, buttonLabel);
 			dialog.ButtonOk.Pressed += (sender, args) => engine.ExitSuccess(string.Empty);
 

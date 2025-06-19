@@ -82,7 +82,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLC_SM_AS_AddServiceItem", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLC_SM_AS_AddRelationship", "SLC_SM_AS_AddRelationship\SLC_SM_AS_AddRelationship.csproj", "{18639B90-C551-4DB9-ABC3-802B9D1A0C7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLC_SM_IAS_ManageRelationships", "SLC_SM_IAS_ManageRelationships\SLC_SM_IAS_ManageRelationships.csproj", "{1FDD8CF5-F402-446A-8B52-1173CB5CA576}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLC_SM_IAS_ManageRelationships", "SLC_SM_IAS_ManageRelationships\SLC_SM_IAS_ManageRelationships.csproj", "{1FDD8CF5-F402-446A-8B52-1173CB5CA576}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLC_SM_AS_DynamicDelete", "SLC_SM_AS_DynamicDelete\SLC_SM_AS_DynamicDelete.csproj", "{58D0D3A9-A882-4958-BCF8-F24609C1300B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SLC_SM_DS_TopologySelectedItems", "SLC_SM_DS_TopologySelectedItems\SLC_SM_DS_TopologySelectedItems.csproj", "{B2BCE86E-5049-458C-A5F3-BD3FC68ACA0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLC_SM_DS_GetWorkflows", "SLC_SM_DS_GetWorkflows\SLC_SM_DS_GetWorkflows.csproj", "{8BB5665F-6165-427C-9218-A86A75CB9427}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -210,6 +216,18 @@ Global
 		{1FDD8CF5-F402-446A-8B52-1173CB5CA576}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FDD8CF5-F402-446A-8B52-1173CB5CA576}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FDD8CF5-F402-446A-8B52-1173CB5CA576}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58D0D3A9-A882-4958-BCF8-F24609C1300B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58D0D3A9-A882-4958-BCF8-F24609C1300B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58D0D3A9-A882-4958-BCF8-F24609C1300B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58D0D3A9-A882-4958-BCF8-F24609C1300B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2BCE86E-5049-458C-A5F3-BD3FC68ACA0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2BCE86E-5049-458C-A5F3-BD3FC68ACA0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2BCE86E-5049-458C-A5F3-BD3FC68ACA0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2BCE86E-5049-458C-A5F3-BD3FC68ACA0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BB5665F-6165-427C-9218-A86A75CB9427}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB5665F-6165-427C-9218-A86A75CB9427}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB5665F-6165-427C-9218-A86A75CB9427}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB5665F-6165-427C-9218-A86A75CB9427}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -246,6 +264,9 @@ Global
 		{6F3390AB-D042-499A-A77C-8AFFB6487C03} = {5B35FE04-DC17-46DA-A887-CFCFF55E5058}
 		{18639B90-C551-4DB9-ABC3-802B9D1A0C7C} = {5B35FE04-DC17-46DA-A887-CFCFF55E5058}
 		{1FDD8CF5-F402-446A-8B52-1173CB5CA576} = {7B54F701-23CF-40FB-B16E-65F702079BF6}
+		{58D0D3A9-A882-4958-BCF8-F24609C1300B} = {5B35FE04-DC17-46DA-A887-CFCFF55E5058}
+		{B2BCE86E-5049-458C-A5F3-BD3FC68ACA0C} = {D44EC38B-25B7-4DDE-AB69-528AE471A88F}
+		{8BB5665F-6165-427C-9218-A86A75CB9427} = {D44EC38B-25B7-4DDE-AB69-528AE471A88F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {38C318B5-7814-41CC-9BA6-DC5069897881}
@@ -255,6 +276,8 @@ Global
 		SLC_SM_Common_Shared\SLC_SM_Common_Shared.projitems*{57dd8900-2c28-49c6-b4f7-7b0b50fd68dc}*SharedItemsImports = 5
 		SLC_SM_Common_Shared\SLC_SM_Common_Shared.projitems*{586fea8a-3436-49eb-81aa-6d990891544d}*SharedItemsImports = 5
 		SLC_SM_Common_Shared\SLC_SM_Common_Shared.projitems*{89096365-07a1-4777-828c-0bdd07d11ff2}*SharedItemsImports = 5
+		SLC_SM_Common_Shared\SLC_SM_Common_Shared.projitems*{8bb5665f-6165-427c-9218-a86a75cb9427}*SharedItemsImports = 5
+		SLC_SM_Common_Shared\SLC_SM_Common_Shared.projitems*{b2bce86e-5049-458c-a5f3-bd3fc68aca0c}*SharedItemsImports = 5
 		SLC_SM_Common_Shared\SLC_SM_Common_Shared.projitems*{b6bcbe1b-3a15-4970-a70d-4eafabfe4299}*SharedItemsImports = 5
 		SLC_SM_Common_Shared\SLC_SM_Common_Shared.projitems*{f42cfeb7-442e-494a-88f1-73d1e9cbfd2c}*SharedItemsImports = 5
 		SLC_SM_Common_Shared\SLC_SM_Common_Shared.projitems*{f53f12c2-d3ab-4bf5-b1c8-d3dd7fee2a39}*SharedItemsImports = 5

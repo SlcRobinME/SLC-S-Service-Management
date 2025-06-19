@@ -48,15 +48,15 @@
 		{
 			var relationships = GetRelationships(DomInstance);
 
-			var outputsInUse = new HashSet<string>(
-				relationships
-					.Where(r => r.ParentServiceItem == source.ServiceItemID.ToString())
-					.Select(r => r.ParentServiceItemInterfaceID));
+			//var outputsInUse = new HashSet<string>(
+			//	relationships
+			//		.Where(r => r.ParentServiceItem == source.ServiceItemID.ToString())
+			//		.Select(r => r.ParentServiceItemInterfaceID));
 
 			var availableOutputs = workflow.Nodes
 				.Where(n =>
-					n.NodeType == SlcWorkflowIds.Enums.Nodetype.Destination &&
-					!outputsInUse.Contains(n.NodeID));
+					n.NodeType == SlcWorkflowIds.Enums.Nodetype.Destination
+					/*&& !outputsInUse.Contains(n.NodeID)*/);
 
 			return availableOutputs;
 		}
@@ -164,6 +164,9 @@
 			addServiceItemScript.Synchronous = true;
 			addServiceItemScript.InheritScriptOutput = true;
 			addServiceItemScript.StartScript();
+
+			if (addServiceItemScript.HadError)
+				throw new Exception($"Error creating the service item:{addServiceItemScript.GetErrorMessages()}");
 
 			return _engine.GetScriptOutput("ServiceItemId");
 		}

@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Text;
 	using DomHelpers;
 	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Automation;
@@ -17,8 +18,8 @@
 		private InteractiveController _controller;
 		private ManageConnectionsModel _model;
 		private ManageConnectionDialog _dialog;
-		private List<ServiceItemLinkMap> _linkMap;
 		private ScriptData _data;
+		private List<ServiceItemLinkMap> _linkMap;
 
 		private int _nextPairIndex = 0;
 
@@ -26,7 +27,7 @@
 		{
 			_engine = engine;
 			_data = data;
-			_controller = new InteractiveController(engine);
+			_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 			_model = new ManageConnectionsModel(engine);
 			_linkMap = new List<ServiceItemLinkMap>();
 		}

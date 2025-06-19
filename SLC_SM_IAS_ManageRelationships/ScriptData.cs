@@ -69,7 +69,7 @@ namespace SLCSMIASManageRelationships
 
 		public Guid DomId { get; set; }
 
-		public List<string> ServiceIds { get; set; }
+		public HashSet<string> ServiceIds { get; set; }
 
 		public string WorkflowName { get; set; }
 
@@ -89,7 +89,7 @@ namespace SLCSMIASManageRelationships
 				throw new InvalidOperationException("No DOM ID provided as input to the script");
 
 			string serviceItemIdsRaw = _engine.GetScriptParam("ServiceItemIds").Value;
-			ServiceIds = JsonConvert.DeserializeObject<List<string>>(serviceItemIdsRaw);
+			ServiceIds = JsonConvert.DeserializeObject<HashSet<string>>(serviceItemIdsRaw);
 
 			string workflowName = _engine.GetScriptParam("WorkflowName").Value;
 			WorkflowName = JsonConvert.DeserializeObject<List<string>>(workflowName).FirstOrDefault();
