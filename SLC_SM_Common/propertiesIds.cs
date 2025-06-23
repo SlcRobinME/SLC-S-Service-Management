@@ -7,6 +7,7 @@
 namespace DomHelpers.SlcProperties
 {
 	using System;
+	using System.ComponentModel;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Sections;
 
@@ -57,124 +58,44 @@ namespace DomHelpers.SlcProperties
 		{
 			public static class Discrete
 			{
-				public static SectionDefinitionID Id
-				{
-					get;
-				}
-
-				= new SectionDefinitionID(new Guid("8354c390-f0d9-478d-a8bf-c4677d646a2d"))
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("8354c390-f0d9-478d-a8bf-c4677d646a2d"))
 				{ ModuleId = "(slc)properties" };
-				public static FieldDescriptorID Option
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("14e1d9ba-a103-4353-a96b-3bd73ccd99db"));
+				public static FieldDescriptorID Option { get; } = new FieldDescriptorID(new Guid("14e1d9ba-a103-4353-a96b-3bd73ccd99db"));
 			}
 
 			public static class PropertyInfo
 			{
-				public static SectionDefinitionID Id
-				{
-					get;
-				}
-
-				= new SectionDefinitionID(new Guid("2997b2a1-d651-4f93-b0db-4de54fb36d35"))
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("2997b2a1-d651-4f93-b0db-4de54fb36d35"))
 				{ ModuleId = "(slc)properties" };
-				public static FieldDescriptorID Name
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("6d4eb3ce-2716-440a-90bf-33751cd8cf8a"));
-				public static FieldDescriptorID PropertyType
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("c0495603-6716-4153-96dc-4c1da932c2d9"));
-				public static FieldDescriptorID Scope
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("97024652-924c-4b16-84ad-2d68632a34f6"));
+				public static FieldDescriptorID Name { get; } = new FieldDescriptorID(new Guid("6d4eb3ce-2716-440a-90bf-33751cd8cf8a"));
+				public static FieldDescriptorID PropertyType { get; } = new FieldDescriptorID(new Guid("c0495603-6716-4153-96dc-4c1da932c2d9"));
+				public static FieldDescriptorID Scope { get; } = new FieldDescriptorID(new Guid("97024652-924c-4b16-84ad-2d68632a34f6"));
 			}
 
 			public static class PropertyValue
 			{
-				public static SectionDefinitionID Id
-				{
-					get;
-				}
-
-				= new SectionDefinitionID(new Guid("abcd2029-3e87-4182-bf8e-23b824ea6fba"))
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("abcd2029-3e87-4182-bf8e-23b824ea6fba"))
 				{ ModuleId = "(slc)properties" };
-				public static FieldDescriptorID PropertyName
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("3dbf1f1f-3e88-4322-ae83-8df1150931cb"));
-				public static FieldDescriptorID Value
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("db3990e6-b899-4409-9a58-a5ee52b22f2f"));
-				public static FieldDescriptorID PropertyID
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("9289f5b2-16e6-45d4-a472-790da3ae71bf"));
+				public static FieldDescriptorID PropertyName { get; } = new FieldDescriptorID(new Guid("3dbf1f1f-3e88-4322-ae83-8df1150931cb"));
+				public static FieldDescriptorID Value { get; } = new FieldDescriptorID(new Guid("db3990e6-b899-4409-9a58-a5ee52b22f2f"));
+				public static FieldDescriptorID PropertyID { get; } = new FieldDescriptorID(new Guid("9289f5b2-16e6-45d4-a472-790da3ae71bf"));
 			}
 
 			public static class PropertyValueInfo
 			{
-				public static SectionDefinitionID Id
-				{
-					get;
-				}
-
-				= new SectionDefinitionID(new Guid("4654bab7-bffb-4b9a-abb1-9b7048baa187"))
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("4654bab7-bffb-4b9a-abb1-9b7048baa187"))
 				{ ModuleId = "(slc)properties" };
-				public static FieldDescriptorID LinkedObjectID
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("2be39464-6815-4a8c-bf84-0b766fc23335"));
-				public static FieldDescriptorID Scope
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("3be83ad3-399a-44a0-8e46-7d99dfc2489a"));
-				public static FieldDescriptorID SubID
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("4fb594bd-59ce-43bd-b83e-8c6acc677508"));
+				public static FieldDescriptorID LinkedObjectID { get; } = new FieldDescriptorID(new Guid("2be39464-6815-4a8c-bf84-0b766fc23335"));
+				public static FieldDescriptorID Scope { get; } = new FieldDescriptorID(new Guid("3be83ad3-399a-44a0-8e46-7d99dfc2489a"));
+				public static FieldDescriptorID SubID { get; } = new FieldDescriptorID(new Guid("4fb594bd-59ce-43bd-b83e-8c6acc677508"));
 			}
 		}
 
 		public static class Definitions
 		{
-			public static DomDefinitionId Property
-			{
-				get;
-			}
-
-			= new DomDefinitionId(new Guid("e6d22478-3415-4795-9b00-6f2a85a610e3"))
+			public static DomDefinitionId Property { get; } = new DomDefinitionId(new Guid("e6d22478-3415-4795-9b00-6f2a85a610e3"))
 			{ ModuleId = "(slc)properties" };
-			public static DomDefinitionId PropertyValues
-			{
-				get;
-			}
-
-			= new DomDefinitionId(new Guid("f2c92f3c-1a57-4f2d-a403-dd8968d15202"))
+			public static DomDefinitionId PropertyValues { get; } = new DomDefinitionId(new Guid("f2c92f3c-1a57-4f2d-a403-dd8968d15202"))
 			{ ModuleId = "(slc)properties" };
 		}
 
@@ -209,6 +130,16 @@ namespace DomHelpers.SlcProperties
 		public PropertyInstance() : base(SlcPropertiesIds.Definitions.Property)
 		{
 			InitializeProperties();
+			AfterLoad();
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PropertyInstance"/> class. Creates an empty <see cref="PropertyInstance"/> instance with default settings and a specific ID.
+		/// </summary>
+		public PropertyInstance(Guid id) : base(SlcPropertiesIds.Definitions.Property, id)
+		{
+			InitializeProperties();
+			AfterLoad();
 		}
 
 		/// <summary>
@@ -220,25 +151,18 @@ namespace DomHelpers.SlcProperties
 			if (!domInstance.DomDefinitionId.Equals(SlcPropertiesIds.Definitions.Property))
 				throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPropertiesIds.Definitions.Property)}'", nameof(domInstance));
 			InitializeProperties();
+			AfterLoad();
 		}
 
 		/// <summary>
 		/// Gets or sets the Discrete section of the DOM Instance.
 		/// </summary>
-		public IList<DiscreteSection> Discrete
-		{
-			get;
-			private set;
-		}
+		public IList<DiscreteSection> Discrete { get; private set; }
 
 		/// <summary>
 		/// Gets or sets the PropertyInfo section of the DOM Instance.
 		/// </summary>
-		public PropertyInfoSection PropertyInfo
-		{
-			get;
-			set;
-		}
+		public PropertyInfoSection PropertyInfo { get; set; }
 
 		public static explicit operator PropertyInstance(DomInstance instance)
 		{
@@ -246,7 +170,7 @@ namespace DomHelpers.SlcProperties
 		}
 
 		/// <inheritdoc />
-		public override DomInstance ToInstance()
+		protected override DomInstance InternalToInstance()
 		{
 			domInstance.Sections.Clear();
 			foreach (var item in Discrete)
@@ -276,7 +200,15 @@ namespace DomHelpers.SlcProperties
 		protected override void InitializeProperties()
 		{
 			Discrete = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcPropertiesIds.Sections.Discrete.Id)).Select(section => new DiscreteSection(section)).ToList();
-			PropertyInfo = new PropertyInfoSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPropertiesIds.Sections.PropertyInfo.Id)));
+			var _propertyInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPropertiesIds.Sections.PropertyInfo.Id));
+			if (_propertyInfo is null)
+			{
+				PropertyInfo = new PropertyInfoSection();
+			}
+			else
+			{
+				PropertyInfo = new PropertyInfoSection(_propertyInfo);
+			}
 		}
 	}
 
@@ -292,6 +224,16 @@ namespace DomHelpers.SlcProperties
 		public PropertyValuesInstance() : base(SlcPropertiesIds.Definitions.PropertyValues)
 		{
 			InitializeProperties();
+			AfterLoad();
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PropertyValuesInstance"/> class. Creates an empty <see cref="PropertyValuesInstance"/> instance with default settings and a specific ID.
+		/// </summary>
+		public PropertyValuesInstance(Guid id) : base(SlcPropertiesIds.Definitions.PropertyValues, id)
+		{
+			InitializeProperties();
+			AfterLoad();
 		}
 
 		/// <summary>
@@ -303,25 +245,18 @@ namespace DomHelpers.SlcProperties
 			if (!domInstance.DomDefinitionId.Equals(SlcPropertiesIds.Definitions.PropertyValues))
 				throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPropertiesIds.Definitions.PropertyValues)}'", nameof(domInstance));
 			InitializeProperties();
+			AfterLoad();
 		}
 
 		/// <summary>
 		/// Gets or sets the PropertyValue section of the DOM Instance.
 		/// </summary>
-		public IList<PropertyValueSection> PropertyValue
-		{
-			get;
-			private set;
-		}
+		public IList<PropertyValueSection> PropertyValue { get; private set; }
 
 		/// <summary>
 		/// Gets or sets the PropertyValueInfo section of the DOM Instance.
 		/// </summary>
-		public PropertyValueInfoSection PropertyValueInfo
-		{
-			get;
-			set;
-		}
+		public PropertyValueInfoSection PropertyValueInfo { get; set; }
 
 		public static explicit operator PropertyValuesInstance(DomInstance instance)
 		{
@@ -329,7 +264,7 @@ namespace DomHelpers.SlcProperties
 		}
 
 		/// <inheritdoc />
-		public override DomInstance ToInstance()
+		protected override DomInstance InternalToInstance()
 		{
 			domInstance.Sections.Clear();
 			foreach (var item in PropertyValue)
@@ -359,7 +294,15 @@ namespace DomHelpers.SlcProperties
 		protected override void InitializeProperties()
 		{
 			PropertyValue = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcPropertiesIds.Sections.PropertyValue.Id)).Select(section => new PropertyValueSection(section)).ToList();
-			PropertyValueInfo = new PropertyValueInfoSection(domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPropertiesIds.Sections.PropertyValueInfo.Id)));
+			var _propertyValueInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPropertiesIds.Sections.PropertyValueInfo.Id));
+			if (_propertyValueInfo is null)
+			{
+				PropertyValueInfo = new PropertyValueInfoSection();
+			}
+			else
+			{
+				PropertyValueInfo = new PropertyValueInfoSection(_propertyValueInfo);
+			}
 		}
 	}
 }
@@ -397,19 +340,8 @@ namespace DomHelpers.SlcProperties
 		/// Initializes a new instance of the <see cref="DiscreteSection"/> class using the specified <paramref name="section"/> for initializing the object.
 		/// </summary>
 		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="DiscreteSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public DiscreteSection(Section section) : base(SlcPropertiesIds.Sections.Discrete.Id)
+		public DiscreteSection(Section section) : base(section, SlcPropertiesIds.Sections.Discrete.Id)
 		{
-			if (section == null)
-			{
-				return;
-			}
-
-			if (!section.SectionDefinitionID.Equals(SlcPropertiesIds.Sections.Discrete.Id))
-			{
-				throw new ArgumentException($"The given section, is not of type '{nameof(SlcPropertiesIds.Sections.Discrete.Id)}'", nameof(section));
-			}
-
-			this.section = section;
 		}
 
 		/// <summary>
@@ -456,7 +388,7 @@ namespace DomHelpers.SlcProperties
 		}
 
 		/// <inheritdoc />
-		public override Section ToSection()
+		protected override Section InternalToSection()
 		{
 			if (section.GetValue<String>(SlcPropertiesIds.Sections.Discrete.Option) == null)
 				throw new InvalidOperationException("'Option' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -481,19 +413,8 @@ namespace DomHelpers.SlcProperties
 		/// Initializes a new instance of the <see cref="PropertyInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
 		/// </summary>
 		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="PropertyInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public PropertyInfoSection(Section section) : base(SlcPropertiesIds.Sections.PropertyInfo.Id)
+		public PropertyInfoSection(Section section) : base(section, SlcPropertiesIds.Sections.PropertyInfo.Id)
 		{
-			if (section == null)
-			{
-				return;
-			}
-
-			if (!section.SectionDefinitionID.Equals(SlcPropertiesIds.Sections.PropertyInfo.Id))
-			{
-				throw new ArgumentException($"The given section, is not of type '{nameof(SlcPropertiesIds.Sections.PropertyInfo.Id)}'", nameof(section));
-			}
-
-			this.section = section;
 		}
 
 		/// <summary>
@@ -626,7 +547,7 @@ namespace DomHelpers.SlcProperties
 		}
 
 		/// <inheritdoc />
-		public override Section ToSection()
+		protected override Section InternalToSection()
 		{
 			if (section.GetValue<String>(SlcPropertiesIds.Sections.PropertyInfo.Name) == null)
 				throw new InvalidOperationException("'Name' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -653,19 +574,8 @@ namespace DomHelpers.SlcProperties
 		/// Initializes a new instance of the <see cref="PropertyValueSection"/> class using the specified <paramref name="section"/> for initializing the object.
 		/// </summary>
 		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="PropertyValueSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public PropertyValueSection(Section section) : base(SlcPropertiesIds.Sections.PropertyValue.Id)
+		public PropertyValueSection(Section section) : base(section, SlcPropertiesIds.Sections.PropertyValue.Id)
 		{
-			if (section == null)
-			{
-				return;
-			}
-
-			if (!section.SectionDefinitionID.Equals(SlcPropertiesIds.Sections.PropertyValue.Id))
-			{
-				throw new ArgumentException($"The given section, is not of type '{nameof(SlcPropertiesIds.Sections.PropertyValue.Id)}'", nameof(section));
-			}
-
-			this.section = section;
 		}
 
 		/// <summary>
@@ -798,7 +708,7 @@ namespace DomHelpers.SlcProperties
 		}
 
 		/// <inheritdoc />
-		public override Section ToSection()
+		protected override Section InternalToSection()
 		{
 			if (section.GetValue<String>(SlcPropertiesIds.Sections.PropertyValue.PropertyName) == null)
 				throw new InvalidOperationException("'PropertyName' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
@@ -823,19 +733,8 @@ namespace DomHelpers.SlcProperties
 		/// Initializes a new instance of the <see cref="PropertyValueInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
 		/// </summary>
 		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="PropertyValueInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public PropertyValueInfoSection(Section section) : base(SlcPropertiesIds.Sections.PropertyValueInfo.Id)
+		public PropertyValueInfoSection(Section section) : base(section, SlcPropertiesIds.Sections.PropertyValueInfo.Id)
 		{
-			if (section == null)
-			{
-				return;
-			}
-
-			if (!section.SectionDefinitionID.Equals(SlcPropertiesIds.Sections.PropertyValueInfo.Id))
-			{
-				throw new ArgumentException($"The given section, is not of type '{nameof(SlcPropertiesIds.Sections.PropertyValueInfo.Id)}'", nameof(section));
-			}
-
-			this.section = section;
 		}
 
 		/// <summary>
@@ -968,7 +867,7 @@ namespace DomHelpers.SlcProperties
 		}
 
 		/// <inheritdoc />
-		public override Section ToSection()
+		protected override Section InternalToSection()
 		{
 			if (section.GetValue<String>(SlcPropertiesIds.Sections.PropertyValueInfo.LinkedObjectID) == null)
 				throw new InvalidOperationException("'LinkedObjectID' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");

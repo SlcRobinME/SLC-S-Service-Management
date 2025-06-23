@@ -17,5 +17,4 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
-	<Import Project="..\SLC_SM_Common_Shared\SLC_SM_Common_Shared.projitems" Label="Shared" />
 </Project>
