@@ -8,8 +8,8 @@
 
 	public partial class ManageConnectionDialog : Dialog
 	{
-		private List<DialogRow> _dialogRows;
-		private ServiceItemLinkMapContext _context;
+		private readonly List<DialogRow> _dialogRows;
+		private readonly ServiceItemLinkMapContext _context;
 
 		public ManageConnectionDialog(IEngine engine, ServiceItemLinkMapContext context) : base(engine)
 		{

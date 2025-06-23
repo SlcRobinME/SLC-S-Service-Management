@@ -13,9 +13,9 @@
 
 	internal class ManageConnectionsModel
 	{
-		private IEngine _engine;
-		private DomHelper _smDomHelper;
-		private DomHelper _wfDomHelper;
+		private readonly IEngine _engine;
+		private readonly DomHelper _smDomHelper;
+		private readonly DomHelper _wfDomHelper;
 
 		public ManageConnectionsModel(IEngine engine)
 		{

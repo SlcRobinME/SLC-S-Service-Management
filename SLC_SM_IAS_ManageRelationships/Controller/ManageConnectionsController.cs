@@ -14,12 +14,12 @@
 
 	public class ManageConnectionsController
 	{
-		private IEngine _engine;
-		private InteractiveController _controller;
-		private ManageConnectionsModel _model;
+		private readonly IEngine _engine;
+		private readonly InteractiveController _controller;
+		private readonly ManageConnectionsModel _model;
+		private readonly ScriptData _data;
+		private readonly List<ServiceItemLinkMap> _linkMap;
 		private ManageConnectionDialog _dialog;
-		private ScriptData _data;
-		private List<ServiceItemLinkMap> _linkMap;
 
 		private int _nextPairIndex = 0;
 
@@ -136,7 +136,7 @@
 
 		private bool CanShowPrevious() => HasNavigablePair(i => i >= 0, i => i - 1, _nextPairIndex - 2);
 
-		private bool IsLast() => _nextPairIndex == _linkMap.Count();
+		private bool IsLast() => _nextPairIndex == _linkMap.Count;
 
 		private bool HasNavigablePair(Func<int, bool> condition, Func<int, int> increment, int startIndex)
 		{

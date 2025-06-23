@@ -9,7 +9,7 @@
 
 	internal class ScriptData
 	{
-		private IEngine _engine;
+		private readonly IEngine _engine;
 
 		public ScriptData(IEngine engine)
 		{
