@@ -41,6 +41,7 @@ namespace Get_ServiceItemsMultipleSections_1
 				new GQIStringColumn("Service Item Script"),
 				new GQIStringColumn("Implementation Reference"),
 				new GQIStringColumn("Implementation Reference Name"),
+				new GQIStringColumn("ID"),
 			};
 		}
 
@@ -140,6 +141,7 @@ namespace Get_ServiceItemsMultipleSections_1
 					new GQICell { Value = item.ServiceItemScript ?? String.Empty },
 					new GQICell { Value = item.ImplementationReference ?? String.Empty },
 					new GQICell { Value = GetImplementationRefName(item.ImplementationReference) },
+					new GQICell { Value = item.ID.Id.ToString() },
 				});
 		}
 

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <DMSScript options="272" xmlns="http://www.skyline.be/automation">
-	<Name>SLC_SM_AS_AddServiceItem</Name>
+	<Name>SLC_SM_IAS_ManageRelationships</Name>
 	<Description></Description>
 	<Type>Automation</Type>
 	<Author>RCA</Author>
@@ -15,19 +15,19 @@
 
 	<Parameters>
 		<ScriptParameter id="2" type="string" values="">
-			<Description>DOM ID</Description>
+			<Description>DomId</Description>
 		</ScriptParameter>
 		<ScriptParameter id="3" type="string" values="">
-			<Description>ServiceItemType</Description>
+			<Description>ServiceItemIds</Description>
 		</ScriptParameter>
 		<ScriptParameter id="4" type="string" values="">
-			<Description>DefinitionReference</Description>
+			<Description>WorkflowName</Description>
 		</ScriptParameter>
 	</Parameters>
 
 	<Script>
 		<Exe id="1" type="csharp">
-			<Value><![CDATA[[Project:SLC_SM_AS_AddServiceItem]]]></Value>
+			<Value><![CDATA[[Project:SLC_SM_IAS_ManageRelationships]]]></Value>
 			<!--<Param type="debug">true</Param>-->
 			<Message></Message>
 		</Exe>
