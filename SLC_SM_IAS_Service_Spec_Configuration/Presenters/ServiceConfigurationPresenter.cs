@@ -58,7 +58,7 @@
 			{
 				foreach (var currentConfig in instance.Configurations)
 				{
-					var configParam = configParams.Find(x => x.ID == currentConfig.ConfigurationParameter.ConfigurationParameterId);
+					var configParam = configParams.Find(x => x.ID == currentConfig?.ConfigurationParameter?.ConfigurationParameterId);
 					if (configParam == null)
 					{
 						continue;
