@@ -128,10 +128,20 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 
 		public override bool TryDelete(Models.ServiceSpecification item)
 		{
-			bool b = TryDelete(item.Properties.ID);
-			foreach (var config in item.Configurations)
+			bool b = true;
+
+			if (item.Properties != null)
 			{
-				b &= TryDelete(config.ID);
+				b &= new DataHelperServicePropertyValues(_connection).TryDelete(item.Properties);
+			}
+
+			if (item.Configurations != null)
+			{
+				var helperConfigs = new DataHelperServiceSpecificationConfigurationValue(_connection);
+				foreach (var config in item.Configurations)
+				{
+					b &= helperConfigs.TryDelete(config.ID);
+				}
 			}
 
 			return b && TryDelete(item.ID);
