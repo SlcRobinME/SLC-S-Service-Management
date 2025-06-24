@@ -120,7 +120,7 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			instance.ServiceInfo.ServiceConfigurationParameters.Clear();
 			if (item.Configurations != null)
 			{
-				foreach (var config in item.Configurations)
+				foreach (var config in item.Configurations.Where(c => c?.ConfigurationParameter != null))
 				{
 					instance.ServiceInfo.ServiceConfigurationParameters.Add(dataHelperConfigurations.CreateOrUpdate(config));
 				}

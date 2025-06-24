@@ -80,11 +80,6 @@
 				{
 					repoService.ServiceSpecificationConfigurationValues.TryDelete(configuration.ServiceConfig);
 				}
-				else
-				{
-					repoService.ServiceSpecificationConfigurationValues.CreateOrUpdate(configuration.ServiceConfig);
-					repoConfig.ConfigurationParameterValues.CreateOrUpdate(configuration.ConfigurationParamValue);
-				}
 			}
 
 			repoService.ServiceSpecifications.CreateOrUpdate(instance);

@@ -74,10 +74,9 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 
 			var dataHelperConfigurations = new DataHelperServiceOrderItemConfigurationValue(_connection);
 			instance.ServiceOrderItemServiceInfo.ServiceOrderItemConfigurations.Clear();
-			foreach (var configurationValue in item.Configurations)
+			foreach (var configurationValue in item.Configurations.Where(c => c?.ConfigurationParameter != null))
 			{
-				var id = dataHelperConfigurations.CreateOrUpdate(configurationValue);
-				instance.ServiceOrderItemServiceInfo.ServiceOrderItemConfigurations.Add(id);
+				instance.ServiceOrderItemServiceInfo.ServiceOrderItemConfigurations.Add(dataHelperConfigurations.CreateOrUpdate(configurationValue));
 			}
 
 			return CreateOrUpdateInstance(instance);

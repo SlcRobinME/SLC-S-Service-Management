@@ -165,7 +165,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				d.OkButton.Pressed += (sender, args) =>
 				{
 					var serviceOrderItem = repo.ServiceOrderItems.Read().Find(x => x.ID == domId);
-					if (domId != Guid.Empty && serviceOrderItem != null)
+					if (domId != Guid.Empty && serviceOrderItem == null)
 					{
 						throw new InvalidOperationException($"No Service Order Item with ID '{domId}' found on the system!");
 					}
