@@ -1,6 +1,7 @@
 ﻿namespace SLC_SM_Create_Service_Inventory_Item.Presenters
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 
 	using Library;
@@ -28,6 +29,8 @@
 				ID = Guid.NewGuid(),
 				Name = $"Service Inventory Item #{getServiceLabels.Length:000}",
 				Description = $"Service Inventory Item #{getServiceLabels.Length:000}",
+				ServiceItems = new List<Models.ServiceItem>(),
+				ServiceItemsRelationships = new List<Models.ServiceItemRelationShip>(),
 			};
 			view.TboxName.PlaceHolder = instanceToReturn.Name;
 
