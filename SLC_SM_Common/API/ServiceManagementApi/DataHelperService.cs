@@ -40,6 +40,7 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 						Icon = x.ServiceInfo.Icon,
 						Category = serviceCategories.Find(c => c.ID == x.ServiceInfo.ServiceCategory),
 						ServiceSpecificationId = x.ServiceInfo.ServiceSpecifcation,
+						OrganizationId = x.ServiceInfo.RelatedOrganization,
 						Properties = serviceProperties.Find(p => p.ID == x.ServiceInfo.ServiceProperties) ?? new Models.ServicePropertyValues { Values = new List<Models.ServicePropertyValue>() },
 						Configurations = serviceConfigurations.Where(p => x.ServiceInfo.ServiceConfigurationParameters.Contains(p.ID)).ToList(),
 						ServiceItems = x.ServiceItems.Select(s => new Models.ServiceItem
@@ -81,6 +82,7 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			instance.ServiceInfo.ServiceCategory = item.Category?.ID;
 			instance.ServiceInfo.ServiceSpecifcation = item.ServiceSpecificationId;
 			instance.ServiceInfo.Icon = item.Icon;
+			instance.ServiceInfo.RelatedOrganization = item.OrganizationId;
 
 			if (item.Properties != null)
 			{
