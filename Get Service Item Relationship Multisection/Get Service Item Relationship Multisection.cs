@@ -58,7 +58,9 @@ namespace GetServiceItemRelationshipMultisection
 	using DomHelpers.SlcWorkflow;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using static SLC_SM_Common.API.ServiceManagementApi.Models;
 
 	/// <summary>
 	/// Represents a data source.
@@ -69,21 +71,16 @@ namespace GetServiceItemRelationshipMultisection
 		, IGQIOnInit
 		, IGQIInputArguments
 	{
-		private readonly Dictionary<string, string> _workflowNameCache = new Dictionary<string, string>();
-		private readonly Dictionary<(string, string), string> _nodeAliasCache = new Dictionary<(string, string), string>();
-
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = false };
 		private Guid _specificationId;
 
-		private DomInstance _domInstance;
+		private IServiceInstanceBase _serviceInstance;
 
 		private DomHelper _smDomHelper;
 		private DomHelper _wfDomHelper;
 		private GQIDMS dms;
 
 		private IEnumerable<WorkflowsInstance> _workflows;
-
-		private Func<string, string> _getWorkflowName;
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
@@ -132,10 +129,7 @@ namespace GetServiceItemRelationshipMultisection
 
 			Init();
 
-			if (_domInstance == null)
-				return EmptyPage();
-
-			var relationships = GetServiceRelationships();
+			var relationships = _serviceInstance.GetServiceItemRelationships();
 
 			return new GQIPage(relationships
 				.Where(r => !r.IsEmpty)
@@ -148,50 +142,21 @@ namespace GetServiceItemRelationshipMultisection
 			_smDomHelper = new DomHelper(dms.SendMessages, SlcServicemanagementIds.ModuleId);
 			_wfDomHelper = new DomHelper(dms.SendMessages, SlcWorkflowIds.ModuleId);
 
-			_domInstance = _smDomHelper.DomInstances
-				.Read(DomInstanceExposers.Id.Equal(_specificationId))
-				.FirstOrDefault();
-
 			_workflows = _wfDomHelper.DomInstances
 				.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcWorkflowIds.Definitions.Workflows.Id))
 				.Select(w => new WorkflowsInstance(w));
 
-			InitInstanceSpecific();
+			var domInstance = _smDomHelper.DomInstances
+				.Read(DomInstanceExposers.Id.Equal(_specificationId))
+				.FirstOrDefault();
+
+			_serviceInstance = ServiceInstancesExtentions.GetTypedInstance(domInstance);
 		}
 
-		private void InitInstanceSpecific()
+		private string GetReferencedObjectName(string serviceItemId)
 		{
-			var defId = _domInstance.DomDefinitionId.Id;
-
-			if (defId == SlcServicemanagementIds.Definitions.Services.Id)
-			{
-				var servicesInstance = new ServicesInstance(_domInstance);
-				_getWorkflowName = serviceItem => servicesInstance.ServiceItems
-					.FirstOrDefault(i => i.ServiceItemID.ToString() == serviceItem)?.DefinitionReference ?? string.Empty;
-			}
-			else if (defId == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-			{
-				var serviceSpecsInstance = new ServiceSpecificationsInstance(_domInstance);
-				_getWorkflowName = serviceItem => serviceSpecsInstance.ServiceItems
-					.FirstOrDefault(i => i.ServiceItemID.ToString() == serviceItem)?.DefinitionReference ?? string.Empty;
-			}
-			else
-			{
-				_getWorkflowName = _ => string.Empty;
-			}
-		}
-
-		private IList<ServiceItemRelationshipSection> GetServiceRelationships()
-		{
-			var defId = _domInstance.DomDefinitionId.Id;
-
-			if (defId == SlcServicemanagementIds.Definitions.Services.Id)
-				return new ServicesInstance(_domInstance).ServiceItemRelationship;
-
-			if (defId == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-				return new ServiceSpecificationsInstance(_domInstance).ServiceItemRelationship;
-
-			return new List<ServiceItemRelationshipSection>();
+			return _serviceInstance.GetServiceItems()
+			.FirstOrDefault(i => i.ServiceItemID.ToString() == serviceItemId)?.DefinitionReference ?? string.Empty;
 		}
 
 		private GQIRow BuildRow(ServiceItemRelationshipSection r)
@@ -204,38 +169,36 @@ namespace GetServiceItemRelationshipMultisection
 				new GQICell { Value = r.ParentServiceItem },
 				new GQICell { Value = r.ChildServiceItemInterfaceID },
 				new GQICell { Value = r.ParentServiceItemInterfaceID },
-				new GQICell { Value = GetCachedWorkflowName(r.ParentServiceItem) },
-				new GQICell { Value = GetCachedWorkflowName(r.ChildServiceItem) },
-				new GQICell { Value = GetCachedNodeAlias(r.ParentServiceItem, r.ParentServiceItemInterfaceID) },
-				new GQICell { Value = GetCachedNodeAlias(r.ChildServiceItem, r.ChildServiceItemInterfaceID) },
+				new GQICell { Value = GetReferencedObjectName(r.ParentServiceItem) },
+				new GQICell { Value = GetReferencedObjectName(r.ChildServiceItem) },
+				new GQICell { Value = GetCachedInterfaceName(r.ParentServiceItem, r.ParentServiceItemInterfaceID) },
+				new GQICell { Value = GetCachedInterfaceName(r.ChildServiceItem, r.ChildServiceItemInterfaceID) },
 			});
 		}
 
-		private string GetCachedWorkflowName(string serviceItem)
+		private string GetCachedInterfaceName(string serviceItemId, string interfaceId)
 		{
-			if (_workflowNameCache.TryGetValue(serviceItem, out var name))
-				return name;
+			var serviceItem = _serviceInstance.GetServiceItems().FirstOrDefault(item => item.ServiceItemID.ToString() == serviceItemId);
+			if (serviceItem.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+			{
+				return GetWorkflowInterfaceName(serviceItemId, interfaceId);
+			}
+			else if (serviceItem.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+			{
+				return interfaceId == "1" ? "Default SRM Output" : "Default SRM Input";
+			}
 
-			name = _getWorkflowName(serviceItem);
-			_workflowNameCache[serviceItem] = name;
-			return name;
+			throw new Exception($"Unrecognized service item type {serviceItem.ServiceItemType.Value.ToString()}");
 		}
 
-		private string GetCachedNodeAlias(string serviceItem, string interfaceId)
+		private string GetWorkflowInterfaceName(string serviceItemId, string interfaceId)
 		{
-			var key = (serviceItem, interfaceId);
-			if (_nodeAliasCache.TryGetValue(key, out var alias))
-				return alias;
-
-			var workflowName = GetCachedWorkflowName(serviceItem);
+			var workflowName = GetReferencedObjectName(serviceItemId);
 			var node = _workflows
 				.FirstOrDefault(w => w.Name == workflowName)?.Nodes
 				.FirstOrDefault(n => n.NodeID == interfaceId);
 
-			alias = node?.NodeAlias ?? string.Empty;
-			_nodeAliasCache[key] = alias;
-
-			return alias;
+			return node?.NodeAlias ?? string.Empty;
 		}
 
 		private GQIPage EmptyPage()

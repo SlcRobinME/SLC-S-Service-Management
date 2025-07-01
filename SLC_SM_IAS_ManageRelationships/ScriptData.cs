@@ -71,28 +71,33 @@ namespace SLCSMIASManageRelationships
 
 		public HashSet<string> ServiceIds { get; set; }
 
-		public string WorkflowName { get; set; }
+		public string DefinitionReference { get; set; }
 
-		public bool HasWorkflowName => !string.IsNullOrEmpty(WorkflowName);
+		public string Type { get; set; }
+
+		public bool HasDefinitionReference => !string.IsNullOrEmpty(DefinitionReference);
 
 		public void Validate()
 		{
-			if (string.IsNullOrEmpty(WorkflowName) && ServiceIds.Count < 2)
+			if (string.IsNullOrEmpty(DefinitionReference) && ServiceIds.Count < 2)
 				throw new Exception("Select a minumum of 2 service items to make a connection");
 		}
 
 		private void LoadScriptParameters()
 		{
-			string domIdRaw = _engine.GetScriptParam("DomId").Value;
+			var domIdRaw = _engine.GetScriptParam("DomId").Value;
 			DomId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
 			if (DomId == Guid.Empty)
 				throw new InvalidOperationException("No DOM ID provided as input to the script");
 
-			string serviceItemIdsRaw = _engine.GetScriptParam("ServiceItemIds").Value;
+			var serviceItemIdsRaw = _engine.GetScriptParam("ServiceItemIds").Value;
 			ServiceIds = JsonConvert.DeserializeObject<HashSet<string>>(serviceItemIdsRaw);
 
-			string workflowName = _engine.GetScriptParam("WorkflowName").Value;
-			WorkflowName = JsonConvert.DeserializeObject<List<string>>(workflowName).FirstOrDefault();
+			var definitionReference = _engine.GetScriptParam("DefinitionReference").Value;
+			DefinitionReference = JsonConvert.DeserializeObject<List<string>>(definitionReference).FirstOrDefault();
+
+			var type = _engine.GetScriptParam("Type").Value;
+			Type = JsonConvert.DeserializeObject<List<string>>(type).FirstOrDefault();
 		}
 	}
 }

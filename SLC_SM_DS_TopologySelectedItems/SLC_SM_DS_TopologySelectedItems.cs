@@ -51,10 +51,7 @@ DATE		VERSION		AUTHOR			COMMENTS
 
 namespace SLCSMDSTopologySelectedItems
 {
-	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using Newtonsoft.Json;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 
 	/// <summary>
@@ -79,18 +76,7 @@ namespace SLCSMDSTopologySelectedItems
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
 			_nodeIds = args.GetArgumentValue(nodeIdsArg);
-			//_nodeIds = nodeIdsRaw
-			//	?.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-			//	.Where(s => Guid.TryParse(s, out _))
-			//	.Select(Guid.Parse)
-			//	.ToList() ?? new List<Guid>();
-
 			_connectionIds = args.GetArgumentValue(connectionIdsArg);
-			//_connectionIds = connectionIdsRaw
-			//	?.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-			//	.Where(s => Guid.TryParse(s, out _))
-			//	.Select(Guid.Parse)
-			//	.ToList() ?? new List<Guid>();
 
 			return new OnArgumentsProcessedOutputArgs();
 		}
@@ -108,7 +94,8 @@ namespace SLCSMDSTopologySelectedItems
 		{
 			string ids, type;
 
-			if ((_nodeIds == null || !_nodeIds.Any()) && (_connectionIds == null || !_connectionIds.Any()))
+			if ((_nodeIds == null || !_nodeIds.Any())
+				&& (_connectionIds == null || !_connectionIds.Any()))
 			{
 				type = "None";
 				ids = string.Empty;
