@@ -58,9 +58,7 @@ namespace GetServiceItemRelationshipMultisection
 	using DomHelpers.SlcWorkflow;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using static SLC_SM_Common.API.ServiceManagementApi.Models;
 
 	/// <summary>
 	/// Represents a data source.
@@ -171,24 +169,25 @@ namespace GetServiceItemRelationshipMultisection
 				new GQICell { Value = r.ParentServiceItemInterfaceID },
 				new GQICell { Value = GetReferencedObjectName(r.ParentServiceItem) },
 				new GQICell { Value = GetReferencedObjectName(r.ChildServiceItem) },
-				new GQICell { Value = GetCachedInterfaceName(r.ParentServiceItem, r.ParentServiceItemInterfaceID) },
-				new GQICell { Value = GetCachedInterfaceName(r.ChildServiceItem, r.ChildServiceItemInterfaceID) },
+				new GQICell { Value = GetInterfaceName(r.ParentServiceItem, r.ParentServiceItemInterfaceID) },
+				new GQICell { Value = GetInterfaceName(r.ChildServiceItem, r.ChildServiceItemInterfaceID) },
 			});
 		}
 
-		private string GetCachedInterfaceName(string serviceItemId, string interfaceId)
+		private string GetInterfaceName(string serviceItemId, string interfaceId)
 		{
-			var serviceItem = _serviceInstance.GetServiceItems().FirstOrDefault(item => item.ServiceItemID.ToString() == serviceItemId);
-			if (serviceItem.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
-			{
-				return GetWorkflowInterfaceName(serviceItemId, interfaceId);
-			}
-			else if (serviceItem.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
-			{
-				return interfaceId == "1" ? "Default SRM Output" : "Default SRM Input";
-			}
+			var serviceItem = _serviceInstance.GetServiceItems()
+				.FirstOrDefault(item => item.ServiceItemID.ToString() == serviceItemId);
 
-			throw new Exception($"Unrecognized service item type {serviceItem.ServiceItemType.Value.ToString()}");
+			var type = serviceItem.ServiceItemType.Value;
+
+			if (type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+				return GetWorkflowInterfaceName(serviceItemId, interfaceId);
+
+			if (type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+				return interfaceId == "1" ? "Default SRM Output" : "Default SRM Input";
+
+			throw new Exception($"Unrecognized service item type {type}");
 		}
 
 		private string GetWorkflowInterfaceName(string serviceItemId, string interfaceId)
