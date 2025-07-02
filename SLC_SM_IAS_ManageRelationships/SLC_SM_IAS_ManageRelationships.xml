@@ -21,7 +21,10 @@
 			<Description>ServiceItemIds</Description>
 		</ScriptParameter>
 		<ScriptParameter id="4" type="string" values="">
-			<Description>WorkflowName</Description>
+			<Description>DefinitionReference</Description>
+		</ScriptParameter>
+		<ScriptParameter id="5" type="string" values="">
+			<Description>Type</Description>
 		</ScriptParameter>
 	</Parameters>
 

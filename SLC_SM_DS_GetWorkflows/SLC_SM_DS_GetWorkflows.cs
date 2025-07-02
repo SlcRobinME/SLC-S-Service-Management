@@ -58,6 +58,7 @@ namespace SLCSMDSGetWorkflows
 	using DomHelpers.SlcWorkflow;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	/// <summary>
@@ -66,7 +67,7 @@ namespace SLCSMDSGetWorkflows
 	/// </summary>
 	[GQIMetaData(Name = "SLC_SM_DS_GetWorkflows")]
 	public sealed class SLCSMDSGetWorkflows : IGQIDataSource
-		, IGQIOnInit
+		, IGQIOnInit, IGQIInputArguments
 	{
 		private GQIDMS _dms;
 
@@ -88,13 +89,12 @@ namespace SLCSMDSGetWorkflows
 				new GQIStringColumn("ID"),
 				new GQIStringColumn("Name"),
 				new GQIStringColumn("Category"),
+				new GQIStringColumn("Type"),
 			};
 		}
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			// Define data source rows
-			// See: https://aka.dataminer.services/igqidatasource-getnextpage
 			var workflowsDomHelper = new DomHelper(_dms.SendMessages, SlcWorkflowIds.ModuleId);
 			var workflowsResult = workflowsDomHelper.DomInstances
 				.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcWorkflowIds.Definitions.Workflows.Id));
@@ -102,17 +102,46 @@ namespace SLCSMDSGetWorkflows
 			if (workflowsResult == null)
 				return ReturnEmptyResult();
 
-			var propertiesDomHelper = new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId);
-			var propertyValues = propertiesDomHelper.DomInstances
+			var workflowPropertyValues = new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId)
+				.DomInstances
 				.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcPropertiesIds.Definitions.PropertyValues.Id))
 				.Select(p => new PropertyValuesInstance(p));
 
-			var rows = workflowsResult
+			var workflows = workflowsResult
 				.Select(w => new WorkflowsInstance(w))
-				.Select(workflow => BuildRow(workflow, FetchWorkflowCategory(workflow, propertyValues)))
+				.Select(wf => BuildRow(wf, FetchWorkflowCategory(wf, workflowPropertyValues)))
 				.ToArray();
 
-			return new GQIPage(rows);
+			var bookings = _dms.SendMessages(new GetLiteElementInfo { ProtocolName = "Skyline Booking Manager" })
+				.OfType<LiteElementInfoEvent>()
+				.ToArray();
+
+			var getPropertyMessages = bookings
+				.Select(b => new GetPropertyValueMessage
+				{
+					ObjectID = $"{b.DataMinerID}/{b.ElementID}",
+					ObjectType = "Element",
+					PropertyName = "Category",
+				})
+				.Cast<DMSMessage>()
+				.ToArray();
+
+			var bookingPropertyValues = _dms.SendMessages(getPropertyMessages)
+				.OfType<PropertyChangeEventMessage>();
+
+			var bookingRows = bookings
+				.Select(b => BuildRow(b, FetchBookingCategory(b, bookingPropertyValues)))
+				.ToArray();
+
+			return new GQIPage(workflows.Concat(bookingRows).ToArray());
+		}
+
+		private string FetchBookingCategory(LiteElementInfoEvent liteElementInfoEvent, IEnumerable<PropertyChangeEventMessage> properties)
+		{
+			return properties
+				.FirstOrDefault(p =>
+					p.DataMinerID == liteElementInfoEvent.DataMinerID &&
+					p.ElementID == liteElementInfoEvent.ElementID)?.Value ?? string.Empty;
 		}
 
 		private string FetchWorkflowCategory(WorkflowsInstance workflow, IEnumerable<PropertyValuesInstance> propertyValues)
@@ -130,6 +159,19 @@ namespace SLCSMDSGetWorkflows
 					new GQICell { Value = workflow.ID.Id.ToString() },
 					new GQICell { Value = workflow.Name },
 					new GQICell { Value = category },
+					new GQICell { Value = "Workflow" },
+				});
+		}
+
+		private GQIRow BuildRow(LiteElementInfoEvent liteElement, string category)
+		{
+			return new GQIRow(
+				new[]
+				{
+					new GQICell { Value = $"{liteElement.DataMinerID}/{liteElement.ElementID}" },
+					new GQICell { Value = liteElement.Name },
+					new GQICell { Value = category },
+					new GQICell { Value = "SRMBooking" },
 				});
 		}
 
@@ -139,6 +181,16 @@ namespace SLCSMDSGetWorkflows
 			{
 				HasNextPage = false,
 			};
+		}
+
+		public GQIArgument[] GetInputArguments()
+		{
+			throw new NotImplementedException();
+		}
+
+		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

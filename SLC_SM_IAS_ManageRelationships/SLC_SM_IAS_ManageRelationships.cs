@@ -108,8 +108,8 @@ namespace SLCSMIASManageRelationships
 			data.Validate();
 
 			var controller = new ManageConnectionsController(engine, data);
-			if (data.HasWorkflowName)
-				controller.CreateServiceItemFromWorkflow();
+			if (data.HasDefinitionReference)
+				controller.CreateServiceItem();
 
 			controller.BuildLinkMap();
 			controller.HandleNext();

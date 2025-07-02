@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using DomHelpers;
 	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
 	using Skyline.DataMiner.Automation;
@@ -24,8 +23,6 @@
 			_wfDomHelper = new DomHelper(_engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
 		}
 
-		public DomInstanceBase DomInstance { get; set; }
-
 		public WorkflowsInstance GetWorkflowbyId(Guid workflowId)
 		{
 			var domInstance = _wfDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(workflowId)).FirstOrDefault();
@@ -42,40 +39,6 @@
 				throw new Exception($"Could not find workflow with id {workflowName}");
 
 			return new WorkflowsInstance(domInstance);
-		}
-
-		public IEnumerable<NodesSection> GetAvailableOutputs(ServiceItemsSection source, WorkflowsInstance workflow)
-		{
-			var relationships = GetRelationships(DomInstance);
-
-			//var outputsInUse = new HashSet<string>(
-			//	relationships
-			//		.Where(r => r.ParentServiceItem == source.ServiceItemID.ToString())
-			//		.Select(r => r.ParentServiceItemInterfaceID));
-
-			var availableOutputs = workflow.Nodes
-				.Where(n =>
-					n.NodeType == SlcWorkflowIds.Enums.Nodetype.Destination
-					/*&& !outputsInUse.Contains(n.NodeID)*/);
-
-			return availableOutputs;
-		}
-
-		public IEnumerable<NodesSection> GetAvailableInputs(ServiceItemsSection destination, WorkflowsInstance workflow)
-		{
-			var relationships = GetRelationships(DomInstance);
-
-			var inputsInuse = new HashSet<string>(
-				relationships
-					.Where(r => r.ChildServiceItem == destination.ServiceItemID.ToString())
-					.Select(r => r.ChildServiceItemInterfaceID));
-
-			var availableInputs = workflow.Nodes
-				.Where(n =>
-					n.NodeType == SlcWorkflowIds.Enums.Nodetype.Source &&
-					!inputsInuse.Contains(n.NodeID));
-
-			return availableInputs;
 		}
 
 		/// <summary>
@@ -101,10 +64,10 @@
 		}
 
 		public List<ServiceItemRelationshipSection> FindRelationshipsBetweenPair(
-			DomInstanceBase domInstance,
+			IServiceInstanceBase instance,
 			(ServiceItemsSection, ServiceItemsSection) pair)
 		{
-			var relationships = GetRelationships(domInstance);
+			var relationships = GetRelationships(instance);
 			var parentId = pair.Item1.ServiceItemID.ToString();
 			var childId = pair.Item2.ServiceItemID.ToString();
 
@@ -113,7 +76,7 @@
 				r.ChildServiceItem == childId).ToList();
 		}
 
-		public DomInstanceBase GetDomInstance(Guid domId)
+		public IServiceInstanceBase GetDomInstance(Guid domId)
 		{
 			var instance = _smDomHelper.DomInstances
 				.Read(DomInstanceExposers.Id.Equal(domId))
@@ -122,21 +85,20 @@
 			if (instance == null)
 				throw new Exception($"Could not find the DOM instance with id {domId}");
 
-			DomInstance = CreateTypedDomInstance(instance);
-			return DomInstance;
+			return ServiceInstancesExtentions.GetTypedInstance(instance);
 		}
 
 		public IEnumerable<ServiceItemsSection> GetServiceItems(
-			DomInstanceBase domInstance,
+			IServiceInstanceBase instance,
 			IEnumerable<string> serviceItemIds)
 		{
-			var items = GetServiceItemList(domInstance);
+			var items = instance.GetServiceItems();
 			return GetServiceItemsFromList(items, serviceItemIds);
 		}
 
-		public void Update(List<ServiceItemLinkMap> linkMap)
+		public void Update(List<ServiceItemLinkMap> linkMap, IServiceInstanceBase instance)
 		{
-			var relationships = GetRelationshipsMutable(DomInstance);
+			var relationships = GetRelationshipsMutable(instance);
 
 			foreach (var link in linkMap.SelectMany(pair => pair.Links))
 			{
@@ -152,15 +114,15 @@
 					relationships.Add(link);
 			}
 
-			DomInstance.Save(_smDomHelper);
+			instance.Save(_smDomHelper);
 		}
 
-		public string CreateServiceItemFromWorkflow(Guid domId, string workflowName)
+		public string CreateServiceItem(Guid domId, string definitionReference, string type)
 		{
 			var addServiceItemScript = _engine.PrepareSubScript("SLC_SM_AS_AddServiceItem");
 			addServiceItemScript.SelectScriptParam("DOM ID", $"[\"{domId}\"]");
-			addServiceItemScript.SelectScriptParam("ServiceItemType", "Workflow");
-			addServiceItemScript.SelectScriptParam("DefinitionReference", workflowName);
+			addServiceItemScript.SelectScriptParam("ServiceItemType", type);
+			addServiceItemScript.SelectScriptParam("DefinitionReference", definitionReference);
 			addServiceItemScript.Synchronous = true;
 			addServiceItemScript.InheritScriptOutput = true;
 			addServiceItemScript.StartScript();
@@ -171,38 +133,19 @@
 			return _engine.GetScriptOutput("ServiceItemId");
 		}
 
-		private DomInstanceBase CreateTypedDomInstance(DomInstance domInstance)
+		public IDefinitionObject ResolveDefinitionReference(IServiceInstanceBase instance, ServiceItemsSection serviceItem)
 		{
-			if (IsServicesInstance(domInstance))
-				return new ServicesInstance(domInstance);
+			var existingRelationships = GetRelationships(instance);
+			if (serviceItem.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+			{
+				return new WorkflowsInstanceAdapter(serviceItem, GetWorkflowbyName(serviceItem.DefinitionReference), existingRelationships);
+			}
+			else if (serviceItem.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+			{
+				return new SRMBooking(serviceItem, existingRelationships);
+			}
 
-			if (IsServiceSpecificationsInstance(domInstance))
-				return new ServiceSpecificationsInstance(domInstance);
-
-			throw new NotSupportedException($"Unsupported DOM definition ID: {domInstance.DomDefinitionId.Id}");
-		}
-
-		private bool IsServicesInstance(DomInstance domInstance)
-		{
-			return domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id;
-		}
-
-		private bool IsServiceSpecificationsInstance(DomInstance domInstance)
-		{
-			return domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id;
-		}
-
-		private IEnumerable<ServiceItemsSection> GetServiceItemList(DomInstanceBase instance)
-		{
-			var services = instance as ServicesInstance;
-			if (services != null)
-				return services.ServiceItems;
-
-			var specs = instance as ServiceSpecificationsInstance;
-			if (specs != null)
-				return specs.ServiceItems;
-
-			throw new NotSupportedException($"Unsupported DomInstance type: {instance.GetType().Name}");
+			throw new ArgumentException($"Unknown definition reference: {serviceItem.DefinitionReference}");
 		}
 
 		private IEnumerable<ServiceItemsSection> GetServiceItemsFromList(
@@ -218,20 +161,14 @@
 				.Where(item => item != null);
 		}
 
-		private IList<ServiceItemRelationshipSection> GetRelationshipsMutable(DomInstanceBase domInstance)
+		private IList<ServiceItemRelationshipSection> GetRelationshipsMutable(IServiceInstanceBase instance)
 		{
-			if (domInstance is ServicesInstance services)
-				return services.ServiceItemRelationship;
-
-			if (domInstance is ServiceSpecificationsInstance specs)
-				return specs.ServiceItemRelationship;
-
-			throw new InvalidOperationException("Unsupported DomInstance type.");
+			return instance.GetServiceItemRelationships();
 		}
 
-		private IList<ServiceItemRelationshipSection> GetRelationships(DomInstanceBase domInstance)
+		private IList<ServiceItemRelationshipSection> GetRelationships(IServiceInstanceBase instance)
 		{
-			return GetRelationshipsMutable(domInstance).ToList(); // Copy
+			return GetRelationshipsMutable(instance).ToList(); // Copy
 		}
 	}
 }

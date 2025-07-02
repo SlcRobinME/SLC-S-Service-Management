@@ -3,8 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Text;
-	using DomHelpers;
 	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -19,7 +17,9 @@
 		private readonly ManageConnectionsModel _model;
 		private readonly ScriptData _data;
 		private readonly List<ServiceItemLinkMap> _linkMap;
+
 		private ManageConnectionDialog _dialog;
+		private IServiceInstanceBase _serviceInstance;
 
 		private int _nextPairIndex = 0;
 
@@ -27,8 +27,8 @@
 		{
 			_engine = engine;
 			_data = data;
-			_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 			_model = new ManageConnectionsModel(engine);
+			_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 			_linkMap = new List<ServiceItemLinkMap>();
 		}
 
@@ -61,19 +61,20 @@
 
 		public void BuildLinkMap()
 		{
-			var instanceBase = _model.GetDomInstance(_data.DomId);
-			var serviceItemNodes = _model.GetServiceItems(instanceBase, _data.ServiceIds);
+			_serviceInstance = _model.GetDomInstance(_data.DomId);
+
+			var serviceItemNodes = _model.GetServiceItems(_serviceInstance, _data.ServiceIds);
 			var sequentialPairs = _model.ToSequentialPairs(serviceItemNodes);
 
-			var connections = sequentialPairs.Select(pair => CreateLinkMapFromPair(instanceBase, pair));
+			var connections = sequentialPairs.Select(pair => CreateLinkMapFromPair(pair));
 
 			foreach (var connection in connections)
 				_linkMap.Add(connection);
 		}
 
-		public void CreateServiceItemFromWorkflow()
+		public void CreateServiceItem()
 		{
-			_data.ServiceIds.Add(_model.CreateServiceItemFromWorkflow(_data.DomId, _data.WorkflowName));
+			_data.ServiceIds.Add(_model.CreateServiceItem(_data.DomId, _data.DefinitionReference, _data.Type));
 		}
 
 		private bool HasMorePairs()
@@ -150,22 +151,19 @@
 			return false;
 		}
 
-		private ServiceItemLinkMap CreateLinkMapFromPair(DomInstanceBase instance, (ServiceItemsSection, ServiceItemsSection) pair)
+		private ServiceItemLinkMap CreateLinkMapFromPair((ServiceItemsSection, ServiceItemsSection) pair)
 		{
-			var links = _model.FindRelationshipsBetweenPair(instance, pair);
+			var links = _model.FindRelationshipsBetweenPair(_serviceInstance, pair);
 
-			var sourceWorkflowName = pair.Item1.DefinitionReference;
-			var destinationWorkflowName = pair.Item2.DefinitionReference;
-
-			var sourceWorkflow = _model.GetWorkflowbyName(sourceWorkflowName);
-			var destinationWorkflow = _model.GetWorkflowbyName(destinationWorkflowName);
+			var source = _model.ResolveDefinitionReference(_serviceInstance, pair.Item1);
+			var destination = _model.ResolveDefinitionReference(_serviceInstance, pair.Item2);
 
 			return new ServiceItemLinkMap
 			{
 				SourceNode = pair.Item1,
 				DestinationNode = pair.Item2,
-				AvailableSources = _model.GetAvailableOutputs(pair.Item1, sourceWorkflow),
-				AvailableDestinations = _model.GetAvailableInputs(pair.Item2, destinationWorkflow),
+				AvailableSources = source.GetAvailableOutputs(),
+				AvailableDestinations = destination.GetAvailableInputs(),
 				Links = links,
 			};
 		}
@@ -185,7 +183,7 @@
 
 		private void Save()
 		{
-			_model.Update(_linkMap);
+			_model.Update(_linkMap, _serviceInstance);
 			_engine.ExitSuccess(string.Empty);
 		}
 	}
