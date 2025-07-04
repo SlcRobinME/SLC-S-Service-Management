@@ -24,7 +24,8 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
-	<ItemGroup>
-		<Compile Include="..\SLC-Service-Management\GlobalSuppressions.cs" Link="GlobalSuppressions.cs"/>
-	</ItemGroup>
+	<PropertyGroup>
+		<!-- Exclude the project from analysis -->
+		<SonarQubeExclude>true</SonarQubeExclude>
+	</PropertyGroup>
 </Project>
