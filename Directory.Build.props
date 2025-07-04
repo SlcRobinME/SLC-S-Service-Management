@@ -24,9 +24,9 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
-	 <ItemGroup>
-		 <SonarQubeSetting Include="sonar.coverage.exclusions">
-		 	<Value>**/*.cs</Value>
-		 </SonarQubeSetting>
-	 </ItemGroup>
+	<PropertyGroup>
+		<SonarQubeAnalysisSettings>
+			sonar.cpd.minimumTokens=500
+		</SonarQubeAnalysisSettings>
+	</PropertyGroup>
 </Project>
