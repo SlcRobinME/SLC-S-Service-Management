@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <DMSScript options="272" xmlns="http://www.skyline.be/automation">
-	<Name>SLC-SM-DS-Get Service Order Item Buttons</Name>
+	<Name>SLC_SM_IAS_Configurations</Name>
 	<Description></Description>
 	<Type>Automation</Type>
-	<Author>JKO</Author>
+	<Author>RME</Author>
 	<CheckSets>FALSE</CheckSets>
 	<Folder>Service Management</Folder>
 
@@ -18,9 +18,7 @@
 
 	<Script>
 		<Exe id="1" type="csharp">
-			<Value><![CDATA[[Project:SLC-SM-DS-Get Service Order Item Buttons]]]></Value>
-			<Param type="preCompile">true</Param>
-			<Param type="libraryName">SLC-SM-DS-Get Service Order Item Buttons</Param>
+			<Value><![CDATA[[Project:SLC_SM_IAS_Configurations]]]></Value>
 			<Message></Message>
 		</Exe>
 	</Script>

@@ -117,7 +117,7 @@ namespace SLCSMASDynamicDelete
 				.FirstOrDefault();
 
 			if (instance == null)
-				throw new Exception($"Could not find the DOM instance with id {scriptData.DomId}");
+				throw new InvalidOperationException($"Could not find the DOM instance with id {scriptData.DomId}");
 
 			var domInstanceBase = CreateTypedDomInstance(instance);
 

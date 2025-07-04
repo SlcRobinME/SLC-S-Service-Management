@@ -24,7 +24,6 @@
 			<Value>
 				<![CDATA[[Project:SLC_SM_Delete_Service]]]>
 			</Value>
-			<!--<Param type="debug">true</Param>-->
 			<Message />
 		</Exe>
 	</Script>

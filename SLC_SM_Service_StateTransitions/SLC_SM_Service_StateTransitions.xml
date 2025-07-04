@@ -25,7 +25,6 @@
 	<Script>
 		<Exe id="1" type="csharp">
 			<Value><![CDATA[[Project:SLC_SM_Service_StateTransitions]]]></Value>
-			<!--<Param type="debug">true</Param>-->
 			<Message></Message>
 		</Exe>
 	</Script>

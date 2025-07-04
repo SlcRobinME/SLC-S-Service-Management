@@ -22,7 +22,6 @@
 	<Script>
 		<Exe id="1" type="csharp">
 			<Value><![CDATA[[Project:SLC_SM_Delete Service Order]]]></Value>
-			<!--<Param type="debug">true</Param>-->
 			<Message></Message>
 		</Exe>
 	</Script>

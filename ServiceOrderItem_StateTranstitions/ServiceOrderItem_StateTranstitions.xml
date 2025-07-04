@@ -28,7 +28,6 @@
 	<Script>
 		<Exe id="10" type="csharp">
 			<Value><![CDATA[[Project:ServiceOrderItem_StateTranstitions]]]></Value>
-			<!--<Param type="debug">true</Param>-->
 			<Message></Message>
 		</Exe>
 	</Script>

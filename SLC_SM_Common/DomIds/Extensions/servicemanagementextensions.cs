@@ -50,7 +50,7 @@
 			if (instance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
 				return new ServicesInstance(instance);
 
-			throw new Exception($"Unsuported Dom Definition: {instance.DomDefinitionId.Id}");
+			throw new InvalidOperationException($"Unsuported Dom Definition: {instance.DomDefinitionId.Id}");
 		}
 	}
 }

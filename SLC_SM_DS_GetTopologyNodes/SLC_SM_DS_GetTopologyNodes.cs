@@ -107,7 +107,7 @@ namespace SLCSMDSGetTopologyNodes
 
 			var domInstance = smDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(_domId)).FirstOrDefault();
 			if (domInstance == null)
-				throw new Exception($"Could not find DOM instance with id {_domId}");
+				throw new InvalidOperationException($"Could not find DOM instance with id {_domId}");
 
 			var serviceItems = ServiceInstancesExtentions.GetTypedInstance(domInstance).GetServiceItems();
 
@@ -185,7 +185,7 @@ namespace SLCSMDSGetTopologyNodes
 				return workflow.ID.Id.ToString();
 			}
 
-			throw new Exception("Unsupported service item type");
+			throw new InvalidOperationException("Unsupported service item type");
 		}
 
 		private string GetIcon(
@@ -211,7 +211,7 @@ namespace SLCSMDSGetTopologyNodes
 					.PropertyValue.FirstOrDefault(v => v.PropertyName == "Icon")?.Value ?? string.Empty;
 			}
 
-			throw new Exception("Unsupported service item type");
+			throw new InvalidOperationException("Unsupported service item type");
 		}
 
 		private GQIRow BuildRow(ServiceItemsSection serviceItem, string referenceId, string icon)

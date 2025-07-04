@@ -12,15 +12,13 @@ namespace Get_ServiceConfiguration_1
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
-	using Guid = System.Guid;
-
 	[GQIMetaData(Name = "Get_ServiceConfiguration")]
 	public class EventManagerGetMultipleSections : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = true };
-		private DomHelper _domHelperSrvMgmt;
 		private DomHelper _domHelperConfig;
+		private DomHelper _domHelperSrvMgmt;
 		private GQIDMS dms;
 
 		// variable where input argument will be stored
@@ -97,22 +95,8 @@ namespace Get_ServiceConfiguration_1
 			return helper.DomInstances.Read(filter);
 		}
 
-		private GQIRow[] GetMultiSection()
+		private static IList<Guid> GetServiceConfigurationGuids(DomInstance domInstance)
 		{
-			if (instanceDomId == Guid.Empty)
-			{
-				return Array.Empty<GQIRow>();
-			}
-
-			// will initiate DomHelper
-			LoadApplicationHandlersAndHelpers();
-
-			var domInstance = FetchDomInstance(_domHelperSrvMgmt, instanceDomId);
-			if (domInstance == null)
-			{
-				return Array.Empty<GQIRow>();
-			}
-
 			IList<Guid> serviceConfigurationGuids = new List<Guid>();
 
 			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
@@ -135,6 +119,26 @@ namespace Get_ServiceConfiguration_1
 				// For future options
 			}
 
+			return serviceConfigurationGuids;
+		}
+
+		private GQIRow[] GetMultiSection()
+		{
+			if (instanceDomId == Guid.Empty)
+			{
+				return Array.Empty<GQIRow>();
+			}
+
+			// will initiate DomHelper
+			LoadApplicationHandlersAndHelpers();
+
+			var domInstance = FetchDomInstance(_domHelperSrvMgmt, instanceDomId);
+			if (domInstance == null)
+			{
+				return Array.Empty<GQIRow>();
+			}
+
+			IList<Guid> serviceConfigurationGuids = GetServiceConfigurationGuids(domInstance);
 			if (serviceConfigurationGuids == null || !serviceConfigurationGuids.Any())
 			{
 				return Array.Empty<GQIRow>();
@@ -150,17 +154,39 @@ namespace Get_ServiceConfiguration_1
 
 			foreach (DomInstance instance in configDomInstances)
 			{
-				var configValueInstance = new ServiceSpecificationConfigurationValueInstance(instance);
+				BuildRow(instance, rows);
+			}
 
-				var configValue = configValueInstance.ServiceSpecificationConfigurationValue.ConfigurationParameterValue;
-				if (configValue == default)
-				{
-					continue;
-				}
+			return rows.ToArray();
+		}
 
-				var item = new ConfigurationParameterValueInstance(FetchDomInstance(_domHelperConfig, configValue.Value));
+		private void BuildRow(DomInstance instance, List<GQIRow> rows)
+		{
+			var configValueInstance = new ServiceSpecificationConfigurationValueInstance(instance);
 
-				rows.Add(
+			var configValue = configValueInstance.ServiceSpecificationConfigurationValue.ConfigurationParameterValue;
+			if (configValue == default)
+			{
+				return;
+			}
+
+			var item = new ConfigurationParameterValueInstance(FetchDomInstance(_domHelperConfig, configValue.Value));
+
+			var cellValue = String.Empty;
+			if (!String.IsNullOrWhiteSpace(item.ConfigurationParameterValue.StringValue))
+			{
+				cellValue = item.ConfigurationParameterValue.StringValue;
+			}
+			else if (item.ConfigurationParameterValue.DoubleValue.HasValue)
+			{
+				cellValue = Convert.ToString(item.ConfigurationParameterValue.DoubleValue.Value);
+			}
+			else
+			{
+				// nothing to do
+			}
+
+			rows.Add(
 				new GQIRow(
 					new[]
 					{
@@ -168,19 +194,12 @@ namespace Get_ServiceConfiguration_1
 						new GQICell { Value = configValueInstance.ServiceSpecificationConfigurationValue.MandatoryAtServiceLevel ?? false },
 						new GQICell { Value = configValueInstance.ServiceSpecificationConfigurationValue.MandatoryAtServiceOrderLevel ?? false },
 						new GQICell { Value = configValueInstance.ServiceSpecificationConfigurationValue.ExposeAtServiceOrderLevel ?? false },
-						new GQICell { Value = item.ConfigurationParameterValue.Type.HasValue ? item.ConfigurationParameterValue.Type.Value.ToString() : SlcConfigurationsIds.Enums.Type.Text.ToString() },
 						new GQICell
 						{
-							Value = !String.IsNullOrWhiteSpace(item.ConfigurationParameterValue.StringValue)
-								? item.ConfigurationParameterValue.StringValue
-								: item.ConfigurationParameterValue.DoubleValue.HasValue
-									? Convert.ToString(item.ConfigurationParameterValue.DoubleValue.Value)
-									: String.Empty,
+							Value = item.ConfigurationParameterValue.Type.HasValue ? item.ConfigurationParameterValue.Type.Value.ToString() : SlcConfigurationsIds.Enums.Type.Text.ToString(),
 						},
+						new GQICell { Value = cellValue },
 					}));
-			}
-
-			return rows.ToArray();
 		}
 
 		private void LoadApplicationHandlersAndHelpers()

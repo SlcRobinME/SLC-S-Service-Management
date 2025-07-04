@@ -27,7 +27,7 @@
 		{
 			var domInstance = _wfDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(workflowId)).FirstOrDefault();
 			if (domInstance == null)
-				throw new Exception($"Could not find workflow with id {workflowId}");
+				throw new InvalidOperationException($"Could not find workflow with id {workflowId}");
 
 			return new WorkflowsInstance(domInstance);
 		}
@@ -36,7 +36,7 @@
 		{
 			var domInstance = _wfDomHelper.DomInstances.Read(DomInstanceExposers.Name.Equal(workflowName)).FirstOrDefault();
 			if (domInstance == null)
-				throw new Exception($"Could not find workflow with id {workflowName}");
+				throw new InvalidOperationException($"Could not find workflow with id {workflowName}");
 
 			return new WorkflowsInstance(domInstance);
 		}
@@ -83,7 +83,7 @@
 				.FirstOrDefault();
 
 			if (instance == null)
-				throw new Exception($"Could not find the DOM instance with id {domId}");
+				throw new InvalidOperationException($"Could not find the DOM instance with id {domId}");
 
 			return ServiceInstancesExtentions.GetTypedInstance(instance);
 		}
@@ -128,7 +128,7 @@
 			addServiceItemScript.StartScript();
 
 			if (addServiceItemScript.HadError)
-				throw new Exception($"Error creating the service item:{addServiceItemScript.GetErrorMessages()}");
+				throw new InvalidOperationException($"Error creating the service item:{addServiceItemScript.GetErrorMessages()}");
 
 			return _engine.GetScriptOutput("ServiceItemId");
 		}

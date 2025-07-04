@@ -21,7 +21,6 @@
 			<Value>
 				<![CDATA[[Project:Service-Management-GQI-CustomOperator-HasValue]]]>
 			</Value>
-			<!--<Param type="debug">true</Param>-->
 			<Param type="preCompile">true</Param>
 			<Param type="libraryName">Service-Management-GQI-CustomOperator-HasValue</Param>
 			<Message />

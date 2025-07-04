@@ -19,7 +19,6 @@
 	<Script>
 		<Exe id="1" type="csharp">
 			<Value><![CDATA[[Project:SLC_SM_Common]]]></Value>
-			<!--<Param type="debug">true</Param>-->
 			<Param type="preCompile">true</Param>
 			<Param type="libraryName">SLC_SM_Common</Param>
 			<Message></Message>
