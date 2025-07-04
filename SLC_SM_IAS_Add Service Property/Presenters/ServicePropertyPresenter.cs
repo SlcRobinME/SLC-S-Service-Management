@@ -3,14 +3,17 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+
 	using DomHelpers.SlcServicemanagement;
+
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+
 	using SLC_SM_IAS_Add_Service_Property_1.Views;
 
 	public class ServicePropertyPresenter
 	{
-		private readonly ServicePropertyView view;
 		private readonly ServicePropertiesInstance[] servicePropertiesInstances;
+		private readonly ServicePropertyView view;
 
 		public ServicePropertyPresenter(ServicePropertyView view, ServicePropertiesInstance[] servicePropertiesInstances)
 		{
@@ -34,24 +37,6 @@
 			view.ServiceProperty.SetOptions(servicePropertiesInstances.Select(x => new Option<ServicePropertiesInstance>(x.Name, x)));
 
 			OnUpdateServiceProperty(view.ServiceProperty.Selected);
-		}
-
-		private void OnUpdateServiceProperty(ServicePropertiesInstance servicePropertySelected)
-		{
-			if (servicePropertySelected?.ServicePropertyInfo.Type != SlcServicemanagementIds.Enums.TypeEnum.Discrete)
-			{
-				view.TBoxValue.Text = String.Empty;
-				view.TBoxValue.IsEnabled = true;
-				view.DdValue.SetOptions(new List<string>());
-				view.DdValue.IsEnabled = false;
-			}
-			else
-			{
-				view.TBoxValue.Text = String.Empty;
-				view.TBoxValue.IsEnabled = false;
-				view.DdValue.SetOptions(servicePropertySelected.DiscreteServicePropertyValueOptions.Select(x => x.DiscreteValue));
-				view.DdValue.IsEnabled = true;
-			}
 		}
 
 		public void LoadFromModel(ServicePropertyValueSection section)
@@ -82,6 +67,24 @@
 			}
 
 			return ok;
+		}
+
+		private void OnUpdateServiceProperty(ServicePropertiesInstance servicePropertySelected)
+		{
+			if (servicePropertySelected?.ServicePropertyInfo.Type != SlcServicemanagementIds.Enums.TypeEnum.Discrete)
+			{
+				view.TBoxValue.Text = String.Empty;
+				view.TBoxValue.IsEnabled = true;
+				view.DdValue.SetOptions(new List<string>());
+				view.DdValue.IsEnabled = false;
+			}
+			else
+			{
+				view.TBoxValue.Text = String.Empty;
+				view.TBoxValue.IsEnabled = false;
+				view.DdValue.SetOptions(servicePropertySelected.DiscreteServicePropertyValueOptions.Select(x => x.DiscreteValue));
+				view.DdValue.IsEnabled = true;
+			}
 		}
 
 		private bool ValidateValue(string newValue)

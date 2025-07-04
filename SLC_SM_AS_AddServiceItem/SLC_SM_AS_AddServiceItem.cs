@@ -117,7 +117,7 @@ namespace SLCSMASAddServiceItem
 		{
 			var domInstance = _domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault();
 			if (domInstance == null)
-				throw new Exception($"Could not find the DOM instance with id {domId}");
+				throw new InvalidOperationException($"Could not find the DOM instance with id {domId}");
 			return domInstance;
 		}
 

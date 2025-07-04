@@ -17,7 +17,6 @@
 			<Value>
 				<![CDATA[[Project:Get Service Order Items Multisection]]]>
 			</Value>
-			<!--<Param type="debug">true</Param>-->
 			<Message />
 			<Param type="preCompile">true</Param>
 			<Param type="libraryName">GetServiceItemsMultipleSections</Param>

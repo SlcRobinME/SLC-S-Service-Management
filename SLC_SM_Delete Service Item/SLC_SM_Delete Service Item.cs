@@ -167,58 +167,71 @@ namespace SLC_SM_Delete_Service_Item_1
 			if (serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 			{
 				// Check job
-				var schedulingHelper = new SchedulingHelper(_engine);
-				var job = schedulingHelper.GetJob(refId);
-				if (job.End < DateTime.UtcNow || job.Start > DateTime.UtcNow)
-				{
-					var cancelJobInputData = new ExecuteJobAction
-					{
-						DomJobId = job.Id,
-						JobAction = Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler.JobAction.CancelJob,
-					};
-					var cancelOutputData = cancelJobInputData.SendToJobHandler(_engine, true);
-					if (!cancelOutputData.TraceData.HasSucceeded())
-					{
-						throw new InvalidOperationException($"Could not cancel Job '{refId}' due to : {JsonConvert.SerializeObject(cancelOutputData.TraceData)}");
-					}
-
-					var deleteJobInputData = new ExecuteJobAction
-					{
-						DomJobId = job.Id,
-						JobAction = Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler.JobAction.DeleteJob,
-					};
-					var deleteOutputData = deleteJobInputData.SendToJobHandler(_engine, true);
-					if (!deleteOutputData.TraceData.HasSucceeded())
-					{
-						throw new InvalidOperationException($"Could not delete Job '{refId}' due to : {JsonConvert.SerializeObject(deleteOutputData.TraceData)}");
-					}
-
-					return false;
-				}
-
-				throw new InvalidOperationException($"Job '{refId}' still active on the system. Please finish this job first before removing the service item from the inventory.");
+				return LinkedJobStillActive(refId);
 			}
-			else
+
+			if (serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
 			{
 				// Check booking
-				var rm = new ResourceManagerHelper(_engine.SendSLNetSingleResponseMessage);
-				var reservation = rm.GetReservationInstance(refId);
-				if (reservation.StartTimeUTC > DateTime.UtcNow
-					&& (reservation.Status == ReservationStatus.Pending || reservation.Status == ReservationStatus.Confirmed))
-				{
-					rm.RemoveReservationInstances(reservation);
-					return false;
-				}
-
-				if (reservation.EndTimeUTC < DateTime.UtcNow
-					|| reservation.Status == ReservationStatus.Canceled
-					|| reservation.Status == ReservationStatus.Ended)
-				{
-					return false;
-				}
-
-				throw new InvalidOperationException($"Booking '{reservation.Name}' still active on the system. Please finish this booking first before removing the service item from the inventory.");
+				return LinkedBookingStillActive(refId);
 			}
+
+			return false;
+		}
+
+		private bool LinkedBookingStillActive(Guid refId)
+		{
+			var rm = new ResourceManagerHelper(_engine.SendSLNetSingleResponseMessage);
+			var reservation = rm.GetReservationInstance(refId);
+			if (reservation.StartTimeUTC > DateTime.UtcNow
+			    && (reservation.Status == ReservationStatus.Pending || reservation.Status == ReservationStatus.Confirmed))
+			{
+				rm.RemoveReservationInstances(reservation);
+				return false;
+			}
+
+			if (reservation.EndTimeUTC < DateTime.UtcNow
+			    || reservation.Status == ReservationStatus.Canceled
+			    || reservation.Status == ReservationStatus.Ended)
+			{
+				return false;
+			}
+
+			throw new InvalidOperationException($"Booking '{reservation.Name}' still active on the system. Please finish this booking first before removing the service item from the inventory.");
+		}
+
+		private bool LinkedJobStillActive(Guid refId)
+		{
+			var schedulingHelper = new SchedulingHelper(_engine);
+			var job = schedulingHelper.GetJob(refId);
+			if (job.End < DateTime.UtcNow || job.Start > DateTime.UtcNow)
+			{
+				var cancelJobInputData = new ExecuteJobAction
+				{
+					DomJobId = job.Id,
+					JobAction = Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler.JobAction.CancelJob,
+				};
+				var cancelOutputData = cancelJobInputData.SendToJobHandler(_engine, true);
+				if (!cancelOutputData.TraceData.HasSucceeded())
+				{
+					throw new InvalidOperationException($"Could not cancel Job '{refId}' due to : {JsonConvert.SerializeObject(cancelOutputData.TraceData)}");
+				}
+
+				var deleteJobInputData = new ExecuteJobAction
+				{
+					DomJobId = job.Id,
+					JobAction = Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler.JobAction.DeleteJob,
+				};
+				var deleteOutputData = deleteJobInputData.SendToJobHandler(_engine, true);
+				if (!deleteOutputData.TraceData.HasSucceeded())
+				{
+					throw new InvalidOperationException($"Could not delete Job '{refId}' due to : {JsonConvert.SerializeObject(deleteOutputData.TraceData)}");
+				}
+
+				return false;
+			}
+
+			throw new InvalidOperationException($"Job '{refId}' still active on the system. Please finish this job first before removing the service item from the inventory.");
 		}
 	}
 }

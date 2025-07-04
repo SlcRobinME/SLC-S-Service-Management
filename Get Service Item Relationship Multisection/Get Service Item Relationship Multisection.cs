@@ -54,10 +54,13 @@ namespace GetServiceItemRelationshipMultisection
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+
 	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
+
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.CPE.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	/// <summary>
@@ -177,7 +180,8 @@ namespace GetServiceItemRelationshipMultisection
 		private string GetInterfaceName(string serviceItemId, string interfaceId)
 		{
 			var serviceItem = _serviceInstance.GetServiceItems()
-				.FirstOrDefault(item => item.ServiceItemID.ToString() == serviceItemId);
+				                  .FirstOrDefault(item => item.ServiceItemID.ToString() == serviceItemId)
+				?? throw new InvalidOperationException($"No Service Item found on the system with ID '{serviceItemId}'");
 
 			var type = serviceItem.ServiceItemType.Value;
 
@@ -187,7 +191,7 @@ namespace GetServiceItemRelationshipMultisection
 			if (type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
 				return interfaceId == "1" ? "Default SRM Output" : "Default SRM Input";
 
-			throw new Exception($"Unrecognized service item type {type}");
+			throw new InvalidOperationException($"Unrecognized service item type {type}");
 		}
 
 		private string GetWorkflowInterfaceName(string serviceItemId, string interfaceId)

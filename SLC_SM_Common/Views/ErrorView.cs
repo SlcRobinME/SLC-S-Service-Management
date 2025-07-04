@@ -62,5 +62,4 @@
 			DetailsButton.Text = DetailsBox.IsVisible ? "-" : "+";
 		}
 	}
-
 }

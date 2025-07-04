@@ -113,7 +113,7 @@ namespace SLCSMASAddRelationship
 
 			if (instance == null)
 			{
-				throw new Exception($"No Service/Service Specification found with ID {domId}");
+				throw new InvalidOperationException($"No Service/Service Specification found with ID {domId}");
 			}
 
 			return instance;
@@ -139,7 +139,7 @@ namespace SLCSMASAddRelationship
 				return HandleServiceItemRelationshipDelete;
 			}
 
-			throw new Exception($"Could not parse the action {_action}");
+			throw new InvalidOperationException($"Could not parse the action {_action}");
 		}
 
 		private void ApplyRelationshipUpdate(DomInstance domInstance, Action<IList<ServiceItemRelationshipSection>> handler)

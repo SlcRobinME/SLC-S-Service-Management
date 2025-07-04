@@ -19,7 +19,6 @@
 	<Script>
 		<Exe id="1" type="csharp">
 			<Value><![CDATA[[Project:Get Service Item Relationship Multisection]]]></Value>
-			<!--<Param type="debug">true</Param>-->
 			<Param type="preCompile">true</Param>
 			<Param type="libraryName">Get Service Item Relationship Multisection</Param>
 			<Message></Message>
