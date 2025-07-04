@@ -24,7 +24,8 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
-	<PropertyGroup>
-		<SonarQubeExclude>**/*.cs</SonarQubeExclude>
-	</PropertyGroup>
+	<ItemGroup>
+		<!-- Correct syntax for excluding all .cs files -->
+		<SonarQubeExclude Include="**/*.cs" />
+	</ItemGroup>
 </Project>
