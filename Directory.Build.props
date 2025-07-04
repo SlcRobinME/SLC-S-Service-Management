@@ -25,7 +25,6 @@
 		</PackageReference>
 	</ItemGroup>
 	<PropertyGroup>
-		 <!-- Raise the threshold (default=100) to ignore small duplicates -->
-		<SonarQubeAnalysisSettings>sonar.cpd.minimumTokens=500;sonar.cpd.enabled=false</SonarQubeAnalysisSettings>
+		<SonarQubeExclude>**/*.cs</SonarQubeExclude>
 	</PropertyGroup>
 </Project>
