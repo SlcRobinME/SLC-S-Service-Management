@@ -24,9 +24,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
-	 <ItemGroup>
-		 <SonarQubeSetting Include="sonar.coverage.exclusions">
-		 	<Value>**/*.cs</Value>
-		 </SonarQubeSetting>
-	 </ItemGroup>
+	<PropertyGroup>
+		<SonarQubeExclude Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('$(MSBuildProjectName)', '^SLC_SM', 'IgnoreCase'))">true</SonarQubeExclude>
+	</PropertyGroup>
 </Project>
