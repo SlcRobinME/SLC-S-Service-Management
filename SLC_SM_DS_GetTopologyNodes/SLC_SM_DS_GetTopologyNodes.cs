@@ -109,7 +109,9 @@ namespace SLCSMDSGetTopologyNodes
 			if (domInstance == null)
 				throw new InvalidOperationException($"Could not find DOM instance with id {_domId}");
 
-			var serviceItems = ServiceInstancesExtentions.GetTypedInstance(domInstance).GetServiceItems();
+			var serviceItems = ServiceInstancesExtentions.GetTypedInstance(domInstance)
+				.GetServiceItems()
+				.Where(i => !i.IsEmpty);
 
 			var workflowPropertyValues = new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId)
 				.DomInstances
