@@ -53,13 +53,18 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+
 	using DomHelpers.SlcServicemanagement;
+
 	using Library.Views;
+
 	using Newtonsoft.Json;
+
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+
 	using SLC_SM_IAS_Add_Service_Item_1.Presenters;
 	using SLC_SM_IAS_Add_Service_Item_1.Views;
 
@@ -197,36 +202,15 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 
 		private static ServiceItemsSection GetServiceItemSection(DomInstance domInstance, string label)
 		{
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
-			{
-				var instance = new ServicesInstance(domInstance);
-				return instance.ServiceItems.FirstOrDefault(x => x.Label == label);
-			}
-
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-			{
-				var instance = new ServiceSpecificationsInstance(domInstance);
-				return instance.ServiceItems.FirstOrDefault(x => x.Label == label);
-			}
-
-			throw new InvalidOperationException($"No Service item found with label '{label}'");
+			IServiceInstanceBase serviceInstanceBase = ServiceInstancesExtentions.GetTypedInstance(domInstance);
+			return serviceInstanceBase.GetServiceItems()?.FirstOrDefault(x => x.Label == label)
+				?? throw new InvalidOperationException($"No Service Item with label '{label}' exists under {serviceInstanceBase.GetName()}");
 		}
 
 		private static int GetServiceItemCount(DomInstance domInstance)
 		{
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
-			{
-				var instance = new ServicesInstance(domInstance);
-				return instance.ServiceItems.Count;
-			}
-
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-			{
-				var instance = new ServiceSpecificationsInstance(domInstance);
-				return instance.ServiceItems.Count;
-			}
-
-			return 0;
+			IServiceInstanceBase serviceInstanceBase = ServiceInstancesExtentions.GetTypedInstance(domInstance);
+			return serviceInstanceBase.GetServiceItems()?.Count ?? 0;
 		}
 
 		private void RunSafe()

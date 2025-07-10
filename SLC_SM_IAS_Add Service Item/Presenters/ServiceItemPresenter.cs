@@ -3,14 +3,17 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+
 	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
+
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Workflows;
+
 	using SLC_SM_IAS_Add_Service_Item_1.Views;
 
 	public class ServiceItemPresenter
@@ -87,11 +90,11 @@
 				new List<Option<SlcServicemanagementIds.Enums.ServiceitemtypesEnum>>
 				{
 					new Option<SlcServicemanagementIds.Enums.ServiceitemtypesEnum>(
-						SlcServicemanagementIds.Enums.Serviceitemtypes.SRMBooking,
-						SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking),
-					new Option<SlcServicemanagementIds.Enums.ServiceitemtypesEnum>(
 						SlcServicemanagementIds.Enums.Serviceitemtypes.Workflow,
 						SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow),
+					new Option<SlcServicemanagementIds.Enums.ServiceitemtypesEnum>(
+						SlcServicemanagementIds.Enums.Serviceitemtypes.SRMBooking,
+						SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking),
 				});
 			OnUpdateServiceItemType(view.ServiceItemType.Selected);
 		}
@@ -175,7 +178,13 @@
 		{
 			if (serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 			{
-				view.DefinitionReferences.SetOptions(workflows.Select(x => x.Name).OrderBy(x => x));
+				var workflowOptions = workflows.Select(x => x.Name).OrderBy(x => x).ToList();
+				view.DefinitionReferences.SetOptions(workflowOptions);
+				if (workflowOptions.Exists(x => x == "Default"))
+				{
+					view.DefinitionReferences.Selected = "Default";
+				}
+
 				view.ScriptSelection.SetOptions(new List<string>());
 				view.ScriptSelection.IsEnabled = false;
 			}
