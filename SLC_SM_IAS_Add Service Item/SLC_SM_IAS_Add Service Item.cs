@@ -207,12 +207,6 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 				?? throw new InvalidOperationException($"No Service Item with label '{label}' exists under {serviceInstanceBase.GetName()}");
 		}
 
-		private static int GetServiceItemCount(DomInstance domInstance)
-		{
-			IServiceInstanceBase serviceInstanceBase = ServiceInstancesExtentions.GetTypedInstance(domInstance);
-			return serviceInstanceBase.GetServiceItems()?.Count ?? 0;
-		}
-
 		private void RunSafe()
 		{
 			string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
@@ -255,7 +249,7 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 
 			if (action == Action.Add)
 			{
-				presenter.LoadFromModel(GetServiceItemCount(domInstance));
+				presenter.LoadFromModel();
 			}
 			else
 			{

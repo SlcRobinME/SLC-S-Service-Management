@@ -81,10 +81,19 @@
 			return job.ID.Id.ToString();
 		}
 
-		public void LoadFromModel(int serviceItemCount)
+		private void UpdateLabelPlaceholder(SlcServicemanagementIds.Enums.ServiceitemtypesEnum serviceItemType, string definitionReference)
 		{
-			view.TboxLabel.PlaceHolder = $"Service Item #{serviceItemCount:000}";
+			string tboxLabelPlaceHolder = $"{serviceItemType}_{definitionReference}";
+			while (getServiceItemLabels.Contains(tboxLabelPlaceHolder))
+			{
+				tboxLabelPlaceHolder += " (1)";
+			}
 
+			view.TboxLabel.PlaceHolder = tboxLabelPlaceHolder;
+		}
+
+		public void LoadFromModel()
+		{
 			// Load correct types
 			view.ServiceItemType.SetOptions(
 				new List<Option<SlcServicemanagementIds.Enums.ServiceitemtypesEnum>>
@@ -102,7 +111,7 @@
 		public void LoadFromModel(ServiceItemsSection section)
 		{
 			// Load correct types
-			LoadFromModel(0);
+			LoadFromModel();
 
 			view.BtnAdd.Text = "Edit Service Item";
 			view.TboxLabel.Text = section.Label;
@@ -163,6 +172,8 @@
 				return;
 			}
 
+			UpdateLabelPlaceholder(view.ServiceItemType.Selected, selected);
+
 			var el = engine.FindElement(selected);
 			if (el == null)
 			{
@@ -195,6 +206,8 @@
 				OnUpdateDefinitionReference(view.DefinitionReferences.Selected);
 				view.ScriptSelection.IsEnabled = false;
 			}
+
+			UpdateLabelPlaceholder(serviceItemType, view.DefinitionReferences.Selected);
 		}
 
 		private bool ValidateLabel(string newValue)
