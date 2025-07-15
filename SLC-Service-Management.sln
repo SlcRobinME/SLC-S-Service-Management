@@ -104,6 +104,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLC_SM_GQIDS_Get Service Or
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLC_SM_IAS_Configurations", "SLC_SM_IAS_Configurations\SLC_SM_IAS_Configurations.csproj", "{7C5D27F4-9438-420C-BE5F-2CDC5FD8E94B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLC_SM_IAS_Manage_Discretes", "SLC_SM_IAS_Manage_Discretes\SLC_SM_IAS_Manage_Discretes.csproj", "{AEEAB0DC-91CE-41E2-8719-D958C459ED6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -274,6 +276,10 @@ Global
 		{7C5D27F4-9438-420C-BE5F-2CDC5FD8E94B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C5D27F4-9438-420C-BE5F-2CDC5FD8E94B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C5D27F4-9438-420C-BE5F-2CDC5FD8E94B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEEAB0DC-91CE-41E2-8719-D958C459ED6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEEAB0DC-91CE-41E2-8719-D958C459ED6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEEAB0DC-91CE-41E2-8719-D958C459ED6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEEAB0DC-91CE-41E2-8719-D958C459ED6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -320,6 +326,7 @@ Global
 		{DD824428-F4FC-4137-84CB-87F4CAD57A9F} = {5B35FE04-DC17-46DA-A887-CFCFF55E5058}
 		{6CC1691F-3A75-48AE-A34E-9B7416ABCEE7} = {D44EC38B-25B7-4DDE-AB69-528AE471A88F}
 		{7C5D27F4-9438-420C-BE5F-2CDC5FD8E94B} = {7B54F701-23CF-40FB-B16E-65F702079BF6}
+		{AEEAB0DC-91CE-41E2-8719-D958C459ED6D} = {7B54F701-23CF-40FB-B16E-65F702079BF6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {38C318B5-7814-41CC-9BA6-DC5069897881}
