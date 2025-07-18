@@ -39,7 +39,17 @@
 			view.TboxName.Changed += (sender, args) => ValidateLabel(args.Value);
 			view.ActionType.Changed += (sender, args) =>
 			{
-				UpdateUiOnActionTypeChange(args.Selected);
+				UpdateUiOnActionTypeChange(args.SelectedOption);
+				Validate();
+			};
+			view.Specification.Changed += (sender, args) =>
+			{
+				UpdateUiOnActionTypeChange(view.ActionType.SelectedOption);
+				Validate();
+			};
+			view.Service.Changed += (sender, args) =>
+			{
+				UpdateUiOnActionTypeChange(view.ActionType.SelectedOption);
 				Validate();
 			};
 		}
@@ -103,7 +113,7 @@
 			view.End.DateTime = DateTime.Now + TimeSpan.FromDays(7);
 			view.IndefiniteTime.IsChecked = false;
 
-			UpdateUiOnActionTypeChange(view.ActionType.Selected);
+			UpdateUiOnActionTypeChange(view.ActionType.SelectedOption);
 		}
 
 		public void LoadFromModel(Models.ServiceOrderItems instance)
@@ -150,7 +160,7 @@
 				view.Specification.Selected = view.Specification.Values.FirstOrDefault(x => x?.ID == view.Service.Selected?.ServiceSpecificationId);
 			}
 
-			UpdateUiOnActionTypeChange(view.ActionType.Selected);
+			UpdateUiOnActionTypeChange(view.ActionType.SelectedOption);
 		}
 
 		public bool Validate()
@@ -182,17 +192,29 @@
 			return ok;
 		}
 
-		private void UpdateUiOnActionTypeChange(ServiceOrderItemView.ActionTypeEnum actionTypeSelected)
+		private void UpdateUiOnActionTypeChange(Option<ServiceOrderItemView.ActionTypeEnum> actionTypeSelected)
 		{
-			if (actionTypeSelected == ServiceOrderItemView.ActionTypeEnum.Add)
+			view.TboxName.PlaceHolder = $"{actionTypeSelected.DisplayValue}";
+
+			if (view.Specification.Selected != null)
+			{
+				view.TboxName.PlaceHolder += $" - {view.Specification.Selected?.Name}";
+			}
+
+			if (actionTypeSelected.Value == ServiceOrderItemView.ActionTypeEnum.Add)
 			{
 				view.Service.IsEnabled = false;
 				view.Specification.IsEnabled = true;
 			}
-			else if (actionTypeSelected == ServiceOrderItemView.ActionTypeEnum.Delete || actionTypeSelected == ServiceOrderItemView.ActionTypeEnum.Modify)
+			else if (actionTypeSelected.Value == ServiceOrderItemView.ActionTypeEnum.Delete || actionTypeSelected.Value == ServiceOrderItemView.ActionTypeEnum.Modify)
 			{
 				view.Service.IsEnabled = true;
 				view.Specification.IsEnabled = false;
+
+				if (view.Service.Selected != null)
+				{
+					view.TboxName.PlaceHolder += $" - {view.Service.Selected.Name}";
+				}
 			}
 			else
 			{

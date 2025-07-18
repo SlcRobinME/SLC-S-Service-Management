@@ -1,24 +1,26 @@
 ﻿namespace SLC_SM_IAS_Configurations.Views
 {
+	using System;
+
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-
-	using SLC_SM_Common.API.ConfigurationsApi;
 
 	public class DiscreteValuesView : Dialog
 	{
 		public DiscreteValuesView(IEngine engine) : base(engine)
 		{
-			Title = "Select Eligible Discrete Options";
-
-			AddWidget(Options, 0, 0, 1, 2);
-			AddWidget(BtnReturn, 1, 0);
-			AddWidget(BtnApply, 1, 1);
+			Title = "Manage Eligible Discrete Options";
 		}
 
-		public CheckBoxList<Models.DiscreteValue> Options { get; } = new CheckBoxList<Models.DiscreteValue>();
+		public TextBox Value { get; } = new TextBox();
 
-		public Button BtnApply { get; } = new Button("Apply Selection");
+		public Label ErrorValue { get; } = new Label(String.Empty);
+
+		public Button BtnAddOption { get; } = new Button("Add Option");
+
+		public Section Options { get; } = new Section();
+
+		public Button BtnApply { get; } = new Button("Apply Updates");
 
 		public Button BtnReturn { get; } = new Button("Return");
 	}

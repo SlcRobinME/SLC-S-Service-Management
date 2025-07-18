@@ -351,10 +351,7 @@
 
 				case SlcConfigurationsIds.Enums.Type.Discrete:
 					{
-						var checkedDiscretes = record.ConfigurationParam.DiscreteOptions.DiscreteValues
-							.Select(x => new Option<Models.DiscreteValue>(x.Value, x))
-							.OrderBy(x => x.DisplayValue)
-							.ToList();
+						List<Option<Models.DiscreteValue>> checkedDiscretes = GetCheckedDiscretes(record.ConfigurationParam.DiscreteOptions);
 
 						var value = new DropDown<Models.DiscreteValue>(checkedDiscretes);
 						if (record.ConfigurationParam.DiscreteOptions.Default != null
@@ -373,20 +370,12 @@
 						values.Pressed += (sender, args) =>
 						{
 							var optionsView = new DiscreteValuesView(engine);
-							optionsView.Options.SetOptions(repoConfig.DiscreteValues.Read().Select(x => new Option<Models.DiscreteValue>(x.Value, x)).OrderBy(x => x.DisplayValue));
-							foreach (var discrete in optionsView.Options.Options.ToList())
-							{
-								if (checkedDiscretes.Exists(d => d.DisplayValue == discrete.DisplayValue))
-								{
-									optionsView.Options.Check(discrete);
-								}
-							}
+							var optionsPresenter = new DiscreteValuesPresenter(engine, optionsView, record.ConfigurationParam.DiscreteOptions);
 
 							optionsView.BtnReturn.Pressed += (o, eventArgs) => controller.ShowDialog(view);
 							optionsView.BtnApply.Pressed += (o, eventArgs) =>
 							{
-								record.ConfigurationParam.DiscreteOptions.DiscreteValues = optionsView.Options.Checked.ToList();
-								value.SetOptions(optionsView.Options.CheckedOptions);
+								value.SetOptions(GetCheckedDiscretes(record.ConfigurationParam.DiscreteOptions));
 								record.State = State.Update;
 								controller.ShowDialog(view);
 							};
@@ -453,6 +442,15 @@
 			view.AddWidget(values, row, 7);
 
 			view.AddWidget(delete, row, 9);
+		}
+
+		private static List<Option<Models.DiscreteValue>> GetCheckedDiscretes(Models.DiscreteParameterOptions options)
+		{
+			var checkedDiscretes = options.DiscreteValues
+				.Select(x => new Option<Models.DiscreteValue>(x.Value, x))
+				.OrderBy(x => x.DisplayValue)
+				.ToList();
+			return checkedDiscretes;
 		}
 
 		private sealed class DataRecord

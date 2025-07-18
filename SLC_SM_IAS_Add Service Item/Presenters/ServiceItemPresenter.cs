@@ -81,9 +81,9 @@
 			return job.ID.Id.ToString();
 		}
 
-		private void UpdateLabelPlaceholder(SlcServicemanagementIds.Enums.ServiceitemtypesEnum serviceItemType, string definitionReference)
+		private void UpdateLabelPlaceholder(string definitionReference)
 		{
-			string tboxLabelPlaceHolder = $"{serviceItemType}_{definitionReference}";
+			string tboxLabelPlaceHolder = $"{definitionReference}";
 			while (getServiceItemLabels.Contains(tboxLabelPlaceHolder))
 			{
 				tboxLabelPlaceHolder += " (1)";
@@ -172,7 +172,7 @@
 				return;
 			}
 
-			UpdateLabelPlaceholder(view.ServiceItemType.Selected, selected);
+			UpdateLabelPlaceholder(selected);
 
 			var el = engine.FindElement(selected);
 			if (el == null)
@@ -207,7 +207,7 @@
 				view.ScriptSelection.IsEnabled = false;
 			}
 
-			UpdateLabelPlaceholder(serviceItemType, view.DefinitionReferences.Selected);
+			UpdateLabelPlaceholder(view.DefinitionReferences.Selected);
 		}
 
 		private bool ValidateLabel(string newValue)
