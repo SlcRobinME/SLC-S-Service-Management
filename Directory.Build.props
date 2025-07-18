@@ -24,8 +24,4 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
-	<PropertyGroup>
-		<!-- Only exclude if project name starts with "SLC_SM" -->
-		<SonarQubeExclude Condition="$(MSBuildProjectName.StartsWith('SLC_SM'))">true</SonarQubeExclude>
-	</PropertyGroup>
 </Project>
