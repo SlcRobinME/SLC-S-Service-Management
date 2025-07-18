@@ -131,9 +131,12 @@ namespace GetServiceItemRelationshipMultisection
 			Init();
 
 			var relationships = _serviceInstance.GetServiceItemRelationships();
+			var items = _serviceInstance.GetServiceItems().Select(i => i.ServiceItemID.ToString());
 
 			return new GQIPage(relationships
-				.Where(r => !r.IsEmpty)
+				.Where(r => !r.IsEmpty
+					&& items.Contains(r.ChildServiceItem)
+					&& items.Contains(r.ParentServiceItem))
 				.Select(BuildRow)
 				.ToArray());
 		}

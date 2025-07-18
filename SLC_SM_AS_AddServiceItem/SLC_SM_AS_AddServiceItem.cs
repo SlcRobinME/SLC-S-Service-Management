@@ -157,6 +157,26 @@ namespace SLCSMASAddServiceItem
 
 		private void HandleServiceItemUpdate(IList<ServiceItemsSection> items, ServiceItemsSection newItem)
 		{
+			SetServiceItemId(items, newItem);
+			SetServiceItemName(items, newItem);
+
+			items.Add(newItem);
+		}
+
+		private void SetServiceItemName(IList<ServiceItemsSection> items, ServiceItemsSection newItem)
+		{
+			string baseLabel = $"{newItem.DefinitionReference}";
+			string label = baseLabel;
+			int counter = 1;
+
+			while (items.Any(i => i.Label == label))
+				label = $"{baseLabel} ({counter++})";
+
+			newItem.Label = label;
+		}
+
+		private void SetServiceItemId(IList<ServiceItemsSection> items, ServiceItemsSection newItem)
+		{
 			var ids = items
 				.Where(x => x.ServiceItemID.HasValue)
 				.Select(x => x.ServiceItemID.Value)
@@ -165,9 +185,6 @@ namespace SLCSMASAddServiceItem
 
 			var itemId = ids.Any() ? ids.Max() + 1 : 0;
 			newItem.ServiceItemID = itemId;
-			newItem.Label = $"Service Item #{itemId:000}";
-
-			items.Add(newItem);
 		}
 
 		private void LoadParameters(IEngine engine)

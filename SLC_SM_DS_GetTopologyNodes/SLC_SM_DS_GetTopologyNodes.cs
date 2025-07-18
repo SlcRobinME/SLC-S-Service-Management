@@ -111,7 +111,7 @@ namespace SLCSMDSGetTopologyNodes
 
 			var serviceItems = ServiceInstancesExtentions.GetTypedInstance(domInstance)
 				.GetServiceItems()
-				.Where(i => !i.IsEmpty);
+				.Where(i => !i.IsEmpty && !string.IsNullOrEmpty(i.Label));
 
 			var workflowPropertyValues = new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId)
 				.DomInstances
