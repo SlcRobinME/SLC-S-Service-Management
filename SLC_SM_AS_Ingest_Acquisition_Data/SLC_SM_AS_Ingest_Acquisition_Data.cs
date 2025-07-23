@@ -79,8 +79,14 @@ namespace SLC_SM_AS_Ingest_Acquisition_Data
 		private const string NameServiceId = "Service ID";
 		private const string NameTransponder = "Transponder";
 		private const string NameUrl = "URL";
+		private const string NameMulticast = "Multicast Address";
+		private const string NameSourceIp = "Source IP";
 		private const string NameUrlMain = "URL Main";
 		private const string NameUrlBackup = "URL Backup";
+		private const string NameMulticastMain = "Multicast Main";
+		private const string NameMulticastBackup = "Multicast Backup";
+		private const string NameSourceIpMain = "Source IP Main";
+		private const string NameSourceIpBackup = "Source IP Backup";
 		private const string NameInterface = "Interface";
 		private const string NameDevice = "Device Name";
 		private const string NameInterfaceMain = "Interface Main";
@@ -93,6 +99,8 @@ namespace SLC_SM_AS_Ingest_Acquisition_Data
 			"{\"id\":\"VFDE:4432\",\"referenceProgramIds\":[1164],\"name\":\"Antenne_Thueringen_(Mitte)/STREAM/1/V02\",\"tenant\":\"VFDE\",\"sourceId\":\"854b0551a1327a9198ade5b37718a18bdc4a41ce\",\"sourceType\":\"Stream\",\"details\":{\"usecase\":\"Qbit Ipstream Radio Channels\",\"_id\":\"682de70f23a1002e1bc60312\",\"updated_at\":\"2025-06-03T15:17:58+02:00\",\"created_at\":\"2025-06-03T15:17:58+02:00\",\"type\":\"Stream\",\"complete\":true,\"main\":true,\"encrypted\":false,\"is_radio\":true,\"eit\":false,\"eit_pf\":false,\"transparent_mpts\":false,\"service_type\":2,\"service_type_label\":\"Radio (0x02)\",\"tenant_ids\":[1],\"service_provider\":[],\"usage_type\":\"ALL\",\"sid_1\":0,\"sid_2\":null,\"sid_3\":null,\"sid_4\":null,\"source_asi\":null,\"source_fm\":null,\"source_dvbt2\":null,\"source_ip\":null,\"source_sat\":null,\"source_sdi\":null,\"source_srt\":null,\"source_stream\":{\"guid\":\"854b0551a1327a9198ade5b37718a18bdc4a41ce\",\"updated_at\":\"2025-06-03T15:17:58+02:00\",\"created_at\":\"2025-06-03T15:17:58+02:00\",\"url_1a\":\"http://dist-01.audiomediaplus.de/atmitte_256k\",\"location_1a\":{\"id\":989,\"region\":\"OTHER\",\"name\":\"PoC Kerpen\",\"loc_type\":4,\"loc_type_label\":\"Foreign site\",\"host_prefix\":\"bm-mich\",\"address\":null,\"room\":null,\"postcode\":null,\"city\":null},\"url_1b\":\"http://dist-01.audiomediaplus.de/atmitte_256k\",\"location_1b\":{\"id\":1024,\"region\":\"OTHER\",\"name\":\"PoC Rödelheim\",\"loc_type\":4,\"loc_type_label\":\"Foreign site\",\"host_prefix\":\"f-brei\",\"address\":null,\"room\":null,\"postcode\":null,\"city\":null},\"url_2a\":null,\"location_2a\":null,\"url_2b\":null,\"location_2b\":null},\"programs\":[1164],\"additional_information\":null,\"pids\":{\"video\":0,\"pmt\":0,\"pcr\":0,\"teletext\":0,\"subtitle\":null,\"ait_hbbtv\":0,\"eit\":null,\"sdt\":null,\"audio\":[]},\"notice\":null},\"readyForProvision\":false,\"usageType\":\"ALL\",\"createdAt\":\"2025-05-21T14:45:35.645Z\",\"updatedAt\":\"2025-05-21T14:45:35.645Z\",\"programs\":[]}";
 		private static readonly string AcquisitionData3 =
 			"{\"id\":\"VFDE:3312\",\"referenceProgramIds\":[434,7895],\"name\":\"ARD_alpha_HD/LTGA3/7.2B\",\"tenant\":\"VFDE\",\"sourceId\":\"88879149e783e554601e2089f06165085bb206cc\",\"sourceType\":\"SDI\",\"details\":{\"usecase\":\"SDI Backhaul Channels\",\"_id\":\"682de70f23a1002e1bc600ae\",\"updated_at\":\"2025-05-21T15:03:33+02:00\",\"created_at\":\"2025-05-21T15:03:33+02:00\",\"type\":\"SDI\",\"complete\":true,\"main\":true,\"encrypted\":false,\"is_radio\":false,\"eit\":false,\"eit_pf\":false,\"transparent_mpts\":false,\"service_type\":25,\"service_type_label\":\"HDTV (0x19)\",\"tenant_ids\":[1],\"service_provider\":[],\"usage_type\":\"ALL\",\"sid_1\":null,\"sid_2\":null,\"sid_3\":null,\"sid_4\":null,\"source_asi\":null,\"source_fm\":null,\"source_dvbt2\":null,\"source_ip\":null,\"source_sat\":null,\"source_sdi\":{\"guid\":\"88879149e783e554601e2089f06165085bb206cc\",\"updated_at\":\"2025-05-21T15:03:33+02:00\",\"created_at\":\"2025-05-21T15:03:33+02:00\",\"standard_1\":\"HD-SDI\",\"physical_port_1\":\"7.2B\",\"location_1\":{\"id\":1012,\"region\":\"OTHER\",\"name\":\"Potsdam A, Marlene-Dietrich-Allee 20, 14882 Potsdam, Raum Sendezentrum Fernsehen (SZF), Hybnet-Raum \",\"loc_type\":4,\"loc_type_label\":\"Foreign site\",\"host_prefix\":\"p-marl-x20-ard-1\",\"address\":null,\"room\":null,\"postcode\":null,\"city\":null},\"standard_2\":\"HD-SDI\",\"physical_port_2\":\"7.2B\",\"location_2\":{\"id\":1034,\"region\":\"OTHER\",\"name\":\"Potsdam B, Marlene-Dietrich-Allee 20, 14882 Potsdam, Raum Radiohaus (RDH), ZGR, p-marl-x20-ard-2\",\"loc_type\":4,\"loc_type_label\":\"Foreign site\",\"host_prefix\":\"p-marl-x20-ard-2\",\"address\":null,\"room\":null,\"postcode\":null,\"city\":null},\"standard_3\":null,\"physical_port_3\":null,\"location_3\":null,\"standard_4\":null,\"physical_port_4\":null,\"location_4\":null},\"source_srt\":null,\"source_stream\":null,\"programs\":[434,7895],\"additional_information\":null,\"pids\":{\"video\":null,\"pmt\":null,\"pcr\":null,\"teletext\":null,\"subtitle\":null,\"ait_hbbtv\":null,\"eit\":null,\"sdt\":null,\"audio\":[]},\"notice\":\"SDI Pre-Enc\"},\"readyForProvision\":false,\"usageType\":\"ALL\",\"createdAt\":\"2025-05-21T14:45:35.633Z\",\"updatedAt\":\"2025-05-21T14:45:35.633Z\",\"programs\":[]}";
+		private static readonly string AcquisitionData4 =
+			"{\"id\":\"VFDE:4393\",\"referenceProgramIds\":[8261,8285],\"name\":\"RTL_Bayern_Nürnberg_SI/IP/1\",\"tenant\":\"VFDE\",\"sourceId\":\"d140a8cf9e51bd87f4ac54fb175e47b959886e9a\",\"sourceType\":\"IP\",\"details\":{\"usecase\":\"[SRM] IP Peering Channels Dual Source\",\"_id\":\"682de76f4ff8c7c10f90b091\",\"updated_at\":\"2025-05-21T15:05:09+02:00\",\"created_at\":\"2025-05-21T15:03:44+02:00\",\"type\":\"IP\",\"complete\":true,\"main\":true,\"encrypted\":false,\"is_radio\":false,\"eit\":true,\"eit_pf\":true,\"transparent_mpts\":false,\"service_type\":1,\"service_type_label\":\"TV (0x01)\",\"tenant_ids\":[1],\"service_provider\":[193],\"usage_type\":\"SI\",\"sid_1\":51063,\"sid_2\":51063,\"sid_3\":51063,\"sid_4\":51063,\"source_asi\":null,\"source_fm\":null,\"source_dvbt2\":null,\"source_ip\":{\"guid\":\"d140a8cf9e51bd87f4ac54fb175e47b959886e9a\",\"updated_at\":\"2025-05-21T15:05:07+02:00\",\"created_at\":\"2025-05-21T15:03:43+02:00\",\"multicast_ip_1a\":\"234.168.7.1:60000\",\"source_ip_1a\":\"10.97.168.7\",\"nid_1a\":61441,\"tid_1a\":10000,\"sid_1a\":51063,\"location_1a\":{\"id\":989,\"region\":\"OTHER\",\"name\":\"PoC Kerpen\",\"loc_type\":4,\"loc_type_label\":\"Foreign site\",\"host_prefix\":\"bm-mich\",\"address\":null,\"room\":null,\"postcode\":null,\"city\":null},\"multicast_ip_1b\":\"234.168.7.1:60000\",\"source_ip_1b\":\"10.97.168.7\",\"nid_1b\":61441,\"tid_1b\":10000,\"sid_1b\":null,\"location_1b\":{\"id\":1024,\"region\":\"OTHER\",\"name\":\"PoC Rödelheim\",\"loc_type\":4,\"loc_type_label\":\"Foreign site\",\"host_prefix\":\"f-brei\",\"address\":null,\"room\":null,\"postcode\":null,\"city\":null},\"multicast_ip_2a\":\"234.142.1.9:60000\",\"source_ip_2a\":\"10.97.142.1\",\"nid_2a\":61441,\"tid_2a\":10000,\"sid_2a\":51063,\"location_2a\":{\"id\":989,\"region\":\"OTHER\",\"name\":\"PoC Kerpen\",\"loc_type\":4,\"loc_type_label\":\"Foreign site\",\"host_prefix\":\"bm-mich\",\"address\":null,\"room\":null,\"postcode\":null,\"city\":null},\"multicast_ip_2b\":\"234.142.1.9:60000\",\"source_ip_2b\":\"10.97.142.1\",\"nid_2b\":61441,\"tid_2b\":10000,\"sid_2b\":51063,\"location_2b\":{\"id\":1024,\"region\":\"OTHER\",\"name\":\"PoC Rödelheim\",\"loc_type\":4,\"loc_type_label\":\"Foreign site\",\"host_prefix\":\"f-brei\",\"address\":null,\"room\":null,\"postcode\":null,\"city\":null}},\"source_sat\":null,\"source_sdi\":null,\"source_srt\":null,\"source_stream\":null,\"programs\":[8261,8285],\"additional_information\":null,\"pids\":{\"video\":null,\"pmt\":null,\"pcr\":null,\"teletext\":null,\"subtitle\":null,\"ait_hbbtv\":null,\"eit\":3318,\"sdt\":3317,\"audio\":[]},\"notice\":\"Migration RTL_Bayern_Nürnberg_SI/IP/1 + RTL_Bayern_Nürnberg_SI/IP/2\"},\"readyForProvision\":true,\"usageType\":\"SI\",\"createdAt\":\"2025-05-21T14:47:12.024Z\",\"updatedAt\":\"2025-06-10T10:55:42.864Z\",\"complete\":{\"readyForUse\":true,\"doneAt\":\"2025-06-10T10:55:42.864Z\",\"user\":{\"id\":\"6458bba7cad2c7a9893f153c\",\"name\":\"LUPO internal\"},\"_id\":\"68480f2eeb938922b6880da7\"},\"dataMinerResponse\":{\"dataMinerServiceId\":\"39118/6482\",\"provisionedAt\":\"2024-07-29T10:20:39.372Z\",\"message\":\"Initial provisioning based on AggregationID import\",\"_id\":\"68480f2eeb938922b6880da5\"},\"deploymentAt\":\"2024-07-29T10:20:39.372Z\",\"noticedAt\":\"2024-07-29T10:20:39.372Z\",\"testResult\":{\"result\":\"accepted\",\"doneAt\":\"2025-06-10T10:55:42.864Z\",\"comment\":\"AUTOMATICALLY ACCEPTED\",\"user\":{\"id\":\"6458bba7cad2c7a9893f153c\",\"name\":\"LUPO internal\"},\"_id\":\"68480f2eeb938922b6880da6\"},\"programs\":[]}";
 
 		private Action<string> _logger;
 		private static string NameFrequency = "Frequency";
@@ -147,6 +155,9 @@ namespace SLC_SM_AS_Ingest_Acquisition_Data
 				case "SDI":
 					return BuildConfigsSdiPenc(model, existing);
 
+				case "IP":
+					return BuildConfigPeering(model, existing);
+
 				default:
 					throw new NotImplementedException($"Type '{model.Details.Type}' not implemented (yet).");
 			}
@@ -164,6 +175,9 @@ namespace SLC_SM_AS_Ingest_Acquisition_Data
 
 				case "SDI":
 					return BuildConfigsServiceOrderSdiPenc(model, existing, spec);
+
+				case "IP":
+					return BuildConfigsServiceOrderPeering(model, existing, spec);
 
 				default:
 					throw new NotImplementedException($"Type '{model.Details.Type}' not implemented (yet).");
@@ -244,7 +258,7 @@ namespace SLC_SM_AS_Ingest_Acquisition_Data
 			var existingConfigParams = dataHelper.Read();
 			var paramOrbital = existingConfigParams.Find(x => x.Name == NameOrbitalPosition) ?? CreateParamOrbitalPosition(dataHelper, NameOrbitalPosition);
 			var orbitalOptions = paramOrbital.DiscreteOptions.DiscreteValues.Select(x => x.Value).ToList();
-			string orbitalVal = orbitalOptions.First(x => x.StartsWith(model.Details.SourceSat.OrbitalPosition.Replace(",", ".").Split('°')[0]));
+			string orbitalVal = orbitalOptions.First(x => x.StartsWith(model.Details.SourceSat.OrbitalPosition.Split(',')[0]));
 
 			var polarization = GetServiceOrderItemConfigurationValue(existing, spec, NamePolarization);
 			var orbital = GetServiceOrderItemConfigurationValue(existing, spec, NameOrbitalPosition);
@@ -255,8 +269,8 @@ namespace SLC_SM_AS_Ingest_Acquisition_Data
 
 			polarization.ConfigurationParameter.StringValue = model.Details.SourceSat.Polarisation.ToUpper().StartsWith("V") ? "Vertical" : "Horizontal";
 			orbital.ConfigurationParameter.StringValue = orbitalVal;
-			freq.ConfigurationParameter.DoubleValue = model.Details.SourceSat.Frequency / 1_000;
-			symbRate.ConfigurationParameter.DoubleValue = model.Details.SourceSat.SymbolRate / 1_000;
+			freq.ConfigurationParameter.DoubleValue = model.Details.SourceSat.Frequency / 1_000.0;
+			symbRate.ConfigurationParameter.DoubleValue = model.Details.SourceSat.SymbolRate / 1_000.0;
 			sid.ConfigurationParameter.DoubleValue = model.Details.Programs.FirstOrDefault();
 			transponder.ConfigurationParameter.StringValue = model.Details.SourceSat.Transponder;
 
@@ -324,6 +338,85 @@ namespace SLC_SM_AS_Ingest_Acquisition_Data
 				sid,
 				urlMain,
 				urlBkup,
+			};
+		}
+
+		private static List<Models.ServiceSpecificationConfigurationValue> BuildConfigPeering(LupoAcquisitionData.Root model, List<Models.ServiceSpecificationConfigurationValue> existing)
+		{
+			var dataHelper = new DataHelperConfigurationParameter(Engine.SLNetRaw);
+			var existingParams = dataHelper.Read();
+			var paramSid = existingParams.Find(x => x.Name == NameServiceId) ?? CreateParamServiceId(dataHelper, NameServiceId);
+			var paramAddress = existingParams.Find(x => x.Name == NameMulticast) ?? CreateParameterString(dataHelper, NameMulticast);
+			var paramSourceIp = existingParams.Find(x => x.Name == NameSourceIp) ?? CreateParameterString(dataHelper, NameSourceIp);
+
+			var dataHelperValue = new DataHelperConfigurationParameterValue(Engine.SLNetRaw);
+
+			return new List<Models.ServiceSpecificationConfigurationValue>
+			{
+				new Models.ServiceSpecificationConfigurationValue
+				{
+					ID = existing.Find(x => x.ConfigurationParameter.Label == NameServiceId)?.ID ?? Guid.NewGuid(),
+					MandatoryAtService = true,
+					MandatoryAtServiceOrder = true,
+					ExposeAtServiceOrder = true,
+					ConfigurationParameter = CreateConfig(dataHelperValue, paramSid, NameServiceId, model.Details.Programs.FirstOrDefault()),
+				},
+				new Models.ServiceSpecificationConfigurationValue
+				{
+					ID = existing.Find(x => x.ConfigurationParameter.Label == NameMulticastMain)?.ID ?? Guid.NewGuid(),
+					MandatoryAtService = true,
+					MandatoryAtServiceOrder = true,
+					ExposeAtServiceOrder = true,
+					ConfigurationParameter = CreateConfig(dataHelperValue, paramAddress, NameMulticastMain, model.Details.SourceIp.MulticastIp1A ?? String.Empty),
+				},
+				new Models.ServiceSpecificationConfigurationValue
+				{
+					ID = existing.Find(x => x.ConfigurationParameter.Label == NameMulticastBackup)?.ID ?? Guid.NewGuid(),
+					MandatoryAtService = true,
+					MandatoryAtServiceOrder = true,
+					ExposeAtServiceOrder = true,
+					ConfigurationParameter = CreateConfig(dataHelperValue, paramAddress, NameMulticastBackup, model.Details.SourceIp.MulticastIp2A ?? String.Empty),
+				},
+				new Models.ServiceSpecificationConfigurationValue
+				{
+					ID = existing.Find(x => x.ConfigurationParameter.Label == NameSourceIpMain)?.ID ?? Guid.NewGuid(),
+					MandatoryAtService = true,
+					MandatoryAtServiceOrder = true,
+					ExposeAtServiceOrder = true,
+					ConfigurationParameter = CreateConfig(dataHelperValue, paramSourceIp, NameSourceIpMain, model.Details.SourceIp.SourceIp1A ?? String.Empty),
+				},
+				new Models.ServiceSpecificationConfigurationValue
+				{
+					ID = existing.Find(x => x.ConfigurationParameter.Label == NameSourceIpBackup)?.ID ?? Guid.NewGuid(),
+					MandatoryAtService = true,
+					MandatoryAtServiceOrder = true,
+					ExposeAtServiceOrder = true,
+					ConfigurationParameter = CreateConfig(dataHelperValue, paramSourceIp, NameSourceIpBackup, model.Details.SourceIp.SourceIp2A ?? String.Empty),
+				},
+			};
+		}
+
+		private static List<Models.ServiceOrderItemConfigurationValue> BuildConfigsServiceOrderPeering(LupoAcquisitionData.Root model, List<Models.ServiceOrderItemConfigurationValue> existing, Models.ServiceSpecification spec)
+		{
+			var sid = GetServiceOrderItemConfigurationValue(existing, spec, NameServiceId);
+			var addressMain = GetServiceOrderItemConfigurationValue(existing, spec, NameMulticastMain);
+			var addressBkup = GetServiceOrderItemConfigurationValue(existing, spec, NameMulticastBackup);
+			var sourceMain = GetServiceOrderItemConfigurationValue(existing, spec, NameSourceIpMain);
+			var sourceBkup = GetServiceOrderItemConfigurationValue(existing, spec, NameSourceIpBackup);
+
+			sid.ConfigurationParameter.DoubleValue = model.Details.Programs.FirstOrDefault();
+			addressMain.ConfigurationParameter.StringValue = model.Details.SourceIp.MulticastIp1A ?? String.Empty;
+			addressBkup.ConfigurationParameter.StringValue = model.Details.SourceIp.MulticastIp2A ?? String.Empty;
+			sourceMain.ConfigurationParameter.StringValue = model.Details.SourceIp.SourceIp1A ?? String.Empty;
+			sourceBkup.ConfigurationParameter.StringValue = model.Details.SourceIp.SourceIp2A ?? String.Empty;
+
+			return new List<Models.ServiceOrderItemConfigurationValue>
+			{
+				sid,
+				addressMain,
+				addressBkup,
+				sourceMain,
+				sourceBkup,
 			};
 		}
 
@@ -796,14 +889,18 @@ namespace SLC_SM_AS_Ingest_Acquisition_Data
 							 ?? throw new InvalidOperationException("Radio Data could not be parsed.");
 			var sdiModel = JsonConvert.DeserializeObject<LupoAcquisitionData.Root>(AcquisitionData3)
 						   ?? throw new InvalidOperationException("Radio Data could not be parsed.");
+			var peerModel = JsonConvert.DeserializeObject<LupoAcquisitionData.Root>(AcquisitionData4)
+						   ?? throw new InvalidOperationException("Radio Data could not be parsed.");
 
 			CreateServiceSpecification(satDlModel, "SAT-DL Booking Manager", "SRM_CreateNewBooking");
 			CreateServiceSpecification(radioModel, "RADIO Booking Manager", "SRM_CreateNewBooking");
 			CreateServiceSpecification(sdiModel, "SDI PRE-ENCODING Booking Manager", "SRM_CreateNewBooking");
+			CreateServiceSpecification(peerModel, "IP Peering Booking Manager", "SRM_CreateNewBooking");
 
 			ImportAcquisitionDataAsServiceOrder(satDlModel);
 			ImportAcquisitionDataAsServiceOrder(radioModel);
 			ImportAcquisitionDataAsServiceOrder(sdiModel);
+			ImportAcquisitionDataAsServiceOrder(peerModel);
 		}
 	}
 }

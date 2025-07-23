@@ -39,12 +39,21 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			instance.ServicePropertyInfo.Name = item.Name;
 			instance.ServicePropertyInfo.Type = item.Type;
 
-			foreach (string discreteValue in item.DiscreteValues)
+			if (item.DiscreteValues != null)
 			{
-				instance.DiscreteServicePropertyValueOptions.Add(new DiscreteServicePropertyValueOptionsSection
+				foreach (string discreteValue in item.DiscreteValues)
 				{
-					DiscreteValue = discreteValue,
-				});
+					instance.DiscreteServicePropertyValueOptions.Add(
+						new DiscreteServicePropertyValueOptionsSection
+						{
+							DiscreteValue = discreteValue,
+						});
+				}
+			}
+
+			if (!instance.DiscreteServicePropertyValueOptions.Any())
+			{
+				instance.DiscreteServicePropertyValueOptions.Add(new DiscreteServicePropertyValueOptionsSection());
 			}
 
 			return CreateOrUpdateInstance(instance);

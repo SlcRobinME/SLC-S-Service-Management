@@ -99,6 +99,7 @@ namespace SLC_SM_UDAPI_Ingest_Acquisition_Service
 
 				var script = engine.PrepareSubScript("SLC_SM_AS_Ingest_Acquisition_Data");
 				script.Synchronous = true;
+				script.InheritScriptOutput = true;
 				script.SelectScriptParam("Data", requestData.RawBody);
 
 				script.StartScript();
@@ -111,14 +112,12 @@ namespace SLC_SM_UDAPI_Ingest_Acquisition_Service
 						ResponseBody = $"Failed to add or update the acquisition data '{acquisitionData.Name} ({acquisitionData.Id})' due to: {String.Join(Environment.NewLine, script.GetErrorMessages())}",
 					};
 				}
-				else
+
+				return new ApiTriggerOutput
 				{
-					return new ApiTriggerOutput
-					{
-						ResponseCode = (int)StatusCode.Ok,
-						ResponseBody = $"Acquisition Data '{acquisitionData.Name} ({acquisitionData.Id})' added or updated",
-					};
-				}
+					ResponseCode = (int)StatusCode.Ok,
+					ResponseBody = $"Acquisition Data '{acquisitionData.Name} ({acquisitionData.Id})' added or updated",
+				};
 			}
 			catch (Exception e)
 			{

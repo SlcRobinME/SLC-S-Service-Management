@@ -39,13 +39,17 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 		{
 			var instance = new ServicePropertyValuesInstance(New(item.ID));
 
-			foreach (var value in item.Values)
+			if (item.Values != null)
 			{
-				instance.ServicePropertyValue.Add(new ServicePropertyValueSection
+				foreach (var value in item.Values)
 				{
-					Value = value.Value,
-					Property = value.ServicePropertyId,
-				});
+					instance.ServicePropertyValue.Add(
+						new ServicePropertyValueSection
+						{
+							Value = value.Value,
+							Property = value.ServicePropertyId,
+						});
+				}
 			}
 
 			if (!instance.ServicePropertyValue.Any())
