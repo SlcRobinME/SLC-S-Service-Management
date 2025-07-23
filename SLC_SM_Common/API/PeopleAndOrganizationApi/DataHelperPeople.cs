@@ -29,6 +29,8 @@ namespace SLC_SM_Common.API.PeopleAndOrganizationApi
 						FullName = x.PeopleInformation.FullName,
 						OrganizationId = x.Organization.Organization_57695f03,
 						Skill = x.PeopleInformation.PersonalSkills,
+						Mail = x.ContactInfo.Email ?? String.Empty,
+						Phone = x.ContactInfo.Phone ?? String.Empty,
 					})
 				.ToList();
 		}
@@ -39,6 +41,7 @@ namespace SLC_SM_Common.API.PeopleAndOrganizationApi
 			instance.PeopleInformation.FullName = item.FullName;
 			instance.PeopleInformation.PersonalSkills = item.Skill ?? String.Empty;
 			instance.PeopleInformation.ExperienceLevel = item.ExperienceLevel.ID;
+			instance.PeopleInformation.ProfileImage = String.Empty;
 			instance.ContactInfo.Email = item.Mail ?? String.Empty;
 			instance.ContactInfo.Phone = item.Phone ?? String.Empty;
 			instance.ContactInfo.StreetAddress = "";

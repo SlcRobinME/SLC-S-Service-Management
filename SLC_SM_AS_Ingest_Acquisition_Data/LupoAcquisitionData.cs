@@ -97,7 +97,7 @@ namespace ACQ_LIB
 			public object SourceDvbt2 { get; set; }
 
 			[JsonProperty("source_ip")]
-			public object SourceIp { get; set; }
+			public SourceIp SourceIp { get; set; }
 
 			[JsonProperty("source_sat")]
 			public SourceSat SourceSat { get; set; }
@@ -137,6 +137,90 @@ namespace ACQ_LIB
 
 			[JsonProperty("outputServiceName")]
 			public string OutputServiceName { get; set; }
+		}
+
+		public class SourceIp
+		{
+			[JsonProperty("guid")]
+			public string Guid { get; set; }
+
+			[JsonProperty("updated_at")]
+			public string UpdatedAt { get; set; }
+
+			[JsonProperty("created_at")]
+			public string CreatedAt { get; set; }
+
+			[JsonProperty("multicast_ip_1a")]
+			public string MulticastIp1A { get; set; }
+
+			[JsonProperty("source_ip_1a")]
+			public string SourceIp1A { get; set; }
+
+			[JsonProperty("nid_1a")]
+			public long Nid1A { get; set; }
+
+			[JsonProperty("tid_1a")]
+			public long Tid1A { get; set; }
+
+			[JsonProperty("sid_1a")]
+			public long Sid1A { get; set; }
+
+			[JsonProperty("location_1a")]
+			public Location Location1A { get; set; }
+
+			[JsonProperty("multicast_ip_1b")]
+			public string MulticastIp1B { get; set; }
+
+			[JsonProperty("source_ip_1b")]
+			public string SourceIp1B { get; set; }
+
+			[JsonProperty("nid_1b")]
+			public long Nid1B { get; set; }
+
+			[JsonProperty("tid_1b")]
+			public long Tid1B { get; set; }
+
+			[JsonProperty("sid_1b")]
+			public object Sid1B { get; set; }
+
+			[JsonProperty("location_1b")]
+			public Location Location1B { get; set; }
+
+			[JsonProperty("multicast_ip_2a")]
+			public string MulticastIp2A { get; set; }
+
+			[JsonProperty("source_ip_2a")]
+			public string SourceIp2A { get; set; }
+
+			[JsonProperty("nid_2a")]
+			public long Nid2A { get; set; }
+
+			[JsonProperty("tid_2a")]
+			public long Tid2A { get; set; }
+
+			[JsonProperty("sid_2a")]
+			public long Sid2A { get; set; }
+
+			[JsonProperty("location_2a")]
+			public Location Location2A { get; set; }
+
+			[JsonProperty("multicast_ip_2b")]
+			public string MulticastIp2B { get; set; }
+
+			[JsonProperty("source_ip_2b")]
+			public string SourceIp2B { get; set; }
+
+			[JsonProperty("nid_2b")]
+			public long Nid2B { get; set; }
+
+			[JsonProperty("tid_2b")]
+			public long Tid2B { get; set; }
+
+			[JsonProperty("sid_2b")]
+			public long Sid2B { get; set; }
+
+			[JsonProperty("location_2b")]
+			public Location Location2B { get; set; }
 		}
 
 		public class SourceSat

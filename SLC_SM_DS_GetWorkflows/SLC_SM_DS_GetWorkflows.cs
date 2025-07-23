@@ -67,7 +67,7 @@ namespace SLCSMDSGetWorkflows
 	/// </summary>
 	[GQIMetaData(Name = "SLC_SM_DS_GetWorkflows")]
 	public sealed class SLCSMDSGetWorkflows : IGQIDataSource
-		, IGQIOnInit, IGQIInputArguments
+		, IGQIOnInit
 	{
 		private GQIDMS _dms;
 
@@ -181,16 +181,6 @@ namespace SLCSMDSGetWorkflows
 			{
 				HasNextPage = false,
 			};
-		}
-
-		public GQIArgument[] GetInputArguments()
-		{
-			throw new NotImplementedException();
-		}
-
-		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

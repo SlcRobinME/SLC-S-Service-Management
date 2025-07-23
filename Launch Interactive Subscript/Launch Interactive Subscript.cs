@@ -1,7 +1,3 @@
-
-//---------------------------------
-// Launch Interactive Subscript_1.cs
-//---------------------------------
 /*
 ****************************************************************************
 *  Copyright (c) 2025,  Skyline Communications NV  All Rights Reserved.    *
