@@ -40,6 +40,7 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 						{
 							ID = x.ID.Id,
 							StatusId = x.StatusId,
+							OrderId = x.ServiceOrderInfo.ID,
 							Name = x.ServiceOrderInfo.Name,
 							Description = x.ServiceOrderInfo.Description,
 							ExternalID = x.ServiceOrderInfo.ExternalID,
@@ -66,6 +67,11 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 			instance.ServiceOrderInfo.Description = order.Description;
 			instance.ServiceOrderInfo.ExternalID = order.ExternalID;
 			instance.ServiceOrderInfo.Priority = order.Priority;
+
+			if (!String.IsNullOrEmpty(order.OrderId))
+			{
+				instance.ServiceOrderInfo.ID = order.OrderId;
+			}
 
 			instance.ServiceOrderInfo.RelatedOrganization = order.OrganizationId;
 

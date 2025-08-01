@@ -124,7 +124,7 @@
 			// Load correct types
 			LoadFromModel(0);
 
-			view.BtnAdd.Text = "Edit Service Order Item";
+			view.BtnAdd.Text = "Edit";
 			view.TboxName.Text = instance.ServiceOrderItem.Name;
 			view.ActionType.Selected = Enum.TryParse(instance.ServiceOrderItem.Action, true, out ServiceOrderItemView.ActionTypeEnum action)
 				? action
