@@ -17,6 +17,7 @@
 		private readonly ManageConnectionsModel _model;
 		private readonly ScriptData _data;
 		private readonly List<ServiceItemLinkMap> _linkMap;
+		private readonly IssueCollector _issueCollector;
 
 		private ManageConnectionDialog _dialog;
 		private IServiceInstanceBase _serviceInstance;
@@ -30,6 +31,7 @@
 			_model = new ManageConnectionsModel(engine);
 			_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 			_linkMap = new List<ServiceItemLinkMap>();
+			_issueCollector = new IssueCollector();
 		}
 
 		public EventHandler<EventArgs> OnCancel => (sender, args) => _engine.ExitSuccess(string.Empty);
@@ -87,8 +89,20 @@
 			while (_nextPairIndex < _linkMap.Count)
 			{
 				var pair = _linkMap[_nextPairIndex++];
-				if (pair.HasSources && pair.HasDestinations)
-					return pair;
+
+				if (!pair.HasSources)
+				{
+					_issueCollector.Add($"{pair.SourceNode.Label} has no outputs available.");
+					continue;
+				}
+
+				if (!pair.HasDestinations)
+				{
+					_issueCollector.Add($"{pair.DestinationNode.Label} has no inputs left.");
+					continue;
+				}
+
+				return pair;
 			}
 
 			return null;
@@ -184,7 +198,20 @@
 		private void Save()
 		{
 			_model.Update(_linkMap, _serviceInstance);
+
+			if (_issueCollector.HasIssues)
+				ReportIssues();
+
 			_engine.ExitSuccess(string.Empty);
+		}
+
+		private void ReportIssues()
+		{
+			var popup = _engine.PrepareSubScript("SLC_SM_IAS_PopupMessage");
+			popup.SelectScriptParam("Title", "Attention!");
+			popup.SelectScriptParam("Message", _issueCollector.PrintReport());
+			popup.SelectScriptParam("ButtonLabel", "Ok");
+			popup.StartScript();
 		}
 	}
 }
