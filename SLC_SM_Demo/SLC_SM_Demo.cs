@@ -61,6 +61,10 @@ namespace SLCSMDemo
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
+	using SLC_SM_Common.API.ConfigurationsApi;
+
+	using Models = SLC_SM_Common.API.ServiceManagementApi.Models;
+
 	/// <summary>
 	/// Represents a DataMiner Automation script.
 	/// </summary>
@@ -101,15 +105,42 @@ namespace SLCSMDemo
 
 		private void RunSafe(IEngine engine)
 		{
-			string categoryType = "Channel";
-			string categoryName = "ARD";
+			//FilterServiceOnCategory(engine);
 
-			var dataHelpers = new DataHelpersServiceManagement(Engine.SLNetRaw);
+			FilterServiceOnCharacteristic(engine);
+		}
 
-			var categoryToMatch = dataHelpers.ServiceCategories.Read().Find(x => x.Type == categoryType && x.Name == categoryName)
-				?? throw new InvalidOperationException($"No Category found matching '{categoryType}-{categoryName}'");
+		////private static void FilterServiceOnCategory(IEngine engine)
+		////{
+		////	string categoryType = "Channel";
+		////	string categoryName = "ARD";
 
-			var services = dataHelpers.Services.Read(ServicesInstanceExposers.ServiceInfoSection.ServiceCategory.Equal(categoryToMatch));
+		////	var dataHelpers = new DataHelpersServiceManagement(Engine.SLNetRaw);
+
+		////	var categoryToMatch = dataHelpers.ServiceCategories.Read().Find(x => x.Type == categoryType && x.Name == categoryName)
+		////	                      ?? throw new InvalidOperationException($"No Category found matching '{categoryType}-{categoryName}'");
+
+		////	var services = dataHelpers.Services.Read(ServicesInstanceExposers.ServiceInfoSection.ServiceCategory.Equal(categoryToMatch));
+		////	engine.GenerateInformation($"Service(s) found:\r\n{String.Join(Environment.NewLine, services.Select(s => $"{s.Name} ({s.ID})"))}");
+		////}
+
+		private static void FilterServiceOnCharacteristic(IEngine engine)
+		{
+			string parameterName = "Service ID";
+			int parameterValue = 1;
+
+			var dataHelpersConf = new RepoConfigurations(Engine.SLNetRaw);
+			var dataHelpersSrvMgmt = new Repo(Engine.SLNetRaw);
+
+			var parameterToMatch = dataHelpersConf.ConfigurationParameterValues.Read().Find(x => x.Label == parameterName && x.DoubleValue == parameterValue)
+								  ?? throw new InvalidOperationException($"No Characteristic found matching '{parameterName}'");
+
+			////var serviceConfigurationParameterToMatch = dataHelpersSrvMgmt.ServiceConfigurationValues.Read(ServicesInstanceExposers.ServiceConfigurationParameterSection.ParameterID.Equal(parameterToMatch.ID))
+			////	?? throw new InvalidOperationException($"No Service Configuration Parameter found matching '{parameterToMatch.ID}'");
+			var serviceConfigurationParameterToMatch = dataHelpersSrvMgmt.ServiceConfigurationValues.Read().Find(x => x.ConfigurationParameter.ID == parameterToMatch.ID)
+							?? throw new InvalidOperationException($"No Service Configuration Parameter found matching '{parameterToMatch.ID}'");
+
+			var services = dataHelpersSrvMgmt.Services.Read(ServicesInstanceExposers.ServiceInfoSection.ServiceConfigurationParameters.Contains(serviceConfigurationParameterToMatch));
 			engine.GenerateInformation($"Service(s) found:\r\n{String.Join(Environment.NewLine, services.Select(s => $"{s.Name} ({s.ID})"))}");
 		}
 	}

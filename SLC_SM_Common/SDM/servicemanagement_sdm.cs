@@ -118,8 +118,13 @@ namespace DomHelpers.SlcServicemanagement
 			//public static readonly Exposer<Models.Service, SdmObjectReference<DomHelpers.SlcServicemanagement.ServicePropertiesInstance>?> ServiceProperties = new Exposer<ServicesInstance, SdmObjectReference<DomHelpers.SlcServicemanagement.ServicePropertiesInstance>?>((obj) => obj.ServiceInfo.ServiceProperties, String.Join(".", nameof(ServiceInfoSection), nameof(ServiceProperties)));
 			public static readonly Exposer<Models.Service, Guid?> RelatedOrganization = new Exposer<Models.Service, Guid?>((obj) => obj.OrganizationId, String.Join(".", nameof(ServiceInfoSection), nameof(RelatedOrganization)));
 			public static readonly Exposer<Models.Service, Models.ServiceCategory> ServiceCategory = new Exposer<Models.Service, Models.ServiceCategory>((obj) => obj.Category, String.Join(".", nameof(ServiceInfoSection), nameof(ServiceCategory)));
-			//public static readonly DynamicListExposer<Models.Service, SdmObjectReference<DomHelpers.SlcServicemanagement.ServiceConfigurationValueInstance>> ServiceConfigurationParameters = DynamicListExposer<ServicesInstance, SdmObjectReference<DomHelpers.SlcServicemanagement.ServiceConfigurationValueInstance>>.CreateFromListExposer(new Exposer<ServicesInstance, IEnumerable>((obj) => obj.ServiceInfo.ServiceConfigurationParameters, String.Join(".", nameof(ServiceInfoSection), nameof(ServiceConfigurationParameters))));
+			public static readonly DynamicListExposer<Models.Service, Models.ServiceConfigurationValue> ServiceConfigurationParameters = DynamicListExposer<Models.Service, Models.ServiceConfigurationValue>.CreateFromListExposer(new Exposer<Models.Service, IEnumerable>((obj) => obj.Configurations, String.Join(".", nameof(ServiceInfoSection), nameof(ServiceConfigurationParameters))));
 			public static readonly Exposer<Models.Service, string> ServiceID = new Exposer<Models.Service, string>((obj) => obj.ServiceID, String.Join(".", nameof(ServiceInfoSection), nameof(ServiceID)));
+		}
+
+		public static class ServiceConfigurationParameterSection
+		{
+			public static readonly Exposer<Models.ServiceConfigurationValue, Guid> ParameterID = new Exposer<Models.ServiceConfigurationValue, Guid>((obj) => obj.ConfigurationParameter.ID, String.Join(".", nameof(ServiceConfigurationParameterSection), nameof(ParameterID)));
 		}
 
 		public static class ServiceItemsSection

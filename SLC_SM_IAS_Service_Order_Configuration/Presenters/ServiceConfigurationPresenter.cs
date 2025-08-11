@@ -177,6 +177,8 @@
 		private void BuildUI(bool showDetails, bool showLifeCycleDetails)
 		{
 			view.Clear();
+			view.Details.Clear();
+			view.LifeCycleDetails.Clear();
 
 			int row = 0;
 			view.AddWidget(view.TitleDetails, row, 0, 1, 2);

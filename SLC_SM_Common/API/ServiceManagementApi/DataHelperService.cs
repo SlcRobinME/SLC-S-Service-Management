@@ -247,9 +247,11 @@ namespace SLC_SM_Common.API.ServiceManagementApi
 				case "ServiceInfoSection.ServiceCategory":
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceCategory), comparer, (value as Models.ServiceCategory)?.ID ?? Guid.Empty);
 				case "ServiceInfoSection.ServiceConfigurationParameters":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfigurationParameters), comparer, (Guid)value);
+					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfigurationParameters), comparer, (value as Models.ServiceConfigurationValue)?.ID ?? Guid.Empty);
 				case "ServiceInfoSection.ServiceID":
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceID), comparer, (string)value);
+				case "ServiceConfigurationParameterSection.ParameterID":
+					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceConfigurationValue.ConfigurationParameterValue), comparer, (Guid)value);
 				case "ServiceItemsSection.Label":
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.Label), comparer, (string)value);
 				case "ServiceItemsSection.ServiceItemID":
