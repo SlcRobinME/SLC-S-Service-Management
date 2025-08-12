@@ -54,6 +54,7 @@ namespace SLCSMDemo
 	using System;
 	using System.Linq;
 
+	using DomHelpers.SlcConfigurations;
 	using DomHelpers.SlcServicemanagement;
 
 	using Library;
@@ -61,9 +62,7 @@ namespace SLCSMDemo
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
-	using SLC_SM_Common.API.ConfigurationsApi;
-
-	using Models = SLC_SM_Common.API.ServiceManagementApi.Models;
+	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
@@ -126,21 +125,38 @@ namespace SLCSMDemo
 
 		private static void FilterServiceOnCharacteristic(IEngine engine)
 		{
-			string parameterName = "Service ID";
-			int parameterValue = 1;
+			string configurationParameterLabel = "Service Type";
+			string configurationParameterValue = "Channel";
 
-			var dataHelpersConf = new RepoConfigurations(Engine.SLNetRaw);
-			var dataHelpersSrvMgmt = new Repo(Engine.SLNetRaw);
+			var dataHelpersConf = new DataHelpersConfigurations(Engine.SLNetRaw);
+			var dataHelpersSrvMgmt = new DataHelpersServiceManagement(Engine.SLNetRaw);
 
-			var parameterToMatch = dataHelpersConf.ConfigurationParameterValues.Read().Find(x => x.Label == parameterName && x.DoubleValue == parameterValue)
-								  ?? throw new InvalidOperationException($"No Characteristic found matching '{parameterName}'");
+			var configurationParametersToMatch = dataHelpersConf.ConfigurationParameterValues.Read(
+				ConfigurationParameterValueExposers.Label.Equal(configurationParameterLabel).AND(ConfigurationParameterValueExposers.StringValue.Equal(configurationParameterValue)));
+			if (configurationParametersToMatch.Count < 1)
+			{
+				throw new InvalidOperationException($"No Characteristics found matching '{configurationParameterLabel}={configurationParameterValue}'");
+			}
 
-			////var serviceConfigurationParameterToMatch = dataHelpersSrvMgmt.ServiceConfigurationValues.Read(ServicesInstanceExposers.ServiceConfigurationParameterSection.ParameterID.Equal(parameterToMatch.ID))
-			////	?? throw new InvalidOperationException($"No Service Configuration Parameter found matching '{parameterToMatch.ID}'");
-			var serviceConfigurationParameterToMatch = dataHelpersSrvMgmt.ServiceConfigurationValues.Read().Find(x => x.ConfigurationParameter.ID == parameterToMatch.ID)
-							?? throw new InvalidOperationException($"No Service Configuration Parameter found matching '{parameterToMatch.ID}'");
+			FilterElement<Models.ServiceConfigurationValue> scvFilter = new ORFilterElement<Models.ServiceConfigurationValue>();
+			foreach (var parameterValueToMatch in configurationParametersToMatch)
+			{
+				scvFilter = scvFilter.OR(ServiceConfigurationValueExposers.ConfigurationParameterID.Equal(parameterValueToMatch.ID));
+			}
 
-			var services = dataHelpersSrvMgmt.Services.Read(ServicesInstanceExposers.ServiceInfoSection.ServiceConfigurationParameters.Contains(serviceConfigurationParameterToMatch));
+			var serviceConfigurationParametersToMatch = dataHelpersSrvMgmt.ServiceConfigurationValues.Read(scvFilter);
+			if (serviceConfigurationParametersToMatch.Count < 1)
+			{
+				throw new InvalidOperationException($"No Service Configuration Parameters found matching '{configurationParameterLabel}={configurationParameterValue}'");
+			}
+
+			FilterElement<Models.Service> servFilter = new ORFilterElement<Models.Service>();
+			foreach (var serviceConfigurationValueToMatch in serviceConfigurationParametersToMatch)
+			{
+				servFilter = servFilter.OR(ServiceExposers.ServiceConfigurationParameters.Contains(serviceConfigurationValueToMatch));
+			}
+
+			var services = dataHelpersSrvMgmt.Services.Read(servFilter);
 			engine.GenerateInformation($"Service(s) found:\r\n{String.Join(Environment.NewLine, services.Select(s => $"{s.Name} ({s.ID})"))}");
 		}
 	}

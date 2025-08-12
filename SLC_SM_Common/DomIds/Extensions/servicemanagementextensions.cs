@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Runtime.CompilerServices;
+
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 
 	public interface IServiceInstanceBase

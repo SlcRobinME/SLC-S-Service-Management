@@ -68,8 +68,6 @@ namespace SLCSMCreateJobForServiceItem
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Workflows;
 
-	using SLC_SM_Common.API.ServiceManagementApi;
-
 	/// <summary>
 	///     Represents a DataMiner Automation script.
 	/// </summary>

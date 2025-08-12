@@ -113,9 +113,9 @@ namespace SLC_SM_Delete_Service_1
 				throw new InvalidOperationException("No DOM ID provided as input to the script");
 			}
 
-			var repo = new Repo(Engine.SLNetRaw);
+			var repo = new DataHelpersServiceManagement(Engine.SLNetRaw);
 
-			var service = repo.Services.Read(ServicesInstanceExposers.Guid.Equal(domId)).FirstOrDefault();
+			var service = repo.Services.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault();
 			if (service != null)
 			{
 				_engine.GenerateInformation($"Service that will be removed: {service.ID}/{service.Name}");

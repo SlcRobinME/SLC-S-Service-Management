@@ -552,12 +552,15 @@ namespace DomHelpers.SlcServicemanagement
 			{
 				public const string Workflow = "Workflow";
 				public const string SRMBooking = "SRM Booking";
+				public const string Service = "Service";
 				public static string ToValue(ServiceitemtypesEnum @enum)
 				{
 					switch (@enum)
 					{
 						case ServiceitemtypesEnum.Workflow:
 							return Workflow;
+						case ServiceitemtypesEnum.Service:
+							return Service;
 						case ServiceitemtypesEnum.SRMBooking:
 							return SRMBooking;
 						default:
@@ -571,6 +574,8 @@ namespace DomHelpers.SlcServicemanagement
 					{
 						case Workflow:
 							return ServiceitemtypesEnum.Workflow;
+						case Service:
+							return ServiceitemtypesEnum.Service;
 						case SRMBooking:
 							return ServiceitemtypesEnum.SRMBooking;
 						default:
@@ -582,6 +587,7 @@ namespace DomHelpers.SlcServicemanagement
 			public enum ServiceitemtypesEnum
 			{
 				Workflow,
+				Service,
 				SRMBooking
 			}
 		}

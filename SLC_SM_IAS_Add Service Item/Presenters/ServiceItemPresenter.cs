@@ -10,6 +10,7 @@
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Workflows;
@@ -23,6 +24,7 @@
 		private readonly string[] getServiceItemLabels;
 		private readonly ServiceItemView view;
 		private readonly Workflow[] workflows;
+		private readonly List<Models.Service> services;
 
 		public ServiceItemPresenter(IEngine engine, ServiceItemView view, string[] getServiceItemLabels, DomInstance domInstance)
 		{
@@ -33,6 +35,7 @@
 
 			var workflowHelper = new WorkflowHelper(engine);
 			workflows = workflowHelper.GetAllWorkflows().ToArray();
+			services = new DataHelperService(Engine.SLNetRaw).Read();
 
 			view.TboxLabel.Changed += (sender, args) => ValidateLabel(args.Value);
 			view.ServiceItemType.Changed += (sender, args) => OnUpdateServiceItemType(args.Selected);
@@ -47,7 +50,7 @@
 			ServiceItemType = view.ServiceItemType.Selected,
 			DefinitionReference = view.DefinitionReferences.Selected ?? String.Empty,
 			ServiceItemScript = view.ScriptSelection.Selected ?? String.Empty,
-			ImplementationReference = String.Empty,
+			ImplementationReference = view.ServiceItemType.Selected == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service ? services.Find(s => view.DefinitionReferences.Selected == GetServiceDropDownLabel(s))?.ID.ToString() : String.Empty,
 		};
 
 		public string UpdateJobForWorkFlow(string label)
@@ -101,6 +104,9 @@
 					new Option<SlcServicemanagementIds.Enums.ServiceitemtypesEnum>(
 						SlcServicemanagementIds.Enums.Serviceitemtypes.Workflow,
 						SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow),
+					new Option<SlcServicemanagementIds.Enums.ServiceitemtypesEnum>(
+						SlcServicemanagementIds.Enums.Serviceitemtypes.Service,
+						SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service),
 					new Option<SlcServicemanagementIds.Enums.ServiceitemtypesEnum>(
 						SlcServicemanagementIds.Enums.Serviceitemtypes.SRMBooking,
 						SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking),
@@ -174,6 +180,11 @@
 
 			UpdateLabelPlaceholder(selected);
 
+			if (view.ServiceItemType.Selected != SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+			{
+				return;
+			}
+
 			var el = engine.FindElement(selected);
 			if (el == null)
 			{
@@ -199,6 +210,16 @@
 				view.ScriptSelection.SetOptions(new List<string>());
 				view.ScriptSelection.IsEnabled = false;
 			}
+			else if (serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
+			{
+				DateTime? currentStart = GetServiceItemTimings(domInstance).Item1;
+				DateTime? currentEnd = GetServiceItemTimings(domInstance).Item2;
+				var serviceOptions = services.Where(x => (currentEnd == null || x.EndTime <= currentEnd) && currentStart < x.StartTime).Select(GetServiceDropDownLabel).OrderBy(s => s).ToList();
+				view.DefinitionReferences.SetOptions(serviceOptions);
+
+				view.ScriptSelection.SetOptions(new List<string>());
+				view.ScriptSelection.IsEnabled = false;
+			}
 			else
 			{
 				var bookingManagers = engine.FindElementsByProtocol("Skyline Booking Manager").Where(x => x.IsActive).Select(x => x.ElementName).ToArray();
@@ -208,6 +229,11 @@
 			}
 
 			UpdateLabelPlaceholder(view.DefinitionReferences.Selected);
+		}
+
+		private static string GetServiceDropDownLabel(Models.Service s)
+		{
+			return $"{s.Name} ({s.ServiceID})";
 		}
 
 		private bool ValidateLabel(string newValue)
