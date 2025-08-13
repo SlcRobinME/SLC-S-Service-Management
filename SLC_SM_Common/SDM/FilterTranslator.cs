@@ -128,6 +128,12 @@
 				case nameof(ServiceConfigurationValueExposers) + "." + nameof(ServiceConfigurationValueExposers.ConfigurationParameterID):
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceConfigurationValue.ConfigurationParameterValue), comparer, (Guid)value);
 
+				/*CONFIGURATION PARAM*/
+				case nameof(ConfigurationParameterExposers) + "." + nameof(ConfigurationParameterExposers.Guid):
+					return FilterElementFactory.Create(DomInstanceExposers.Id, comparer, (Guid)value);
+				case nameof(ConfigurationParameterExposers) + "." + nameof(ConfigurationParameterExposers.Name):
+					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.ParameterName), comparer, (string)value);
+
 				/*CONFIGURATION VALUE*/
 				case nameof(ConfigurationParameterValueExposers) + "." + nameof(ConfigurationParameterValueExposers.Guid):
 					return FilterElementFactory.Create(DomInstanceExposers.Id, comparer, (Guid)value);

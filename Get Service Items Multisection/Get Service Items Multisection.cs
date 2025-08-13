@@ -109,7 +109,6 @@ namespace Get_ServiceItemsMultipleSections_1
 			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
 			{
 				var instance = new ServicesInstance(domInstance);
-
 				serviceItems = instance.ServiceItems;
 			}
 			else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)

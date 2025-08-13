@@ -125,38 +125,13 @@ namespace SLCSMDemo
 
 		private static void FilterServiceOnCharacteristic(IEngine engine)
 		{
-			string configurationParameterLabel = "Service Type";
+			string configurationParameter = "Service Type";
+			//string configurationParameterLabel = "Service Type";
 			string configurationParameterValue = "Channel";
 
-			var dataHelpersConf = new DataHelpersConfigurations(Engine.SLNetRaw);
 			var dataHelpersSrvMgmt = new DataHelpersServiceManagement(Engine.SLNetRaw);
+			var services = dataHelpersSrvMgmt.Services.GetServicesByCharacteristic(configurationParameter, null, configurationParameterValue);
 
-			var configurationParametersToMatch = dataHelpersConf.ConfigurationParameterValues.Read(
-				ConfigurationParameterValueExposers.Label.Equal(configurationParameterLabel).AND(ConfigurationParameterValueExposers.StringValue.Equal(configurationParameterValue)));
-			if (configurationParametersToMatch.Count < 1)
-			{
-				throw new InvalidOperationException($"No Characteristics found matching '{configurationParameterLabel}={configurationParameterValue}'");
-			}
-
-			FilterElement<Models.ServiceConfigurationValue> scvFilter = new ORFilterElement<Models.ServiceConfigurationValue>();
-			foreach (var parameterValueToMatch in configurationParametersToMatch)
-			{
-				scvFilter = scvFilter.OR(ServiceConfigurationValueExposers.ConfigurationParameterID.Equal(parameterValueToMatch.ID));
-			}
-
-			var serviceConfigurationParametersToMatch = dataHelpersSrvMgmt.ServiceConfigurationValues.Read(scvFilter);
-			if (serviceConfigurationParametersToMatch.Count < 1)
-			{
-				throw new InvalidOperationException($"No Service Configuration Parameters found matching '{configurationParameterLabel}={configurationParameterValue}'");
-			}
-
-			FilterElement<Models.Service> servFilter = new ORFilterElement<Models.Service>();
-			foreach (var serviceConfigurationValueToMatch in serviceConfigurationParametersToMatch)
-			{
-				servFilter = servFilter.OR(ServiceExposers.ServiceConfigurationParameters.Contains(serviceConfigurationValueToMatch));
-			}
-
-			var services = dataHelpersSrvMgmt.Services.Read(servFilter);
 			engine.GenerateInformation($"Service(s) found:\r\n{String.Join(Environment.NewLine, services.Select(s => $"{s.Name} ({s.ID})"))}");
 		}
 	}

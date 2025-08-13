@@ -14,6 +14,15 @@ namespace DomHelpers.SlcConfigurations
 	/// <summary>
 	/// Exposer-methods for the <see cref="Models.ConfigurationParameterValue"/> instances.
 	/// </summary>
+	public static class ConfigurationParameterExposers
+	{
+		public static readonly Exposer<Models.ConfigurationParameter, Guid> Guid = new Exposer<Models.ConfigurationParameter, Guid>((obj) => obj.ID, String.Join(".", nameof(ConfigurationParameterExposers), nameof(Guid)));
+		public static readonly Exposer<Models.ConfigurationParameter, string> Name = new Exposer<Models.ConfigurationParameter, string>((obj) => obj.Name, String.Join(".", nameof(ConfigurationParameterExposers), nameof(Name)));
+	}
+
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.ConfigurationParameterValue"/> instances.
+	/// </summary>
 	public static class ConfigurationParameterValueExposers
 	{
 		public static readonly Exposer<Models.ConfigurationParameterValue, Guid> Guid = new Exposer<Models.ConfigurationParameterValue, Guid>((obj) => obj.ID, String.Join(".", nameof(ConfigurationParameterValueExposers), nameof(Guid)));

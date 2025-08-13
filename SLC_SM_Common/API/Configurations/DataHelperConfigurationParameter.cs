@@ -9,6 +9,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.SDM;
 
 	/// <inheritdoc />
 	public class DataHelperConfigurationParameter : DataHelper<Models.ConfigurationParameter>
@@ -47,11 +48,28 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 		}
 
 		/// <inheritdoc />
+		public List<Models.ConfigurationParameter> Read(FilterElement<Models.ConfigurationParameter> filter)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			var domFilter = FilterTranslator.TranslateFullFilter(filter);
+			return Read(_domHelper.DomInstances.Read(domFilter));
+		}
+
+		/// <inheritdoc />
 		public override List<Models.ConfigurationParameter> Read()
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new ConfigurationParametersInstance(x))
-				.ToList();
+			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id));
+			return Read(instances);
+		}
+
+		/// <inheritdoc />
+		private List<Models.ConfigurationParameter> Read(List<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new ConfigurationParametersInstance(x)).ToList();
 
 			var numberOptions = new DataHelperNumberParameterOptions(_connection).Read();
 			var discreteOptions = new DataHelperDiscreteParameterOptions(_connection).Read();

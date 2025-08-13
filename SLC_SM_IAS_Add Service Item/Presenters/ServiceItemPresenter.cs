@@ -22,9 +22,10 @@
 		private readonly DomInstance domInstance;
 		private readonly IEngine engine;
 		private readonly string[] getServiceItemLabels;
+		private readonly List<Models.Service> services = new List<Models.Service>();
+		private readonly List<Models.ServiceSpecification> specifications = new List<Models.ServiceSpecification>();
 		private readonly ServiceItemView view;
 		private readonly Workflow[] workflows;
-		private readonly List<Models.Service> services;
 
 		public ServiceItemPresenter(IEngine engine, ServiceItemView view, string[] getServiceItemLabels, DomInstance domInstance)
 		{
@@ -35,7 +36,6 @@
 
 			var workflowHelper = new WorkflowHelper(engine);
 			workflows = workflowHelper.GetAllWorkflows().ToArray();
-			services = new DataHelperService(Engine.SLNetRaw).Read();
 
 			view.TboxLabel.Changed += (sender, args) => ValidateLabel(args.Value);
 			view.ServiceItemType.Changed += (sender, args) => OnUpdateServiceItemType(args.Selected);
@@ -50,50 +50,10 @@
 			ServiceItemType = view.ServiceItemType.Selected,
 			DefinitionReference = view.DefinitionReferences.Selected ?? String.Empty,
 			ServiceItemScript = view.ScriptSelection.Selected ?? String.Empty,
-			ImplementationReference = view.ServiceItemType.Selected == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service ? services.Find(s => view.DefinitionReferences.Selected == GetServiceDropDownLabel(s))?.ID.ToString() : String.Empty,
+			ImplementationReference = view.ServiceItemType.Selected == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service
+				? services.Find(s => view.ImplementationReferences.Selected == GetServiceDropDownLabel(s))?.ID.ToString()
+				: String.Empty,
 		};
-
-		public string UpdateJobForWorkFlow(string label)
-		{
-			if (view.ServiceItemType.Selected != SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
-			{
-				return String.Empty;
-			}
-
-			var job = GetJobForOrder(domInstance, label);
-			if (job == null)
-			{
-				return String.Empty;
-			}
-
-			var timings = GetServiceItemTimings(domInstance);
-			var action = new EditJobAction
-			{
-				DomJobId = job.ID.Id,
-				End = timings.Item2,
-			};
-
-			// Only add start update if the job is not already running
-			if (job.JobInfo.JobStart <= DateTime.UtcNow)
-			{
-				action.Start = timings.Item1;
-			}
-
-			action.SendToJobHandler(engine, true);
-
-			return job.ID.Id.ToString();
-		}
-
-		private void UpdateLabelPlaceholder(string definitionReference)
-		{
-			string tboxLabelPlaceHolder = $"{definitionReference}";
-			while (getServiceItemLabels.Contains(tboxLabelPlaceHolder))
-			{
-				tboxLabelPlaceHolder += " (1)";
-			}
-
-			view.TboxLabel.PlaceHolder = tboxLabelPlaceHolder;
-		}
 
 		public void LoadFromModel()
 		{
@@ -133,10 +93,46 @@
 				view.DefinitionReferences.Selected = section.DefinitionReference;
 			}
 
+			if (!String.IsNullOrEmpty(section.ImplementationReference) && services.Exists(s => s.ID.ToString() == section.ImplementationReference))
+			{
+				view.ImplementationReferences.Selected = GetServiceDropDownLabel(services.Find(s => s.ID.ToString() == section.ImplementationReference));
+			}
+
 			if (!String.IsNullOrEmpty(section.ServiceItemScript))
 			{
 				view.ScriptSelection.SetOptions(new[] { section.ServiceItemScript });
 			}
+		}
+
+		public string UpdateJobForWorkFlow(string label)
+		{
+			if (view.ServiceItemType.Selected != SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+			{
+				return String.Empty;
+			}
+
+			var job = GetJobForOrder(domInstance, label);
+			if (job == null)
+			{
+				return String.Empty;
+			}
+
+			var timings = GetServiceItemTimings(domInstance);
+			var action = new EditJobAction
+			{
+				DomJobId = job.ID.Id,
+				End = timings.Item2,
+			};
+
+			// Only add start update if the job is not already running
+			if (job.JobInfo.JobStart <= DateTime.UtcNow)
+			{
+				action.Start = timings.Item1;
+			}
+
+			action.SendToJobHandler(engine, true);
+
+			return job.ID.Id.ToString();
 		}
 
 		public bool Validate()
@@ -146,6 +142,16 @@
 			ok &= ValidateLabel(Name);
 
 			return ok;
+		}
+
+		private static string GetServiceDropDownLabel(Models.Service s)
+		{
+			if (s == null)
+			{
+				return String.Empty;
+			}
+
+			return $"{s.Name} ({s.ServiceID})";
 		}
 
 		private static (DateTime?, DateTime?) GetServiceItemTimings(DomInstance domInstance)
@@ -161,7 +167,8 @@
 
 		private JobsInstance GetJobForOrder(DomInstance instance, string label)
 		{
-			var jobFilter = DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription).Equal($"{instance.ID.Id} | {label}")
+			var jobFilter = DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription)
+				.Equal($"{instance.ID.Id} | {label}")
 				.OR(DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription).Equal($"{instance.ID.Id}|{label}"));
 
 			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
@@ -178,22 +185,22 @@
 				return;
 			}
 
+			var selectedSpec = specifications.Find(s => s.Name == view.DefinitionReferences.Selected);
+			UpdateImplementationReference(selectedSpec);
 			UpdateLabelPlaceholder(selected);
 
-			if (view.ServiceItemType.Selected != SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+			if (view.ServiceItemType.Selected == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
 			{
-				return;
-			}
+				var el = engine.FindElement(selected);
+				if (el == null)
+				{
+					view.ScriptSelection.SetOptions(new List<string>());
+					return;
+				}
 
-			var el = engine.FindElement(selected);
-			if (el == null)
-			{
-				view.ScriptSelection.SetOptions(new List<string>());
-				return;
+				var scriptName = Convert.ToString(el.GetParameter(195));
+				view.ScriptSelection.SetOptions(new[] { scriptName });
 			}
-
-			var scriptName = Convert.ToString(el.GetParameter(195));
-			view.ScriptSelection.SetOptions(new[] { scriptName });
 		}
 
 		private void OnUpdateServiceItemType(SlcServicemanagementIds.Enums.ServiceitemtypesEnum serviceItemType)
@@ -212,10 +219,17 @@
 			}
 			else if (serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
 			{
-				DateTime? currentStart = GetServiceItemTimings(domInstance).Item1;
-				DateTime? currentEnd = GetServiceItemTimings(domInstance).Item2;
-				var serviceOptions = services.Where(x => (currentEnd == null || x.EndTime <= currentEnd) && currentStart < x.StartTime).Select(GetServiceDropDownLabel).OrderBy(s => s).ToList();
-				view.DefinitionReferences.SetOptions(serviceOptions);
+				if (specifications.Count < 1)
+				{
+					specifications.AddRange(new DataHelperServiceSpecification(Engine.SLNetRaw).Read());
+				}
+
+				List<string> specOptions = specifications.Select(x => x.Name).OrderBy(x => x).ToList();
+				specOptions.Insert(0, "-None-");
+				view.DefinitionReferences.SetOptions(specOptions);
+				var selectedSpec = specifications.Find(s => s.Name == view.DefinitionReferences.Selected);
+
+				UpdateImplementationReference(selectedSpec);
 
 				view.ScriptSelection.SetOptions(new List<string>());
 				view.ScriptSelection.IsEnabled = false;
@@ -228,12 +242,42 @@
 				view.ScriptSelection.IsEnabled = false;
 			}
 
+			view.LblImplementationReference.IsVisible = serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service;
+			view.ImplementationReferences.IsVisible = serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service;
+
 			UpdateLabelPlaceholder(view.DefinitionReferences.Selected);
 		}
 
-		private static string GetServiceDropDownLabel(Models.Service s)
+		private void UpdateImplementationReference(Models.ServiceSpecification selectedSpec)
 		{
-			return $"{s.Name} ({s.ServiceID})";
+			services.Clear();
+			if (selectedSpec != null)
+			{
+				services.AddRange(new DataHelperService(Engine.SLNetRaw).Read(ServiceExposers.ServiceSpecifcation.Equal(selectedSpec.ID)));
+			}
+			else
+			{
+				services.AddRange(new DataHelperService(Engine.SLNetRaw).Read());
+			}
+
+			DateTime? currentStart = GetServiceItemTimings(domInstance).Item1;
+			DateTime? currentEnd = GetServiceItemTimings(domInstance).Item2;
+			var serviceOptions = services.Where(x => (currentEnd == null || x.EndTime <= currentEnd) && currentStart < x.StartTime)
+				.Select(GetServiceDropDownLabel)
+				.OrderBy(s => s)
+				.ToList();
+			view.ImplementationReferences.SetOptions(serviceOptions);
+		}
+
+		private void UpdateLabelPlaceholder(string definitionReference)
+		{
+			string tboxLabelPlaceHolder = $"{definitionReference}";
+			while (getServiceItemLabels.Contains(tboxLabelPlaceHolder))
+			{
+				tboxLabelPlaceHolder += " (1)";
+			}
+
+			view.TboxLabel.PlaceHolder = tboxLabelPlaceHolder;
 		}
 
 		private bool ValidateLabel(string newValue)

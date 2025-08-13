@@ -4,8 +4,12 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 	using System.Collections.Generic;
 	using System.Linq;
 
+	using DomHelpers.SlcConfigurations;
 	using DomHelpers.SlcServicemanagement;
 
+	using Library;
+
+	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -161,6 +165,64 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			var serviceIds = services.Where(x => x?.ServiceID != null).Select(x => Int32.TryParse(x.ServiceID.Split('-').Last(), out int res) ? res : 0).ToArray();
 			int max = serviceIds.Length > 0 ? serviceIds.Max() : 0;
 			return $"SERVICE-{max + 1:00000}";
+		}
+
+		/// <summary>
+		/// Retrieve a list of services filtered by a configuration parameter (characteristic).
+		/// </summary>
+		/// <param name="parameterName">Name of the characteristic <see cref="Configurations.Models.ConfigurationParameter"/> (optional).</param>
+		/// <param name="configurationParameterLabel">Label of the <see cref="Configurations.Models.ConfigurationParameterValue"/> (optional).</param>
+		/// <param name="configurationParameterValue">Value of the <see cref="Configurations.Models.ConfigurationParameterValue"/> (optional).</param>
+		/// <returns><see cref="List{T}"/> of filtered services.</returns>
+		public List<Models.Service> GetServicesByCharacteristic(string parameterName = null, string configurationParameterLabel = null, string configurationParameterValue = null)
+		{
+			// Filter Configuration Parameter Value
+			FilterElement<Configurations.Models.ConfigurationParameterValue> cpvFilter = new ANDFilterElement<Configurations.Models.ConfigurationParameterValue>();
+
+			if (parameterName != null)
+			{
+				var configurationParameter = new Configurations.DataHelperConfigurationParameter(_connection).Read(ConfigurationParameterExposers.Name.Equal(parameterName)).FirstOrDefault();
+				if (configurationParameter != null)
+				{
+					cpvFilter = cpvFilter.AND(ConfigurationParameterValueExposers.ConfigurationParameterID.Equal(configurationParameter.ID));
+				}
+			}
+
+			if (configurationParameterLabel != null)
+			{
+				cpvFilter = cpvFilter.AND(ConfigurationParameterValueExposers.Label.Equal(configurationParameterValue));
+			}
+
+			if (configurationParameterValue != null)
+			{
+				cpvFilter = cpvFilter.AND(ConfigurationParameterValueExposers.StringValue.Equal(configurationParameterValue));
+			}
+
+			List<Configurations.Models.ConfigurationParameterValue> configurationParametersToMatch = new DataHelpersConfigurations(_connection).ConfigurationParameterValues.Read(cpvFilter);
+			if (configurationParametersToMatch.Count < 1)
+			{
+				return new List<Models.Service>();
+			}
+
+			FilterElement<Models.ServiceConfigurationValue> scvFilter = new ORFilterElement<Models.ServiceConfigurationValue>();
+			foreach (var parameterValueToMatch in configurationParametersToMatch)
+			{
+				scvFilter = scvFilter.OR(ServiceConfigurationValueExposers.ConfigurationParameterID.Equal(parameterValueToMatch.ID));
+			}
+
+			var serviceConfigurationParametersToMatch = new DataHelperServiceConfigurationValue(_connection).Read(scvFilter);
+			if (serviceConfigurationParametersToMatch.Count < 1)
+			{
+				return new List<Models.Service>();
+			}
+
+			FilterElement<Models.Service> servFilter = new ORFilterElement<Models.Service>();
+			foreach (var serviceConfigurationValueToMatch in serviceConfigurationParametersToMatch)
+			{
+				servFilter = servFilter.OR(ServiceExposers.ServiceConfigurationParameters.Contains(serviceConfigurationValueToMatch));
+			}
+
+			return Read(servFilter);
 		}
 
 		private static Models.Service FromInstance(

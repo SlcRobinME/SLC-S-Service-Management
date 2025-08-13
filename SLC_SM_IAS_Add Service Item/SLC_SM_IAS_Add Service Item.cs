@@ -172,8 +172,6 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 					newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
 				}
 
-				AddServiceLink(instance.ID.Id, instance.ServiceSpecificationInfo.SpecificationName, newSection);
-
 				instance.ServiceItems.Add(newSection);
 				instance.Save(helper);
 			}
