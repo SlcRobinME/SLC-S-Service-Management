@@ -136,13 +136,13 @@ namespace SLCSMCreateJobForServiceItem
 			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
 			{
 				var instance = new ServicesInstance(domInstance);
-				return instance.ServiceItems.FirstOrDefault(x => x.Label == label);
+				return instance.ServiceItemses.FirstOrDefault(x => x.Label == label);
 			}
 
 			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
 			{
 				var instance = new ServiceSpecificationsInstance(domInstance);
-				return instance.ServiceItems.FirstOrDefault(x => x.Label == label);
+				return instance.ServiceItemses.FirstOrDefault(x => x.Label == label);
 			}
 
 			throw new InvalidOperationException($"No Service item found with label '{label}'");
@@ -230,19 +230,19 @@ namespace SLCSMCreateJobForServiceItem
 				var instance = new ServicesInstance(domInstance);
 
 				// Remove old instance first in case of edit
-				var oldItem = instance.ServiceItems.FirstOrDefault(x => x.Label == oldLabel);
+				var oldItem = instance.ServiceItemses.FirstOrDefault(x => x.Label == oldLabel);
 				if (oldItem != null)
 				{
-					instance.ServiceItems.Remove(oldItem);
+					instance.ServiceItemses.Remove(oldItem);
 				}
 				else
 				{
 					// Auto assign new ID
-					long[] ids = instance.ServiceItems.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
+					long[] ids = instance.ServiceItemses.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
 					newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
 				}
 
-				instance.ServiceItems.Add(newSection);
+				instance.ServiceItemses.Add(newSection);
 				instance.Save(helper);
 			}
 			else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
@@ -250,19 +250,19 @@ namespace SLCSMCreateJobForServiceItem
 				var instance = new ServiceSpecificationsInstance(domInstance);
 
 				// Remove old instance first in case of edit
-				var oldItem = instance.ServiceItems.FirstOrDefault(x => x.Label == oldLabel);
+				var oldItem = instance.ServiceItemses.FirstOrDefault(x => x.Label == oldLabel);
 				if (oldItem != null)
 				{
-					instance.ServiceItems.Remove(oldItem);
+					instance.ServiceItemses.Remove(oldItem);
 				}
 				else
 				{
 					// Auto assign new ID
-					long[] ids = instance.ServiceItems.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
+					long[] ids = instance.ServiceItemses.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
 					newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
 				}
 
-				instance.ServiceItems.Add(newSection);
+				instance.ServiceItemses.Add(newSection);
 				instance.Save(helper);
 			}
 			else

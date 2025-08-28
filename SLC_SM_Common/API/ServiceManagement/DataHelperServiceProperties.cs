@@ -26,7 +26,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			{
 				foreach (string discreteValue in item.DiscreteValues)
 				{
-					instance.DiscreteServicePropertyValueOptions.Add(
+					instance.DiscreteServicePropertyValueOptionses.Add(
 						new DiscreteServicePropertyValueOptionsSection
 						{
 							DiscreteValue = discreteValue,
@@ -34,9 +34,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				}
 			}
 
-			if (!instance.DiscreteServicePropertyValueOptions.Any())
+			if (!instance.DiscreteServicePropertyValueOptionses.Any())
 			{
-				instance.DiscreteServicePropertyValueOptions.Add(new DiscreteServicePropertyValueOptionsSection());
+				instance.DiscreteServicePropertyValueOptionses.Add(new DiscreteServicePropertyValueOptionsSection());
 			}
 
 			return CreateOrUpdateInstance(instance);
@@ -54,7 +54,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 						ID = x.ID.Id,
 						Name = x.ServicePropertyInfo.Name,
 						Type = x.ServicePropertyInfo.Type ?? SlcServicemanagementIds.Enums.TypeEnum.String,
-						DiscreteValues = x.DiscreteServicePropertyValueOptions.Select(d => d.DiscreteValue).ToList(),
+						DiscreteValues = x.DiscreteServicePropertyValueOptionses.Select(d => d.DiscreteValue).ToList(),
 					})
 				.ToList();
 		}

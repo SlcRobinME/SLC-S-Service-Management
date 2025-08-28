@@ -128,20 +128,20 @@ namespace SLC_SM_Delete_Service_Item_1
 			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
 			{
 				var instance = new ServicesInstance(domInstance);
-				var serviceItemToRemove = instance.ServiceItems.FirstOrDefault(x => x.Label == label);
+				var serviceItemToRemove = instance.ServiceItemses.FirstOrDefault(x => x.Label == label);
 				if (serviceItemToRemove != null && !LinkedReferenceStillActive(serviceItemToRemove.ServiceItemType, serviceItemToRemove.ImplementationReference))
 				{
-					instance.ServiceItems.Remove(serviceItemToRemove);
+					instance.ServiceItemses.Remove(serviceItemToRemove);
 					instance.Save(helper);
 				}
 			}
 			else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
 			{
 				var instance = new ServiceSpecificationsInstance(domInstance);
-				var serviceItemToRemove = instance.ServiceItems.FirstOrDefault(x => x.Label == label);
+				var serviceItemToRemove = instance.ServiceItemses.FirstOrDefault(x => x.Label == label);
 				if (serviceItemToRemove != null && !LinkedReferenceStillActive(serviceItemToRemove.ServiceItemType, serviceItemToRemove.ImplementationReference))
 				{
-					instance.ServiceItems.Remove(serviceItemToRemove);
+					instance.ServiceItemses.Remove(serviceItemToRemove);
 					instance.Save(helper);
 				}
 			}

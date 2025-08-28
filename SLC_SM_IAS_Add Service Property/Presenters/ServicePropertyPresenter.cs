@@ -82,7 +82,7 @@
 			{
 				view.TBoxValue.Text = String.Empty;
 				view.TBoxValue.IsEnabled = false;
-				view.DdValue.SetOptions(servicePropertySelected.DiscreteServicePropertyValueOptions.Select(x => x.DiscreteValue));
+				view.DdValue.SetOptions(servicePropertySelected.DiscreteServicePropertyValueOptionses.Select(x => x.DiscreteValue));
 				view.DdValue.IsEnabled = true;
 			}
 		}

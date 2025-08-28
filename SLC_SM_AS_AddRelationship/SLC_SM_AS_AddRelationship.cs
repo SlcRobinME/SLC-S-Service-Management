@@ -147,13 +147,13 @@ namespace SLCSMASAddRelationship
 			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
 			{
 				var service = new ServicesInstance(domInstance);
-				handler(service.ServiceItemRelationship);
+				handler(service.ServiceItemRelationships);
 				service.Save(_domHelper);
 			}
 			else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
 			{
 				var specification = new ServiceSpecificationsInstance(domInstance);
-				handler(specification.ServiceItemRelationship);
+				handler(specification.ServiceItemRelationships);
 				specification.Save(_domHelper);
 			}
 		}

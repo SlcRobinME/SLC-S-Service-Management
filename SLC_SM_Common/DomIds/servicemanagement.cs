@@ -6,271 +6,275 @@
 //------------------------------------------------------------------------------
 namespace DomHelpers
 {
-    using System;
-    using System.Linq;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
-    using Skyline.DataMiner.Net.Sections;
+	using System;
+	using System.Linq;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.ManagerStore;
+	using Skyline.DataMiner.Net.Messages;
+	using Skyline.DataMiner.Net.Sections;
 
-    /// <summary>
-    /// Serves as the abstract base class for wrapper classes that provide access to DOM instances.
-    /// The <see cref="DomInstanceBase"/> class defines the common functionality and structure for interacting with DOM objects stored in the database, serving as a foundation for derived classes that wrap specific DOM instances.
-    /// </summary>
-    public abstract class DomInstanceBase : IEquatable<DomInstanceBase>
-    {
-        protected DomInstanceBase(DomDefinitionId definitionId)
-        {
-            if (definitionId == null)
-                throw new ArgumentNullException(nameof(definitionId));
-            domInstance = new DomInstance{DomDefinitionId = definitionId};
-        }
+	/// <summary>
+	/// Serves as the abstract base class for wrapper classes that provide access to DOM instances.
+	/// The <see cref="DomInstanceBase"/> class defines the common functionality and structure for interacting with DOM objects stored in the database, serving as a foundation for derived classes that wrap specific DOM instances.
+	/// </summary>
+	public abstract class DomInstanceBase : IEquatable<DomInstanceBase>
+	{
+		protected DomInstanceBase(DomDefinitionId definitionId)
+		{
+			if (definitionId == null)
+				throw new ArgumentNullException(nameof(definitionId));
+			domInstance = new DomInstance { DomDefinitionId = definitionId };
+		}
 
-        protected DomInstanceBase(DomDefinitionId definitionId, Guid id)
-        {
-            if (definitionId == null)
-                throw new ArgumentNullException(nameof(definitionId));
-            if (id == Guid.Empty)
-                throw new ArgumentException("The id cannot be an empty guid", nameof(id));
-            domInstance = new DomInstance{ID = new DomInstanceId(id)
-            {ModuleId = definitionId.ModuleId}, DomDefinitionId = definitionId};
-        }
+		protected DomInstanceBase(DomDefinitionId definitionId, Guid id)
+		{
+			if (definitionId == null)
+				throw new ArgumentNullException(nameof(definitionId));
+			if (id == Guid.Empty)
+				throw new ArgumentException("The id cannot be an empty guid", nameof(id));
+			domInstance = new DomInstance
+			{
+				ID = new DomInstanceId(id)
+				{ ModuleId = definitionId.ModuleId },
+				DomDefinitionId = definitionId
+			};
+		}
 
-        protected DomInstanceBase(DomInstance domInstance)
-        {
-            if (domInstance == null)
-                throw new ArgumentNullException(nameof(domInstance));
-            this.domInstance = domInstance;
-        }
+		protected DomInstanceBase(DomInstance domInstance)
+		{
+			if (domInstance == null)
+				throw new ArgumentNullException(nameof(domInstance));
+			this.domInstance = domInstance;
+		}
 
-        /// <summary>
-        /// Gets the Module ID of the DOM Instance.
-        /// </summary>
-        public String ModuleId
-        {
-            get
-            {
-                return domInstance.DomDefinitionId.ModuleId;
-            }
-        }
+		/// <summary>
+		/// Gets the Module ID of the DOM Instance.
+		/// </summary>
+		public String ModuleId
+		{
+			get
+			{
+				return domInstance.DomDefinitionId.ModuleId;
+			}
+		}
 
-        /// <summary>
-        /// Gets the ID of the DOM Instance.
-        /// </summary>
-        public DomInstanceId ID
-        {
-            get
-            {
-                return domInstance.ID;
-            }
-        }
+		/// <summary>
+		/// Gets the ID of the DOM Instance.
+		/// </summary>
+		public DomInstanceId ID
+		{
+			get
+			{
+				return domInstance.ID;
+			}
+		}
 
-        /// <summary>
-        /// Gets the name of the DOM Instance.
-        /// </summary>
-        public String Name
-        {
-            get
-            {
-                return domInstance.Name;
-            }
-        }
+		/// <summary>
+		/// Gets the name of the DOM Instance.
+		/// </summary>
+		public String Name
+		{
+			get
+			{
+				return domInstance.Name;
+			}
+		}
 
-        /// <summary>
-        /// Gets the Status ID of the DOM Instance.
-        /// </summary>
-        public String StatusId
-        {
-            get
-            {
-                return domInstance.StatusId;
-            }
-        }
+		/// <summary>
+		/// Gets the Status ID of the DOM Instance.
+		/// </summary>
+		public String StatusId
+		{
+			get
+			{
+				return domInstance.StatusId;
+			}
+		}
 
-        /// <summary>
-        /// Gets the underlying DOM Instance.
-        /// </summary>
-        public DomDefinitionId DomDefinitionId
-        {
-            get
-            {
-                return domInstance.DomDefinitionId;
-            }
-        }
+		/// <summary>
+		/// Gets the underlying DOM Instance.
+		/// </summary>
+		public DomDefinitionId DomDefinitionId
+		{
+			get
+			{
+				return domInstance.DomDefinitionId;
+			}
+		}
 
-        protected DomInstance domInstance { get; set; }
+		protected DomInstance domInstance { get; set; }
 
-        /// <summary>
-        /// Gets the datetime when the DOM Instance was created in UTC.
-        /// </summary>
-        public DateTime? CreatedAt
-        {
-            get
-            {
-                var createdAt = ((ITrackCreatedAt)domInstance).CreatedAt;
-                if (createdAt == null)
-                    return null;
-                else
-                    return createdAt.ToUniversalTime();
-            }
-        }
+		/// <summary>
+		/// Gets the datetime when the DOM Instance was created in UTC.
+		/// </summary>
+		public DateTime? CreatedAt
+		{
+			get
+			{
+				var createdAt = ((ITrackCreatedAt)domInstance).CreatedAt;
+				if (createdAt == null)
+					return null;
+				else
+					return createdAt.ToUniversalTime();
+			}
+		}
 
-        /// <summary>
-        /// Gets the user that created the DOM Instance.
-        /// </summary>
-        public string CreatedBy
-        {
-            get
-            {
-                return ((ITrackCreatedBy)domInstance).CreatedBy;
-            }
-        }
+		/// <summary>
+		/// Gets the user that created the DOM Instance.
+		/// </summary>
+		public string CreatedBy
+		{
+			get
+			{
+				return ((ITrackCreatedBy)domInstance).CreatedBy;
+			}
+		}
 
-        /// <summary>
-        /// Gets the datetime when the DOM Instance was last modified in UTC.
-        /// </summary>
-        public DateTime? LastModified
-        {
-            get
-            {
-                var lastModified = ((ITrackLastModified)domInstance).LastModified;
-                if (lastModified == null)
-                    return null;
-                else
-                    return lastModified.ToUniversalTime();
-            }
-        }
+		/// <summary>
+		/// Gets the datetime when the DOM Instance was last modified in UTC.
+		/// </summary>
+		public DateTime? LastModified
+		{
+			get
+			{
+				var lastModified = ((ITrackLastModified)domInstance).LastModified;
+				if (lastModified == null)
+					return null;
+				else
+					return lastModified.ToUniversalTime();
+			}
+		}
 
-        /// <summary>
-        /// Gets the user that last modified the DOM Instance.
-        /// </summary>
-        public string LastModifiedBy
-        {
-            get
-            {
-                return ((ITrackLastModifiedBy)domInstance).LastModifiedBy;
-            }
-        }
+		/// <summary>
+		/// Gets the user that last modified the DOM Instance.
+		/// </summary>
+		public string LastModifiedBy
+		{
+			get
+			{
+				return ((ITrackLastModifiedBy)domInstance).LastModifiedBy;
+			}
+		}
 
-        public static implicit operator DomInstanceId(DomInstanceBase instance)
-        {
-            return instance.ID;
-        }
+		public static implicit operator DomInstanceId(DomInstanceBase instance)
+		{
+			return instance.ID;
+		}
 
-        public static implicit operator DomInstance(DomInstanceBase instance)
-        {
-            return instance.ToInstance();
-        }
+		public static implicit operator DomInstance(DomInstanceBase instance)
+		{
+			return instance.ToInstance();
+		}
 
-        public static bool operator ==(DomInstanceBase left, DomInstanceBase right)
-        {
-            if (left is null)
-            {
-                return right is null;
-            }
+		public static bool operator ==(DomInstanceBase left, DomInstanceBase right)
+		{
+			if (left is null)
+			{
+				return right is null;
+			}
 
-            return left.Equals(right);
-        }
+			return left.Equals(right);
+		}
 
-        public static bool operator !=(DomInstanceBase left, DomInstanceBase right)
-        {
-            return !(left == right);
-        }
+		public static bool operator !=(DomInstanceBase left, DomInstanceBase right)
+		{
+			return !(left == right);
+		}
 
-        /// <summary>
-        /// Deletes this DOM Instance from the database.
-        /// </summary>
-        /// <param name="messageHandler">The connection to the DataMiner system.</param>
-        public void Delete(Func<DMSMessage[], DMSMessage[]> messageHandler)
-        {
-            Delete(new DomHelper(messageHandler, ModuleId));
-        }
+		/// <summary>
+		/// Deletes this DOM Instance from the database.
+		/// </summary>
+		/// <param name="messageHandler">The connection to the DataMiner system.</param>
+		public void Delete(Func<DMSMessage[], DMSMessage[]> messageHandler)
+		{
+			Delete(new DomHelper(messageHandler, ModuleId));
+		}
 
-        /// <summary>
-        /// Deletes this DOM Instance from the database.
-        /// </summary>
-        /// <param name="helper">The connection to the DataMiner system.</param>
-        public void Delete(DomHelper helper)
-        {
-            helper.DomInstances.Delete(domInstance);
-        }
+		/// <summary>
+		/// Deletes this DOM Instance from the database.
+		/// </summary>
+		/// <param name="helper">The connection to the DataMiner system.</param>
+		public void Delete(DomHelper helper)
+		{
+			helper.DomInstances.Delete(domInstance);
+		}
 
-        /// <summary>
-        /// Saves this DOM Instance to the database.
-        /// </summary>
-        /// <param name="messageHandler">The connection to the DataMiner system.</param>
-        public void Save(Func<DMSMessage[], DMSMessage[]> messageHandler)
-        {
-            Save(new DomHelper(messageHandler, ModuleId));
-        }
+		/// <summary>
+		/// Saves this DOM Instance to the database.
+		/// </summary>
+		/// <param name="messageHandler">The connection to the DataMiner system.</param>
+		public void Save(Func<DMSMessage[], DMSMessage[]> messageHandler)
+		{
+			Save(new DomHelper(messageHandler, ModuleId));
+		}
 
-        /// <summary>
-        /// Saves this DOM Instance to the database.
-        /// </summary>
-        /// <param name="helper">The connection to the DataMiner system.</param>
-        public abstract void Save(DomHelper helper);
-        /// <summary>
-        /// Return the DOM Instance object with all the fields filled in according to this object.
-        /// </summary>
-        public DomInstance ToInstance()
-        {
-            BeforeToInstance();
-            var instance = InternalToInstance();
-            AfterToInstance();
-            return instance;
-        }
+		/// <summary>
+		/// Saves this DOM Instance to the database.
+		/// </summary>
+		/// <param name="helper">The connection to the DataMiner system.</param>
+		public abstract void Save(DomHelper helper);
+		/// <summary>
+		/// Return the DOM Instance object with all the fields filled in according to this object.
+		/// </summary>
+		public DomInstance ToInstance()
+		{
+			BeforeToInstance();
+			var instance = InternalToInstance();
+			AfterToInstance();
+			return instance;
+		}
 
-        /// <summary>
-        /// Optional method that runs before the internal ToInstance method runs.
-        /// </summary>
-        protected virtual void BeforeToInstance()
-        {
-        }
+		/// <summary>
+		/// Optional method that runs before the internal ToInstance method runs.
+		/// </summary>
+		protected virtual void BeforeToInstance()
+		{
+		}
 
-        /// <summary>
-        /// Return the DOM Instance object with all the fields filled in according to this object.
-        /// </summary>
-        protected abstract DomInstance InternalToInstance();
-        /// <summary>
-        /// Optional method that runs after the internal ToInstance method runs.
-        /// </summary>
-        protected virtual void AfterToInstance()
-        {
-        }
+		/// <summary>
+		/// Return the DOM Instance object with all the fields filled in according to this object.
+		/// </summary>
+		protected abstract DomInstance InternalToInstance();
+		/// <summary>
+		/// Optional method that runs after the internal ToInstance method runs.
+		/// </summary>
+		protected virtual void AfterToInstance()
+		{
+		}
 
-        protected abstract void InitializeProperties();
-        /// <summary>
-        /// Optional method that runs after the object is constructed and the initialize has ran.
-        /// </summary>
-        protected virtual void AfterLoad()
-        {
-        }
+		protected abstract void InitializeProperties();
+		/// <summary>
+		/// Optional method that runs after the object is constructed and the initialize has ran.
+		/// </summary>
+		protected virtual void AfterLoad()
+		{
+		}
 
-        public override int GetHashCode()
-        {
-            return this.ID.GetHashCode();
-        }
+		public override int GetHashCode()
+		{
+			return this.ID.GetHashCode();
+		}
 
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as DomInstanceBase);
-        }
+		public override bool Equals(object obj)
+		{
+			return Equals(obj as DomInstanceBase);
+		}
 
-        public bool Equals(DomInstanceBase other)
-        {
-            if (other is null)
-            {
-                return false;
-            }
+		public bool Equals(DomInstanceBase other)
+		{
+			if (other is null)
+			{
+				return false;
+			}
 
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
+			if (ReferenceEquals(this, other))
+			{
+				return true;
+			}
 
-            return this.ID.Equals(other.ID);
-        }
-    }
+			return this.ID.Equals(other.ID);
+		}
+	}
 }
 //------------------------------------------------------------------------------
 // <auto-generated>
@@ -282,7 +286,6 @@ namespace DomHelpers
 {
 	using System;
 	using System.Linq;
-
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Sections;
 
@@ -459,7 +462,6 @@ namespace DomHelpers.SlcServicemanagement
 {
 	using System;
 	using System.ComponentModel;
-
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Sections;
 
@@ -551,8 +553,8 @@ namespace DomHelpers.SlcServicemanagement
 			public static class Serviceitemtypes
 			{
 				public const string Workflow = "Workflow";
-				public const string SRMBooking = "SRM Booking";
 				public const string Service = "Service";
+				public const string SRMBooking = "SRM Booking";
 				public static string ToValue(ServiceitemtypesEnum @enum)
 				{
 					switch (@enum)
@@ -766,6 +768,7 @@ namespace DomHelpers.SlcServicemanagement
 				public static FieldDescriptorID ServiceItemConfiguration { get; } = new FieldDescriptorID(new Guid("9a3144ee-794d-4ea9-8888-c06d9b4789ed"));
 				public static FieldDescriptorID ServiceItemScript { get; } = new FieldDescriptorID(new Guid("bfc7a72c-5e0d-4ffe-9c96-27f5e749d3fa"));
 				public static FieldDescriptorID ImplementationReference { get; } = new FieldDescriptorID(new Guid("8cedc78a-a23f-46c4-92a3-30393704f340"));
+				public static FieldDescriptorID Icon { get; } = new FieldDescriptorID(new Guid("9b0fdbce-8ecc-4480-afc0-42010e8e7a69"));
 			}
 
 			public static class ServiceOrderItemInfo
@@ -1695,7 +1698,6 @@ namespace DomHelpers.SlcServicemanagement
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
 
@@ -1754,7 +1756,7 @@ namespace DomHelpers.SlcServicemanagement
 		/// <summary>
 		/// Gets or sets the ServiceOrderItems section of the DOM Instance.
 		/// </summary>
-		public IList<ServiceOrderItemsSection> ServiceOrderItems { get; private set; }
+		public IList<ServiceOrderItemsSection> ServiceOrderItemses { get; private set; }
 
 		public static explicit operator ServiceOrdersInstance(DomInstance instance)
 		{
@@ -1792,7 +1794,7 @@ namespace DomHelpers.SlcServicemanagement
 		{
 			domInstance.Sections.Clear();
 			domInstance.Sections.Add(ServiceOrderInfo.ToSection());
-			foreach (var item in ServiceOrderItems)
+			foreach (var item in ServiceOrderItemses)
 			{
 				domInstance.Sections.Add(item.ToSection());
 			}
@@ -1827,7 +1829,7 @@ namespace DomHelpers.SlcServicemanagement
 				ServiceOrderInfo = new ServiceOrderInfoSection(_serviceOrderInfo);
 			}
 
-			ServiceOrderItems = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServiceOrderItems.Id)).Select(section => new ServiceOrderItemsSection(section)).ToList();
+			ServiceOrderItemses = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServiceOrderItems.Id)).Select(section => new ServiceOrderItemsSection(section)).ToList();
 		}
 	}
 
@@ -2089,12 +2091,12 @@ namespace DomHelpers.SlcServicemanagement
 		/// <summary>
 		/// Gets or sets the ServiceItemRelationship section of the DOM Instance.
 		/// </summary>
-		public IList<ServiceItemRelationshipSection> ServiceItemRelationship { get; private set; }
+		public IList<ServiceItemRelationshipSection> ServiceItemRelationships { get; private set; }
 
 		/// <summary>
 		/// Gets or sets the ServiceItems section of the DOM Instance.
 		/// </summary>
-		public IList<ServiceItemsSection> ServiceItems { get; private set; }
+		public IList<ServiceItemsSection> ServiceItemses { get; private set; }
 
 		public static explicit operator ServiceSpecificationsInstance(DomInstance instance)
 		{
@@ -2132,12 +2134,12 @@ namespace DomHelpers.SlcServicemanagement
 		{
 			domInstance.Sections.Clear();
 			domInstance.Sections.Add(ServiceSpecificationInfo.ToSection());
-			foreach (var item in ServiceItemRelationship)
+			foreach (var item in ServiceItemRelationships)
 			{
 				domInstance.Sections.Add(item.ToSection());
 			}
 
-			foreach (var item in ServiceItems)
+			foreach (var item in ServiceItemses)
 			{
 				domInstance.Sections.Add(item.ToSection());
 			}
@@ -2172,8 +2174,8 @@ namespace DomHelpers.SlcServicemanagement
 				ServiceSpecificationInfo = new ServiceSpecificationInfoSection(_serviceSpecificationInfo);
 			}
 
-			ServiceItemRelationship = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServiceItemRelationship.Id)).Select(section => new ServiceItemRelationshipSection(section)).ToList();
-			ServiceItems = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServiceItems.Id)).Select(section => new ServiceItemsSection(section)).ToList();
+			ServiceItemRelationships = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServiceItemRelationship.Id)).Select(section => new ServiceItemRelationshipSection(section)).ToList();
+			ServiceItemses = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServiceItems.Id)).Select(section => new ServiceItemsSection(section)).ToList();
 		}
 	}
 
@@ -2434,7 +2436,7 @@ namespace DomHelpers.SlcServicemanagement
 		/// <summary>
 		/// Gets or sets the DiscreteServicePropertyValueOptions section of the DOM Instance.
 		/// </summary>
-		public IList<DiscreteServicePropertyValueOptionsSection> DiscreteServicePropertyValueOptions { get; private set; }
+		public IList<DiscreteServicePropertyValueOptionsSection> DiscreteServicePropertyValueOptionses { get; private set; }
 
 		/// <summary>
 		/// Gets or sets the ServicePropertyInfo section of the DOM Instance.
@@ -2476,7 +2478,7 @@ namespace DomHelpers.SlcServicemanagement
 		protected sealed override DomInstance InternalToInstance()
 		{
 			domInstance.Sections.Clear();
-			foreach (var item in DiscreteServicePropertyValueOptions)
+			foreach (var item in DiscreteServicePropertyValueOptionses)
 			{
 				domInstance.Sections.Add(item.ToSection());
 			}
@@ -2502,7 +2504,7 @@ namespace DomHelpers.SlcServicemanagement
 
 		protected sealed override void InitializeProperties()
 		{
-			DiscreteServicePropertyValueOptions = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.DiscreteServicePropertyValueOptions.Id)).Select(section => new DiscreteServicePropertyValueOptionsSection(section)).ToList();
+			DiscreteServicePropertyValueOptionses = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.DiscreteServicePropertyValueOptions.Id)).Select(section => new DiscreteServicePropertyValueOptionsSection(section)).ToList();
 			var _servicePropertyInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServicePropertyInfo.Id));
 			if (_servicePropertyInfo is null)
 			{
@@ -2554,7 +2556,7 @@ namespace DomHelpers.SlcServicemanagement
 		/// <summary>
 		/// Gets or sets the ServicePropertyValue section of the DOM Instance.
 		/// </summary>
-		public IList<ServicePropertyValueSection> ServicePropertyValue { get; private set; }
+		public IList<ServicePropertyValueSection> ServicePropertyValues { get; private set; }
 
 		public static explicit operator ServicePropertyValuesInstance(DomInstance instance)
 		{
@@ -2591,7 +2593,7 @@ namespace DomHelpers.SlcServicemanagement
 		protected sealed override DomInstance InternalToInstance()
 		{
 			domInstance.Sections.Clear();
-			foreach (var item in ServicePropertyValue)
+			foreach (var item in ServicePropertyValues)
 			{
 				domInstance.Sections.Add(item.ToSection());
 			}
@@ -2616,7 +2618,7 @@ namespace DomHelpers.SlcServicemanagement
 
 		protected sealed override void InitializeProperties()
 		{
-			ServicePropertyValue = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServicePropertyValue.Id)).Select(section => new ServicePropertyValueSection(section)).ToList();
+			ServicePropertyValues = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServicePropertyValue.Id)).Select(section => new ServicePropertyValueSection(section)).ToList();
 		}
 	}
 
@@ -2675,12 +2677,12 @@ namespace DomHelpers.SlcServicemanagement
 		/// <summary>
 		/// Gets or sets the ServiceItemRelationship section of the DOM Instance.
 		/// </summary>
-		public IList<ServiceItemRelationshipSection> ServiceItemRelationship { get; private set; }
+		public IList<ServiceItemRelationshipSection> ServiceItemRelationships { get; private set; }
 
 		/// <summary>
 		/// Gets or sets the ServiceItems section of the DOM Instance.
 		/// </summary>
-		public IList<ServiceItemsSection> ServiceItems { get; private set; }
+		public IList<ServiceItemsSection> ServiceItemses { get; private set; }
 
 		public static explicit operator ServicesInstance(DomInstance instance)
 		{
@@ -2718,12 +2720,12 @@ namespace DomHelpers.SlcServicemanagement
 		{
 			domInstance.Sections.Clear();
 			domInstance.Sections.Add(ServiceInfo.ToSection());
-			foreach (var item in ServiceItemRelationship)
+			foreach (var item in ServiceItemRelationships)
 			{
 				domInstance.Sections.Add(item.ToSection());
 			}
 
-			foreach (var item in ServiceItems)
+			foreach (var item in ServiceItemses)
 			{
 				domInstance.Sections.Add(item.ToSection());
 			}
@@ -2758,8 +2760,8 @@ namespace DomHelpers.SlcServicemanagement
 				ServiceInfo = new ServiceInfoSection(_serviceInfo);
 			}
 
-			ServiceItemRelationship = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServiceItemRelationship.Id)).Select(section => new ServiceItemRelationshipSection(section)).ToList();
-			ServiceItems = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServiceItems.Id)).Select(section => new ServiceItemsSection(section)).ToList();
+			ServiceItemRelationships = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServiceItemRelationship.Id)).Select(section => new ServiceItemRelationshipSection(section)).ToList();
+			ServiceItemses = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcServicemanagementIds.Sections.ServiceItems.Id)).Select(section => new ServiceItemsSection(section)).ToList();
 		}
 	}
 
@@ -3129,7 +3131,6 @@ namespace DomHelpers.SlcServicemanagement
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Linq;
-
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.Sections.Sections;
 	using Skyline.DataMiner.Net.Messages;
@@ -4387,6 +4388,33 @@ namespace DomHelpers.SlcServicemanagement
 			}
 		}
 
+		[Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
+		/// <summary>
+		/// Gets the ServiceConfiguration field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? ServiceConfiguration
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceSpecificationInfo.ServiceConfiguration);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+		}
+
 		/// <summary>
 		/// Gets or sets the ServiceSpecificationConfigurationParameters field of the DOM Instance.
 		/// </summary>
@@ -4884,6 +4912,33 @@ namespace DomHelpers.SlcServicemanagement
 				else
 				{
 					section.AddOrUpdateValue(SlcServicemanagementIds.Sections.ServiceInfo.ServiceProperties, (Guid)value);
+				}
+			}
+		}
+
+		[Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
+		/// <summary>
+		/// Gets the ServiceConfiguration field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? ServiceConfiguration
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfiguration);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
 				}
 			}
 		}
@@ -6373,6 +6428,33 @@ namespace DomHelpers.SlcServicemanagement
 			}
 		}
 
+		[Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
+		/// <summary>
+		/// Gets the Configuration field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? Configuration
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceOrderItemServiceInfo.Configuration);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+		}
+
 		/// <summary>
 		/// Gets or sets the ServiceOrderItemConfigurations field of the DOM Instance.
 		/// </summary>
@@ -6614,6 +6696,33 @@ namespace DomHelpers.SlcServicemanagement
 			}
 		}
 
+		[Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
+		/// <summary>
+		/// Gets the ServiceItemConfiguration field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? ServiceItemConfiguration
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemConfiguration);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+		}
+
 		/// <summary>
 		/// Gets or sets the ServiceItemScript field of the DOM Instance.
 		/// </summary>
@@ -6696,6 +6805,49 @@ namespace DomHelpers.SlcServicemanagement
 				else
 				{
 					section.AddOrUpdateValue(SlcServicemanagementIds.Sections.ServiceItems.ImplementationReference, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the Icon field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String Icon
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcServicemanagementIds.Sections.ServiceItems.Icon);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcServicemanagementIds.Sections.ServiceItems.Icon);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcServicemanagementIds.Sections.ServiceItems.Icon, (String)value);
 				}
 			}
 		}
