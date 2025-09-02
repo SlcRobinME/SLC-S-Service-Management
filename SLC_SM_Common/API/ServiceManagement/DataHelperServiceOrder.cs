@@ -49,14 +49,14 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 
 			var dataHelperServiceOrderItem = new DataHelperServiceOrderItem(_connection);
 
-			instance.ServiceOrderItems.Clear();
+			instance.ServiceOrderItemses.Clear();
 			if (order.OrderItems != null)
 			{
 				foreach (Models.ServiceOrderItems item in order.OrderItems)
 				{
 					item.ServiceOrderItem.ID = dataHelperServiceOrderItem.CreateOrUpdate(item.ServiceOrderItem);
 
-					instance.ServiceOrderItems.Add(
+					instance.ServiceOrderItemses.Add(
 						new ServiceOrderItemsSection
 						{
 							PriorityOrder = item.Priority,
@@ -81,7 +81,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			return instances.Select(
 					x =>
 					{
-						List<Models.ServiceOrderItems> orderItems = x.ServiceOrderItems
+						List<Models.ServiceOrderItems> orderItems = x.ServiceOrderItemses
 							.Select(
 								serviceOrderItemsSection => new Models.ServiceOrderItems
 								{

@@ -100,7 +100,7 @@ namespace Launch_Interactive_Subscript_1
                     if (inst.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
                     {
                         var serviceItemInstance = new ServicesInstance(inst);
-                        var serviceItem = serviceItemInstance.ServiceItems.FirstOrDefault(x => x.Label == itemLabel);
+                        var serviceItem = serviceItemInstance.ServiceItemses.FirstOrDefault(x => x.Label == itemLabel);
                         if (serviceItem == null)
                         {
                             return;
