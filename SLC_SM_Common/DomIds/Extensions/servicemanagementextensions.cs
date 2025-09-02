@@ -26,7 +26,7 @@
 
 		public DomInstanceId GetId() => ID;
 
-		public string GetName() => Name;
+		public string GetName() => ServiceSpecificationInfo.SpecificationName;
 	}
 
 	public partial class ServicesInstance : IServiceInstanceBase
@@ -37,7 +37,7 @@
 
 		public DomInstanceId GetId() => ID;
 
-		public string GetName() => Name;
+		public string GetName() => ServiceInfo.ServiceName;
 	}
 
 	public class ServiceInstancesExtentions

@@ -125,20 +125,12 @@ namespace SLCSMCreateJobForServiceItem
 				throw new InvalidOperationException("No DOM ID provided as input to the script");
 			}
 
-			engine.Log("Parsed DomId to Guid");
-
 			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-
-			engine.Log("Instantiated dom helper");
 
 			var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
 							  ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
 
-			engine.Log("got the dom instance");
-
 			string label = engine.GetScriptParam("Service Item Label").Value.Trim('"', '[', ']');
-
-			engine.Log("Got script parameter label");
 
 			var instance = ServiceInstancesExtentions.GetTypedInstance(domInstance);
 			ServiceItemsSection serviceItemsSection = instance.GetServiceItems().SingleOrDefault(s => s.Label == label);
@@ -147,25 +139,15 @@ namespace SLCSMCreateJobForServiceItem
 				throw new InvalidOperationException($"Could not find the service item section with label {label}");
 			}
 
-			engine.Log("Got service items in memory");
-
 			var workflowHelper = new WorkflowHelper(engine);
 			var workflow = workflowHelper.GetAllWorkflows().FirstOrDefault(x => x.Name == serviceItemsSection.DefinitionReference)
 						   ?? throw new InvalidOperationException($"No Workflow found on the system with name '{serviceItemsSection.DefinitionReference}'");
 
-			engine.Log("Instantiated workflow helper and found workflow");
-
 			var timings = GetServiceItemTimings(instance);
 
-			engine.Log("Got service timings");
-
 			CreateJobAction jobConfiguration = CreateJobConfiguration(domInstance, instance, serviceItemsSection, workflow, timings);
-
-			engine.Log("Composed job configuration");
-
 			OutputData sendToJobHandler = jobConfiguration.SendToJobHandler(engine, true);
 
-			engine.Log("Made request to create the job");
 			if (sendToJobHandler == null)
 			{
 				engine.Log("Failed to create the job");
@@ -179,8 +161,6 @@ namespace SLCSMCreateJobForServiceItem
 				return;
 			}
 
-			engine.Log("Created the job successfully");
-
 			var outputData = (CreateJobActionOutput)sendToJobHandler.ActionOutput;
 			if (outputData == null)
 			{
@@ -189,8 +169,6 @@ namespace SLCSMCreateJobForServiceItem
 
 			var jobId = outputData.DomJobId;
 
-			engine.Log("Got output data and job id");
-
 			var transitionJobToTentativeInputData = new ExecuteJobAction
 			{
 				DomJobId = jobId,
@@ -198,18 +176,13 @@ namespace SLCSMCreateJobForServiceItem
 			};
 			transitionJobToTentativeInputData.SendToJobHandler(engine, true);
 
-			engine.Log("Sent request to transition job to tentative");
-
-			var job = FindJob(engine, jobId);
-
-			engine.Log("Found job instance");
-
+			var domWorkflowHelper = new DomHelper(engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
+			var job = FindJob(domWorkflowHelper, jobId);
 			CreateRelationship(engine, instance, job);
-
-			engine.Log("Created the relationship between service and the job");
 
 			// TODO check the monitoring service toggle is ON
 			SetCreateMonitoringServiceForJob(job);
+			job.Save(domWorkflowHelper);
 
 			serviceItemsSection.ImplementationReference = jobId.ToString();
 			AddOrUpdateServiceItemToInstance(domHelper, instance, serviceItemsSection, label);
@@ -298,9 +271,8 @@ namespace SLCSMCreateJobForServiceItem
 			job.MonitoringSettings.AtJobEnd = SlcWorkflowIds.Enums.Atjobend.DeleteServiceIfOneExists;
 		}
 
-		private JobsInstance FindJob(IEngine engine, Guid jobId)
+		private JobsInstance FindJob(DomHelper domWorkflowHelper, Guid jobId)
 		{
-			var domWorkflowHelper = new DomHelper(engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
 			var filter = DomInstanceExposers.Id.Equal(jobId);
 			var instance = domWorkflowHelper.DomInstances.Read(filter).FirstOrDefault();
 			if (instance != null)
