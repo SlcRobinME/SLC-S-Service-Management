@@ -687,6 +687,7 @@ namespace DomHelpers.SlcServicemanagement
 				public static FieldDescriptorID ServiceCategory { get; } = new FieldDescriptorID(new Guid("1aba841d-3c8e-411d-9821-a9209c02e4c8"));
 				public static FieldDescriptorID ServiceConfigurationParameters { get; } = new FieldDescriptorID(new Guid("226d2c8b-544b-4ee2-aec6-093dc3c0e8fa"));
 				public static FieldDescriptorID ServiceID { get; } = new FieldDescriptorID(new Guid("17e449be-c41e-40d1-8844-a43c0d71119f"));
+				public static FieldDescriptorID GenerateMonitoringService { get; } = new FieldDescriptorID(new Guid("89647ce1-e618-49bd-a711-9feaf5b0f85e"));
 			}
 
 			public static class ServiceItemRelationship
@@ -5085,6 +5086,49 @@ namespace DomHelpers.SlcServicemanagement
 				else
 				{
 					section.AddOrUpdateValue(SlcServicemanagementIds.Sections.ServiceInfo.ServiceID, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the GenerateMonitoringService field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public Boolean? GenerateMonitoringService
+		{
+			get
+			{
+				var wrapper = section.GetValue<Boolean>(SlcServicemanagementIds.Sections.ServiceInfo.GenerateMonitoringService);
+				if (wrapper != null)
+				{
+					return (Boolean?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcServicemanagementIds.Sections.ServiceInfo.GenerateMonitoringService);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcServicemanagementIds.Sections.ServiceInfo.GenerateMonitoringService, (Boolean)value);
 				}
 			}
 		}
