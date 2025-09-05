@@ -144,11 +144,14 @@ namespace SLCSMCreateJobForServiceItem
 			var workflow = workflowHelper.GetAllWorkflows().FirstOrDefault(x => x.Name == serviceItemsSection.DefinitionReference)
 						   ?? throw new InvalidOperationException($"No Workflow found on the system with name '{serviceItemsSection.DefinitionReference}'");
 
-			var timings = GetServiceItemTimings(instance);
+			if (instance.GetEndTime() < DateTime.UtcNow)
+			{
+				throw new InvalidOperationException($"End time lies in the past ({instance.GetEndTime()}), not possible to create a job for a past event");
+			}
 
 			engine.Log("Gonna create job configuration");
 
-			CreateJobAction jobConfiguration = CreateJobConfiguration(domInstance, instance, serviceItemsSection, workflow, timings);
+			CreateJobAction jobConfiguration = CreateJobConfiguration(instance, serviceItemsSection, workflow);
 
 			engine.Log("Gonna send to job handler");
 			OutputData sendToJobHandler = jobConfiguration.SendToJobHandler(engine, true);
@@ -195,17 +198,6 @@ namespace SLCSMCreateJobForServiceItem
 			AddOrUpdateServiceItemToInstance(domHelper, instance, serviceItemsSection, label);
 		}
 
-		private (DateTime?, DateTime?) GetServiceItemTimings(IServiceInstanceBase instance)
-		{
-			if (instance is ServicesInstance)
-			{
-				var service = instance as ServicesInstance;
-				return (service.ServiceInfo.ServiceStartTime, service.ServiceInfo.ServiceEndTime);
-			}
-
-			return (null, null);
-		}
-
 		private void CreateLink(IEngine engine, IServiceInstanceBase instance, JobsInstance job)
 		{
 			var relationshipHelper = new RelationshipsHelper(engine);
@@ -239,22 +231,17 @@ namespace SLCSMCreateJobForServiceItem
 			return linkConfiguration;
 		}
 
-		private CreateJobAction CreateJobConfiguration(
-			DomInstance domInstance,
-			IServiceInstanceBase instance,
-			ServiceItemsSection serviceItemsSection,
-			Workflow workflow,
-			(DateTime?, DateTime?) timings)
+		private CreateJobAction CreateJobConfiguration(IServiceInstanceBase instance, ServiceItemsSection serviceItemsSection, Workflow workflow)
 		{
 			return new CreateJobAction
 			{
 				Name = $"{instance.GetName()} | {serviceItemsSection.Label}",
-				Description = $"{domInstance.ID.Id} | {serviceItemsSection.Label}",
+				Description = $"{instance.GetId()} | {serviceItemsSection.Label}",
 				DomWorkflowId = workflow.Id,
 				Source = "Scheduling",
 				DesiredJobStatus = DesiredJobStatus.Tentative,
-				Start = timings.Item1 ?? throw new InvalidOperationException("No Start Time configured to create the job from"),
-				End = timings.Item2 ?? ReservationInstance.PermanentEnd,
+				Start = instance.GetStartTime() ?? throw new InvalidOperationException("No Start Time configured to create the job from"),
+				End = instance.GetEndTime() ?? ReservationInstance.PermanentEnd,
 			};
 		}
 
