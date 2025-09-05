@@ -106,7 +106,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			try
 			{
 				_engine = engine;
-				_controller = new InteractiveController(engine);
+				_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 				InitHelpers();
 
 				RunSafe();

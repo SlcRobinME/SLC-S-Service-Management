@@ -96,7 +96,7 @@ namespace SLC_SM_Delete_Service_Item_1
 			try
 			{
 				_engine = engine;
-				_controller = new InteractiveController(engine);
+				_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 				RunSafe();
 			}
 			catch (ScriptAbortException)

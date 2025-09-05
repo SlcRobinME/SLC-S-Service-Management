@@ -112,7 +112,7 @@ namespace SLCSMCreateJobForServiceItem
 			catch (Exception e)
 			{
 				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-				new InteractiveController(engine).ShowDialog(errorView);
+				new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways }.ShowDialog(errorView);
 				engine.Log(e.ToString());
 			}
 		}
