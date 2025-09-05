@@ -37,6 +37,8 @@
 			AddWidget(End, row, 1, 1, 2);
 			AddWidget(IndefiniteRuntime, row, 3);
 
+			AddWidget(GenerateMonitoringService, ++row, 1);
+
 			AddWidget(new WhiteSpace(), ++row, 0);
 			AddWidget(BtnAdd, ++row, 1);
 			AddWidget(BtnCancel, row, 2);
@@ -93,6 +95,8 @@
 		};
 
 		public CheckBox IndefiniteRuntime { get; } = new CheckBox("Indefinite (no end time)") { IsChecked = false };
+
+		public CheckBox GenerateMonitoringService { get; set; } = new CheckBox("Generate DataMiner Monitoring Service") { IsChecked = false };
 
 		public Button BtnAdd { get; } = new Button("Create") { Style = ButtonStyle.CallToAction };
 	}

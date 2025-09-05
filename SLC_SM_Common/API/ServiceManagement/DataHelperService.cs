@@ -39,6 +39,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			instance.ServiceInfo.ServiceID = item.ServiceID;
 			instance.ServiceInfo.ServiceStartTime = item.StartTime;
 			instance.ServiceInfo.ServiceEndTime = item.EndTime;
+			instance.ServiceInfo.GenerateMonitoringService = item.GenerateMonitoringService;
 			instance.ServiceInfo.ServiceProperties = item.Properties?.ID;
 			instance.ServiceInfo.ServiceCategory = item.Category?.ID;
 			instance.ServiceInfo.ServiceSpecifcation = item.ServiceSpecificationId;
@@ -239,6 +240,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				Description = domInstance.ServiceInfo.Description,
 				StartTime = domInstance.ServiceInfo.ServiceStartTime,
 				EndTime = domInstance.ServiceInfo.ServiceEndTime,
+				GenerateMonitoringService = domInstance.ServiceInfo.GenerateMonitoringService,
 				Icon = domInstance.ServiceInfo.Icon,
 				Category = serviceCategories.Find(c => c.ID == domInstance.ServiceInfo.ServiceCategory),
 				ServiceSpecificationId = domInstance.ServiceInfo.ServiceSpecifcation,

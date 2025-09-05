@@ -176,6 +176,11 @@ namespace SLC_SM_Delete_Service_Item_1
 		{
 			var schedulingHelper = new SchedulingHelper(_engine);
 			var job = schedulingHelper.GetJob(refId);
+			if (job == null)
+			{
+				return false; // If job doesn't exist, then it can't be active.
+			}
+
 			if (job.End < DateTime.UtcNow || job.Start > DateTime.UtcNow)
 			{
 				var cancelJobInputData = new ExecuteJobAction
@@ -183,6 +188,7 @@ namespace SLC_SM_Delete_Service_Item_1
 					DomJobId = job.Id,
 					JobAction = Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler.JobAction.CancelJob,
 				};
+
 				var cancelOutputData = cancelJobInputData.SendToJobHandler(_engine, true);
 				if (!cancelOutputData.TraceData.HasSucceeded())
 				{
@@ -195,6 +201,7 @@ namespace SLC_SM_Delete_Service_Item_1
 					JobAction = Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler.JobAction.DeleteJob,
 				};
 				var deleteOutputData = deleteJobInputData.SendToJobHandler(_engine, true);
+
 				if (!deleteOutputData.TraceData.HasSucceeded())
 				{
 					throw new InvalidOperationException($"Could not delete Job '{refId}' due to : {JsonConvert.SerializeObject(deleteOutputData.TraceData)}");

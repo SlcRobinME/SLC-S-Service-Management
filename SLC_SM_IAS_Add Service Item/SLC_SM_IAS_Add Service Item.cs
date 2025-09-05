@@ -150,6 +150,8 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 					newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
 				}
 
+				newSection.Icon = instance.ServiceInfo.Icon; // inherit icon from service.
+
 				AddServiceLink(instance.ID.Id, instance.ServiceInfo.ServiceName, newSection);
 
 				instance.ServiceItemses.Add(newSection);

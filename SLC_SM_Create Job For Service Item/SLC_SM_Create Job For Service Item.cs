@@ -113,6 +113,7 @@ namespace SLCSMCreateJobForServiceItem
 			{
 				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
 				new InteractiveController(engine).ShowDialog(errorView);
+				engine.Log(e.ToString());
 			}
 		}
 
@@ -145,8 +146,14 @@ namespace SLCSMCreateJobForServiceItem
 
 			var timings = GetServiceItemTimings(instance);
 
+			engine.Log("Gonna create job configuration");
+
 			CreateJobAction jobConfiguration = CreateJobConfiguration(domInstance, instance, serviceItemsSection, workflow, timings);
+
+			engine.Log("Gonna send to job handler");
 			OutputData sendToJobHandler = jobConfiguration.SendToJobHandler(engine, true);
+
+			engine.Log("Returned from job handler");
 
 			if (sendToJobHandler == null)
 			{
@@ -178,10 +185,10 @@ namespace SLCSMCreateJobForServiceItem
 
 			var domWorkflowHelper = new DomHelper(engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
 			var job = FindJob(domWorkflowHelper, jobId);
-			CreateRelationship(engine, instance, job);
 
-			// TODO check the monitoring service toggle is ON
-			SetCreateMonitoringServiceForJob(job);
+			CreateLink(engine, instance, job);
+			TrySetMonitoringSettingsForJob(instance, job);
+
 			job.Save(domWorkflowHelper);
 
 			serviceItemsSection.ImplementationReference = jobId.ToString();
@@ -199,7 +206,7 @@ namespace SLCSMCreateJobForServiceItem
 			return (null, null);
 		}
 
-		private void CreateRelationship(IEngine engine, IServiceInstanceBase instance, JobsInstance job)
+		private void CreateLink(IEngine engine, IServiceInstanceBase instance, JobsInstance job)
 		{
 			var relationshipHelper = new RelationshipsHelper(engine);
 
@@ -265,7 +272,7 @@ namespace SLCSMCreateJobForServiceItem
 			return objectType.Id;
 		}
 
-		private void SetCreateMonitoringServiceForJob(JobsInstance job)
+		private void TrySetMonitoringSettingsForJob(IServiceInstanceBase instance, JobsInstance job)
 		{
 			job.MonitoringSettings.AtJobStart = SlcWorkflowIds.Enums.Atjobstart.CreateServiceAtWorkflowStart;
 			job.MonitoringSettings.AtJobEnd = SlcWorkflowIds.Enums.Atjobend.DeleteServiceIfOneExists;
