@@ -111,7 +111,7 @@
 			// Load correct types
 			LoadFromModel();
 
-			view.BtnAdd.Text = "Edit Service Order";
+			view.BtnAdd.Text = "Save";
 			view.TboxName.Text = instance.Name;
 			view.TboxName.PlaceHolder = instance.OrderId;
 			view.OrderId.Text = instance.OrderId;

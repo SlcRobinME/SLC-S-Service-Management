@@ -79,7 +79,7 @@
 			// Load correct types
 			LoadFromModel();
 
-			view.BtnAdd.Text = "Edit";
+			view.BtnAdd.Text = "Save";
 			view.TboxLabel.Text = section.Label;
 
 			if (section.ServiceItemType.HasValue)

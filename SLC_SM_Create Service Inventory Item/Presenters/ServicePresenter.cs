@@ -97,7 +97,7 @@
 			// Load correct types
 			LoadFromModel();
 
-			view.BtnAdd.Text = "Edit Service Inventory Item";
+			view.BtnAdd.Text = "Save";
 			view.TboxName.Text = instance.Name;
 			if (!String.IsNullOrEmpty(instance.ServiceID))
 			{
