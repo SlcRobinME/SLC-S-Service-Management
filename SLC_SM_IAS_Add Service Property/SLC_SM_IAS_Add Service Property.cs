@@ -132,13 +132,13 @@ namespace SLC_SM_IAS_Add_Service_Property_1
         private static void AddOrUpdateServicePropertyToInstance(DomHelper helper, ServicePropertyValuesInstance domInstance, ServicePropertyValueSection newSection, Guid oldPropertyId)
         {
             // Remove old instance first in case of edit
-            var oldItem = domInstance.ServicePropertyValue.FirstOrDefault(x => x.Property == oldPropertyId);
+            var oldItem = domInstance.ServicePropertyValues.FirstOrDefault(x => x.Property == oldPropertyId);
             if (oldItem != null)
             {
-                domInstance.ServicePropertyValue.Remove(oldItem);
+                domInstance.ServicePropertyValues.Remove(oldItem);
             }
 
-            domInstance.ServicePropertyValue.Add(newSection);
+            domInstance.ServicePropertyValues.Add(newSection);
             domInstance.Save(helper);
         }
 
@@ -198,7 +198,7 @@ namespace SLC_SM_IAS_Add_Service_Property_1
             if (!id.HasValue)
             {
                 var propertyValue = new ServicePropertyValuesInstance();
-                propertyValue.ServicePropertyValue.Add(new ServicePropertyValueSection());
+                propertyValue.ServicePropertyValues.Add(new ServicePropertyValueSection());
                 propertyValue.Save(domHelper);
 
                 usedPropertyValue = propertyValue.ID.Id;
@@ -259,7 +259,7 @@ namespace SLC_SM_IAS_Add_Service_Property_1
             }
             else
             {
-                var section = propertyValueInstance.ServicePropertyValue.FirstOrDefault(x => x.Property == propertyId);
+                var section = propertyValueInstance.ServicePropertyValues.FirstOrDefault(x => x.Property == propertyId);
                 presenter.LoadFromModel(section);
             }
 

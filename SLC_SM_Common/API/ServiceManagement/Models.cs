@@ -170,6 +170,8 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 
 			public string Type { get; set; }
 
+			public string Icon { get; set; }
+
 			public bool Equals(ServiceCategory other)
 			{
 				if (other == null && ID == Guid.Empty) { return true; }
@@ -197,6 +199,8 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			public DateTime? StartTime { get; set; }
 
 			public DateTime? EndTime { get; set; }
+
+			public bool? GenerateMonitoringService { get; set; }
 
 			public ServiceCategory Category { get; set; }
 

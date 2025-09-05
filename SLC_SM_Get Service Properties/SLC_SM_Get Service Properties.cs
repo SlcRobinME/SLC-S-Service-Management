@@ -119,7 +119,7 @@ namespace Get_Service_Properties_1
             }
 
             var propertiesInstance = new ServicePropertyValuesInstance(propertyDomInstance);
-            return propertiesInstance.ServicePropertyValue
+            return propertiesInstance.ServicePropertyValues
                 .Where(x => x.Property.HasValue)
                 .Select(BuildRow)
                 .ToArray();

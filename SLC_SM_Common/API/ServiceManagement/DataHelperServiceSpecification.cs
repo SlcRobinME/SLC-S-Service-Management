@@ -37,7 +37,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			{
 				foreach (var relationship in item.ServiceItemsRelationships.Where(r => r != null))
 				{
-					instance.ServiceItemRelationship.Add(
+					instance.ServiceItemRelationships.Add(
 						new ServiceItemRelationshipSection
 						{
 							ParentServiceItem = relationship.ParentServiceItem,
@@ -49,9 +49,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				}
 			}
 
-			if (!instance.ServiceItemRelationship.Any())
+			if (!instance.ServiceItemRelationships.Any())
 			{
-				instance.ServiceItemRelationship.Add(new ServiceItemRelationshipSection());
+				instance.ServiceItemRelationships.Add(new ServiceItemRelationshipSection());
 			}
 
 			var dataHelperConfigurations = new DataHelperServiceSpecificationConfigurationValue(_connection);
@@ -67,7 +67,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			{
 				foreach (var si in item.ServiceItems.Where(s => s != null))
 				{
-					instance.ServiceItems.Add(
+					instance.ServiceItemses.Add(
 						new ServiceItemsSection
 						{
 							ServiceItemID = si.ID,
@@ -80,9 +80,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				}
 			}
 
-			if (!instance.ServiceItems.Any())
+			if (!instance.ServiceItemses.Any())
 			{
-				instance.ServiceItems.Add(new ServiceItemsSection());
+				instance.ServiceItemses.Add(new ServiceItemsSection());
 			}
 
 			return CreateOrUpdateInstance(instance);
@@ -110,7 +110,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 						Properties = serviceProperties.Find(p => p.ID == x.ServiceSpecificationInfo.ServiceProperties)
 						             ?? new Models.ServicePropertyValues { Values = new List<Models.ServicePropertyValue>() },
 						Configurations = serviceConfigurations.Where(p => x.ServiceSpecificationInfo.ServiceSpecificationConfigurationParameters.Contains(p.ID)).ToList(),
-						ServiceItems = x.ServiceItems.Select(
+						ServiceItems = x.ServiceItemses.Select(
 								s => new Models.ServiceItem
 								{
 									ID = s.ServiceItemID ?? 1,
@@ -122,7 +122,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 								})
 							.Where(s => !String.IsNullOrEmpty(s.Label))
 							.ToList(),
-						ServiceItemsRelationships = x.ServiceItemRelationship.Select(
+						ServiceItemsRelationships = x.ServiceItemRelationships.Select(
 								r => new Models.ServiceItemRelationShip
 								{
 									ParentServiceItem = r.ParentServiceItem,

@@ -55,11 +55,12 @@
 				instanceToReturn.Description = instanceToReturn.Description ?? String.Empty;
 				instanceToReturn.StartTime = view.Start.DateTime.ToUniversalTime();
 				instanceToReturn.EndTime = view.IndefiniteRuntime.IsChecked ? default(DateTime?) : view.End.DateTime.ToUniversalTime();
-				instanceToReturn.Icon = instanceToReturn.Icon ?? String.Empty;
+				instanceToReturn.GenerateMonitoringService = view.GenerateMonitoringService.IsChecked;
 				instanceToReturn.Description = instanceToReturn.Description ?? String.Empty;
 				instanceToReturn.Category = view.ServiceCategory.Selected;
 				instanceToReturn.ServiceSpecificationId = view.Specs.Selected?.ID;
 				instanceToReturn.OrganizationId = view.Organizations.Selected?.ID;
+				instanceToReturn.Icon = view.ServiceCategory.Selected.Icon ?? string.Empty;
 
 				return instanceToReturn;
 			}
@@ -135,6 +136,8 @@
 			{
 				view.Organizations.SelectedOption = view.Organizations.Options.First(x => x.Value?.ID == instance.OrganizationId);
 			}
+
+			view.GenerateMonitoringService.IsVisible = false;
 		}
 
 		public bool Validate()

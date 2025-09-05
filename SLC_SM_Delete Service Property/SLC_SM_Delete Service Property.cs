@@ -167,13 +167,13 @@ namespace SLC_SM_Delete_Service_Property_1
 
         private static void DeleteServiceItemFromInstance(DomHelper helper, ServicePropertyValuesInstance domInstance, Guid propertyId)
         {
-            var itemToRemove = domInstance.ServicePropertyValue.FirstOrDefault(x => x.Property == propertyId);
+            var itemToRemove = domInstance.ServicePropertyValues.FirstOrDefault(x => x.Property == propertyId);
             if (itemToRemove == null)
             {
                 throw new InvalidOperationException($"No Property exists with ID '{propertyId}' to remove");
             }
 
-            domInstance.ServicePropertyValue.Remove(itemToRemove);
+            domInstance.ServicePropertyValues.Remove(itemToRemove);
             domInstance.Save(helper);
         }
     }
