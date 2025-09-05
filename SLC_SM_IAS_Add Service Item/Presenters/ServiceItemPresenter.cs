@@ -19,7 +19,7 @@
 
 	public class ServiceItemPresenter
 	{
-		private readonly DomInstance domInstance;
+		private readonly IServiceInstanceBase domInstance;
 		private readonly IEngine engine;
 		private readonly string[] getServiceItemLabels;
 		private readonly List<Models.Service> services = new List<Models.Service>();
@@ -27,7 +27,7 @@
 		private readonly ServiceItemView view;
 		private readonly Workflow[] workflows;
 
-		public ServiceItemPresenter(IEngine engine, ServiceItemView view, string[] getServiceItemLabels, DomInstance domInstance)
+		public ServiceItemPresenter(IEngine engine, ServiceItemView view, string[] getServiceItemLabels, IServiceInstanceBase domInstance)
 		{
 			this.engine = engine;
 			this.view = view;
@@ -111,23 +111,22 @@
 				return String.Empty;
 			}
 
-			var job = GetJobForOrder(domInstance, label);
+			var job = GetJobForOrder(label);
 			if (job == null)
 			{
 				return String.Empty;
 			}
 
-			var timings = GetServiceItemTimings(domInstance);
 			var action = new EditJobAction
 			{
 				DomJobId = job.ID.Id,
-				End = timings.Item2,
+				End = domInstance.GetEndTime(),
 			};
 
 			// Only add start update if the job is not already running
 			if (job.JobInfo.JobStart <= DateTime.UtcNow)
 			{
-				action.Start = timings.Item1;
+				action.Start = domInstance.GetStartTime();
 			}
 
 			action.SendToJobHandler(engine, true);
@@ -154,22 +153,11 @@
 			return $"{s.Name} ({s.ServiceID})";
 		}
 
-		private static (DateTime?, DateTime?) GetServiceItemTimings(DomInstance domInstance)
-		{
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
-			{
-				var instance = new ServicesInstance(domInstance);
-				return (instance.ServiceInfo.ServiceStartTime, instance.ServiceInfo.ServiceEndTime);
-			}
-
-			return (null, null);
-		}
-
-		private JobsInstance GetJobForOrder(DomInstance instance, string label)
+		private JobsInstance GetJobForOrder(string label)
 		{
 			var jobFilter = DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription)
-				.Equal($"{instance.ID.Id} | {label}")
-				.OR(DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription).Equal($"{instance.ID.Id}|{label}"));
+				.Equal($"{domInstance.GetId()} | {label}")
+				.OR(DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription).Equal($"{domInstance.GetId()}|{label}"));
 
 			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
 			return domHelper.DomInstances.Read(jobFilter)
@@ -260,12 +248,13 @@
 				services.AddRange(new DataHelperService(Engine.SLNetRaw).Read());
 			}
 
-			DateTime? currentStart = GetServiceItemTimings(domInstance).Item1;
-			DateTime? currentEnd = GetServiceItemTimings(domInstance).Item2;
+			DateTime? currentStart = domInstance.GetStartTime();
+			DateTime? currentEnd = domInstance.GetEndTime();
 			var serviceOptions = services.Where(x => (currentEnd == null || x.EndTime <= currentEnd) && currentStart < x.StartTime)
 				.Select(GetServiceDropDownLabel)
 				.OrderBy(s => s)
 				.ToList();
+			serviceOptions.Insert(0, "-None-");
 			view.ImplementationReferences.SetOptions(serviceOptions);
 		}
 

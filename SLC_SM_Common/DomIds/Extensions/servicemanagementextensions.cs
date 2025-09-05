@@ -15,6 +15,10 @@
 
 		string GetName();
 
+		DateTime? GetStartTime();
+
+		DateTime? GetEndTime();
+
 		void Save(DomHelper domHelper);
 	}
 
@@ -27,6 +31,10 @@
 		public DomInstanceId GetId() => ID;
 
 		public string GetName() => ServiceSpecificationInfo.SpecificationName;
+
+		public DateTime? GetStartTime() => null;
+
+		public DateTime? GetEndTime() => null;
 	}
 
 	public partial class ServicesInstance : IServiceInstanceBase
@@ -38,6 +46,10 @@
 		public DomInstanceId GetId() => ID;
 
 		public string GetName() => ServiceInfo.ServiceName;
+
+		public DateTime? GetStartTime() => ServiceInfo.ServiceStartTime;
+
+		public DateTime? GetEndTime() => ServiceInfo.ServiceEndTime;
 	}
 
 	public class ServiceInstancesExtentions

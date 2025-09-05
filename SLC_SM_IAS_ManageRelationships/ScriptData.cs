@@ -80,7 +80,7 @@ namespace SLCSMIASManageRelationships
 		public void Validate()
 		{
 			if (string.IsNullOrEmpty(DefinitionReference) && ServiceIds.Count < 2)
-				throw new InvalidOperationException("Select a minumum of 2 service items to make a connection");
+				throw new InvalidOperationException("Select a minimum of 2 service items to make a connection");
 		}
 
 		private void LoadScriptParameters()
