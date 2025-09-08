@@ -27,7 +27,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			{
 				foreach (var value in item.Values)
 				{
-					instance.ServicePropertyValue.Add(
+					instance.ServicePropertyValues.Add(
 						new ServicePropertyValueSection
 						{
 							Value = value.Value,
@@ -36,9 +36,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				}
 			}
 
-			if (!instance.ServicePropertyValue.Any())
+			if (!instance.ServicePropertyValues.Any())
 			{
-				instance.ServicePropertyValue.Add(new ServicePropertyValueSection());
+				instance.ServicePropertyValues.Add(new ServicePropertyValueSection());
 			}
 
 			return CreateOrUpdateInstance(instance);
@@ -55,7 +55,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 					x => new Models.ServicePropertyValues
 					{
 						ID = x.ID.Id,
-						Values = x.ServicePropertyValue.Select(
+						Values = x.ServicePropertyValues.Select(
 								p => new Models.ServicePropertyValue
 								{
 									Value = p.Value,

@@ -45,32 +45,27 @@ Revision History:
 
 DATE		VERSION		AUTHOR			COMMENTS
 
-11/06/2025	1.0.0.1		RCA, Skyline	Initial version
+28/08/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
 
-namespace SLCSMASDynamicDelete
+namespace SLCSMASSetIcon
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-
-	using DomHelpers;
 	using DomHelpers.SlcServicemanagement;
-
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-
-	using SLC_SM_AS_DynamicDelete;
+	using SLC_SM_AS_SetIcon;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
 	/// </summary>
 	public class Script
 	{
-		private IList<ServiceItemRelationshipSection> _connections;
-		private IList<ServiceItemsSection> _nodes;
+		private ScriptData _scriptData;
+		private DomHelper _domHelper;
 
 		/// <summary>
 		/// The script entry point.
@@ -111,94 +106,67 @@ namespace SLCSMASDynamicDelete
 
 		private void RunSafe(IEngine engine)
 		{
-			var scriptData = new ScriptData(engine);
-			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
+			_scriptData = new ScriptData(engine);
+			_domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
 
-			var instance = domHelper.DomInstances
-				.Read(DomInstanceExposers.Id.Equal(scriptData.DomId))
-				.FirstOrDefault();
+			SetIcon();
+		}
 
+		private void SetIcon()
+		{
+			switch (_scriptData.Type)
+			{
+				case ScriptData.ObjectType.ServiceCategory:
+					SetServiceCategoryIcon();
+					break;
+				case ScriptData.ObjectType.Service:
+					SetServiceIcon();
+					break;
+				case ScriptData.ObjectType.ServiceItem:
+					SetServiceItemIcon();
+					break;
+				default:
+					break;
+			}
+		}
+
+		private void SetServiceItemIcon()
+		{
+			throw new NotImplementedException();
+		}
+
+		private void SetServiceIcon()
+		{
+			var filter = DomInstanceExposers.DomDefinitionId.Equal(SlcServicemanagementIds.Definitions.Services.Id)
+				.AND(DomInstanceExposers.Id.Equal(_scriptData.DomId));
+
+			var instance = _domHelper.DomInstances.Read(filter).FirstOrDefault();
 			if (instance == null)
-				throw new InvalidOperationException($"Could not find the DOM instance with id {scriptData.DomId}");
-
-			var domInstanceBase = CreateTypedDomInstance(instance);
-
-			Load(domInstanceBase);
-			DeleteNodes(scriptData);
-			DeleteRelationships(scriptData);
-
-			domInstanceBase.Save(domHelper);
-		}
-
-		private void DeleteNodes(ScriptData scriptData)
-		{
-			var connections = _connections.ToList(); // cannot iterate mutable collection
-			var nodes = _nodes.ToList(); // cannot iterate mutable collection
-
-			foreach (var nodeId in scriptData.NodeIds)
 			{
-				DeleteNode(connections, nodes, nodeId);
+				throw new Exception($"Could not find instance with id {_scriptData.DomId}");
 			}
+
+			var serviceCategory = new ServicesInstance(instance);
+
+			serviceCategory.ServiceInfo.Icon = _scriptData.Name;
+			serviceCategory.Save(_domHelper);
 		}
 
-		private void DeleteNode(List<ServiceItemRelationshipSection> connections, List<ServiceItemsSection> nodes, string nodeId)
+		private void SetServiceCategoryIcon()
 		{
-			var node = nodes.FirstOrDefault(n => n.ServiceItemID.ToString() == nodeId);
-			var connectionsToDelete = connections.Where(c => c.ParentServiceItem == node?.ServiceItemID?.ToString() || c.ChildServiceItem == node?.ServiceItemID?.ToString());
+			var filter = DomInstanceExposers.DomDefinitionId.Equal(SlcServicemanagementIds.Definitions.ServiceCategory.Id)
+				.AND(DomInstanceExposers.Id.Equal(_scriptData.DomId));
 
-			foreach (var connection in connectionsToDelete)
-				_connections.Remove(connection);
-
-			_nodes.Remove(node);
-		}
-
-		private void DeleteRelationships(ScriptData scriptData)
-		{
-			var connections = _connections.ToList(); // cannot iterate mutable collection
-			foreach (var connectionId in scriptData.ConnectionIds)
+			var instance = _domHelper.DomInstances.Read(filter).FirstOrDefault();
+			if (instance == null)
 			{
-				var connection = connections.FirstOrDefault(c => c.SectionID.Id == connectionId);
-				_connections.Remove(connection);
+				throw new Exception($"Could not find instance with id {_scriptData.DomId}");
 			}
-		}
 
-		private DomInstanceBase CreateTypedDomInstance(DomInstance domInstance)
-		{
-			if (IsServicesInstance(domInstance))
-				return new ServicesInstance(domInstance);
+			var serviceCategory = new ServiceCategoryInstance(instance);
 
-			if (IsServiceSpecificationsInstance(domInstance))
-				return new ServiceSpecificationsInstance(domInstance);
-
-			throw new NotSupportedException($"Unsupported DOM definition ID: {domInstance.DomDefinitionId.Id}");
-		}
-
-		private bool IsServicesInstance(DomInstance domInstance)
-		{
-			return domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id;
-		}
-
-		private bool IsServiceSpecificationsInstance(DomInstance domInstance)
-		{
-			return domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id;
-		}
-
-		private void Load(DomInstanceBase domInstance)
-		{
-			if (domInstance is ServicesInstance services)
-			{
-				_nodes = services.ServiceItemses;
-				_connections = services.ServiceItemRelationships;
-			}
-			else if (domInstance is ServiceSpecificationsInstance specs)
-			{
-				_nodes = specs.ServiceItemses;
-				_connections = specs.ServiceItemRelationships;
-			}
-			else
-			{
-				throw new InvalidOperationException("Unsupported DomInstance type.");
-			}
+			serviceCategory.ServiceCategoryInfo.Icon = _scriptData.Name;
+			serviceCategory.Save(_domHelper);
 		}
 	}
 }

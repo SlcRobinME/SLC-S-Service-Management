@@ -24,6 +24,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			var instance = new ServiceCategoryInstance(New(item.ID));
 			instance.ServiceCategoryInfo.Name = item.Name;
 			instance.ServiceCategoryInfo.Type = item.Type;
+			instance.ServiceCategoryInfo.Icon = item.Icon;
 
 			return CreateOrUpdateInstance(instance);
 		}
@@ -41,6 +42,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 						ID = x.ID.Id,
 						Name = x.ServiceCategoryInfo.Name,
 						Type = x.ServiceCategoryInfo.Type,
+						Icon = x.ServiceCategoryInfo.Icon,
 					})
 				.ToList();
 		}

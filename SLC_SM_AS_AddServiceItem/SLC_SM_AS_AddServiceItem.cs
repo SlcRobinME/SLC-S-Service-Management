@@ -128,13 +128,13 @@ namespace SLCSMASAddServiceItem
 			if (defId == SlcServicemanagementIds.Definitions.Services.Id)
 			{
 				var service = new ServicesInstance(domInstance);
-				HandleServiceItemUpdate(service.ServiceItems, newSection);
+				HandleServiceItemUpdate(service.ServiceItemses, newSection);
 				service.Save(_domHelper);
 			}
 			else if (defId == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
 			{
 				var spec = new ServiceSpecificationsInstance(domInstance);
-				HandleServiceItemUpdate(spec.ServiceItems, newSection);
+				HandleServiceItemUpdate(spec.ServiceItemses, newSection);
 				spec.Save(_domHelper);
 			}
 			else

@@ -20,24 +20,24 @@
 
 	public partial class ServiceSpecificationsInstance : IServiceInstanceBase
 	{
-		public IList<ServiceItemsSection> GetServiceItems() => ServiceItems;
+		public IList<ServiceItemsSection> GetServiceItems() => ServiceItemses;
 
-		public IList<ServiceItemRelationshipSection> GetServiceItemRelationships() => ServiceItemRelationship;
+		public IList<ServiceItemRelationshipSection> GetServiceItemRelationships() => ServiceItemRelationships;
 
 		public DomInstanceId GetId() => ID;
 
-		public string GetName() => Name;
+		public string GetName() => ServiceSpecificationInfo.SpecificationName;
 	}
 
 	public partial class ServicesInstance : IServiceInstanceBase
 	{
-		public IList<ServiceItemsSection> GetServiceItems() => ServiceItems;
+		public IList<ServiceItemsSection> GetServiceItems() => ServiceItemses;
 
-		public IList<ServiceItemRelationshipSection> GetServiceItemRelationships() => ServiceItemRelationship;
+		public IList<ServiceItemRelationshipSection> GetServiceItemRelationships() => ServiceItemRelationships;
 
 		public DomInstanceId GetId() => ID;
 
-		public string GetName() => Name;
+		public string GetName() => ServiceInfo.ServiceName;
 	}
 
 	public class ServiceInstancesExtentions

@@ -60,6 +60,8 @@ namespace SLC_SM_Create_Service_Inventory_Item
 	using Library.Views;
 
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -130,6 +132,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			{
 				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
 				_controller.ShowDialog(errorView);
+				engine.Log(e.ToString());
 			}
 		}
 
@@ -143,7 +146,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			var serviceSpecificationInstance = repo.ServiceSpecifications.Read().First(x => x.ID == instance.ServiceSpecificationId);
 
-			instance.Icon = serviceSpecificationInstance.Icon;
+			//instance.Icon = serviceSpecificationInstance.Icon;
 			instance.Description = serviceSpecificationInstance.Description;
 			instance.Properties = serviceSpecificationInstance.Properties ?? new Models.ServicePropertyValues();
 			instance.Properties.ID = Guid.NewGuid();
@@ -209,6 +212,31 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			}
 
 			repo.Services.CreateOrUpdate(instance);
+
+			if (instance.GenerateMonitoringService == true)
+			{
+				TryCreateDmsService(instance);
+			}
+		}
+
+		private void TryCreateDmsService(Models.Service instance)
+		{
+			var dms = _engine.GetDms();
+			if (_engine.FindService(instance.Name) != null)
+			{
+				throw new InvalidOperationException($"A dataminer service with name {instance.Name} already exists.");
+			}
+
+			var agent = dms.GetAgents().SingleOrDefault();
+			if (agent == null)
+			{
+				throw new InvalidOperationException($"This operation is valid only on single agent dataminer systems.");
+			}
+
+			var serviceConfiguration = new ServiceConfiguration(dms, instance.Name);
+			var serviceId = agent.CreateService(serviceConfiguration);
+
+			// TODO store the dms service id on this service instance?
 		}
 
 		private void CreateNewServiceAndLinkItToServiceOrder(DataHelpersServiceManagement repo, Models.ServiceOrderItem serviceOrder)
