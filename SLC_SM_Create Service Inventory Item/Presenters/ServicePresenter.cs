@@ -60,7 +60,7 @@
 				instanceToReturn.Category = view.ServiceCategory.Selected;
 				instanceToReturn.ServiceSpecificationId = view.Specs.Selected?.ID;
 				instanceToReturn.OrganizationId = view.Organizations.Selected?.ID;
-				instanceToReturn.Icon = view.ServiceCategory.Selected.Icon ?? string.Empty;
+				instanceToReturn.Icon = view.ServiceCategory?.Selected?.Icon ?? string.Empty;
 
 				return instanceToReturn;
 			}
@@ -76,6 +76,7 @@
 			var specs = repo.ServiceSpecifications.Read().OrderBy(x => x.Name).Select(x => new Option<Models.ServiceSpecification>(x.Name, x)).ToList();
 			specs.Insert(0, new Option<Models.ServiceSpecification>("-None-", null));
 			view.Specs.SetOptions(specs);
+			view.Specs.Changed += Specs_Changed;
 
 			var orgs = new DataHelperOrganization(Engine.SLNetRaw).Read()
 				.OrderBy(x => x.Name)
@@ -86,6 +87,15 @@
 
 			view.Start.DateTime = DateTime.Now + TimeSpan.FromHours(1);
 			view.End.DateTime = view.Start.DateTime + TimeSpan.FromHours(1);
+		}
+
+		private void Specs_Changed(object sender, DropDown<Models.ServiceSpecification>.DropDownChangedEventArgs e)
+		{
+			view.GenerateMonitoringService.IsEnabled = e.SelectedOption?.Value != null;
+			if (e.SelectedOption?.Value == null)
+			{
+				view.GenerateMonitoringService.IsChecked = false;
+			}
 		}
 
 		public void LoadFromModel(Models.Service instance)

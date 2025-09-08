@@ -104,6 +104,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 							ServiceItemType = si.Type,
 							DefinitionReference = si.DefinitionReference,
 							ImplementationReference = si.ImplementationReference,
+							Icon = si.Icon,
 						});
 				}
 			}

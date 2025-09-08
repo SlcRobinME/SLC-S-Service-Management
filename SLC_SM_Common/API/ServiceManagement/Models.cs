@@ -47,6 +47,8 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			public string DefinitionReference { get; set; }
 
 			public string ImplementationReference { get; set; }
+
+			public string Icon { get; set; }
 		}
 
 		public class ServiceOrder
