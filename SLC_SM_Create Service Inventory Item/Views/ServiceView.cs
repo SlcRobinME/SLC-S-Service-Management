@@ -96,7 +96,7 @@
 
 		public CheckBox IndefiniteRuntime { get; } = new CheckBox("Indefinite (no end time)") { IsChecked = false };
 
-		public CheckBox GenerateMonitoringService { get; set; } = new CheckBox("Generate DataMiner Monitoring Service") { IsChecked = false };
+		public CheckBox GenerateMonitoringService { get; set; } = new CheckBox("Generate DataMiner Monitoring Service") { IsChecked = false, IsEnabled = false };
 
 		public Button BtnAdd { get; } = new Button("Create") { Style = ButtonStyle.CallToAction };
 	}

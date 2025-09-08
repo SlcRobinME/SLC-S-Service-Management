@@ -42,6 +42,7 @@
 
 			view.IndefiniteRuntime.Changed += (sender, args) => view.End.IsEnabled = !args.IsChecked;
 			view.TboxName.Changed += (sender, args) => ValidateLabel(args.Value);
+			view.Specs.Changed += Specs_Changed;
 		}
 
 		public string Name => String.IsNullOrWhiteSpace(view.TboxName.Text) ? view.TboxName.PlaceHolder : view.TboxName.Text;
@@ -60,7 +61,7 @@
 				instanceToReturn.Category = view.ServiceCategory.Selected;
 				instanceToReturn.ServiceSpecificationId = view.Specs.Selected?.ID;
 				instanceToReturn.OrganizationId = view.Organizations.Selected?.ID;
-				instanceToReturn.Icon = view.ServiceCategory.Selected.Icon ?? string.Empty;
+				instanceToReturn.Icon = view.ServiceCategory?.Selected?.Icon ?? string.Empty;
 
 				return instanceToReturn;
 			}
@@ -86,6 +87,15 @@
 
 			view.Start.DateTime = DateTime.Now + TimeSpan.FromHours(1);
 			view.End.DateTime = view.Start.DateTime + TimeSpan.FromHours(1);
+		}
+
+		private void Specs_Changed(object sender, DropDown<Models.ServiceSpecification>.DropDownChangedEventArgs e)
+		{
+			view.GenerateMonitoringService.IsEnabled = e.SelectedOption?.Value != null;
+			if (e.SelectedOption?.Value == null)
+			{
+				view.GenerateMonitoringService.IsChecked = false;
+			}
 		}
 
 		public void LoadFromModel(Models.Service instance)
