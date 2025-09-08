@@ -61,7 +61,9 @@ namespace SLC_SM_Delete_Service_1
 	using Newtonsoft.Json;
 
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
@@ -74,6 +76,7 @@ namespace SLC_SM_Delete_Service_1
 		///     The script entry point.
 		/// </summary>
 		/// <param name="engine">Link with SLAutomation process.</param>
+		/// // engine.ShowUI();
 		public void Run(IEngine engine)
 		{
 			try
@@ -107,19 +110,30 @@ namespace SLC_SM_Delete_Service_1
 		private void RunSafe()
 		{
 			string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
-			Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
-			if (domId == Guid.Empty)
+			_engine.GenerateInformation(domIdRaw);
+			List<Guid> domIdList = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw);
+			if (domIdList.Count() == 0)
 			{
-				throw new InvalidOperationException("No DOM ID provided as input to the script");
+				return;
+				//throw new InvalidOperationException("No DOM ID provided as input to the script");
 			}
 
-			var repo = new DataHelpersServiceManagement(Engine.SLNetRaw);
+			var _serviceManagementHelper = new DataHelpersServiceManagement(Engine.SLNetRaw);
 
-			var service = repo.Services.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault();
-			if (service != null)
+			// confirmation if the user wants to delete the services
+			if (!_engine.ShowConfirmDialog($"Are you sure to you want to delete the selected {domIdList.Count} service(s) from the Inventory?"))
 			{
-				_engine.GenerateInformation($"Service that will be removed: {service.ID}/{service.Name}");
-				repo.Services.TryDelete(service);
+				return; 
+			}
+			
+			foreach (var domId in domIdList)
+			{
+				var service = _serviceManagementHelper.Services.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault();
+				if (service != null)
+				{
+					_engine.GenerateInformation($"Service that will be removed: {service.ID}/{service.Name}");
+					_serviceManagementHelper.Services.TryDelete(service);
+				}
 			}
 		}
 	}
