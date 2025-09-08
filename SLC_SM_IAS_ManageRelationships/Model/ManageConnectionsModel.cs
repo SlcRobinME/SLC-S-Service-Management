@@ -148,7 +148,7 @@
 
 			if (serviceItem.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
 			{
-				return new ServiceLink(instance);
+				return new ServiceLink(_engine, instance);
 			}
 
 			throw new ArgumentException($"Unknown definition reference: {serviceItem.DefinitionReference}");
