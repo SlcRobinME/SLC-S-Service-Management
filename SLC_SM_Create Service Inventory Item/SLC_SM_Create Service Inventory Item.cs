@@ -106,7 +106,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			try
 			{
 				_engine = engine;
-				_controller = new InteractiveController(engine);
+				_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 				InitHelpers();
 
 				RunSafe();
@@ -430,7 +430,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			}
 			else
 			{
-				view.BtnAdd.Text = "Edit Service";
+				view.BtnAdd.Text = "Save";
 				presenter.LoadFromModel(GetService(repo, domId));
 				view.BtnAdd.Pressed += (sender, args) =>
 				{

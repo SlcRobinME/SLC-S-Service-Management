@@ -102,7 +102,7 @@ namespace SLC_SM_IAS_Add_Service_Property_1
             try
             {
                 _engine = engine;
-                _controller = new InteractiveController(engine);
+                _controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
                 RunSafe();
             }
             catch (ScriptAbortException)

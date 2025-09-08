@@ -44,7 +44,7 @@
 			// Load correct types
 			LoadFromModel();
 
-			view.BtnAdd.Text = "Edit";
+			view.BtnAdd.Text = "Save";
 			view.ServiceProperty.Selected = servicePropertiesInstances.FirstOrDefault(x => x.ID.Id == section.Property);
 			OnUpdateServiceProperty(view.ServiceProperty.Selected);
 			if (view.DdValue.IsEnabled)

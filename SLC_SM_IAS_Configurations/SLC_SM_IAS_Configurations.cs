@@ -86,7 +86,7 @@ namespace SLC_SM_IAS_Configurations
 			try
 			{
 				_engine = engine;
-				_controller = new InteractiveController(engine);
+				_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 				RunSafe();
 			}
 			catch (ScriptAbortException)

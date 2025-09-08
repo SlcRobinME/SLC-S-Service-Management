@@ -54,7 +54,7 @@
 			// Load correct types
 			LoadFromModel();
 
-			view.BtnAdd.Text = "Edit";
+			view.BtnAdd.Text = "Save";
 			view.TboxName.Text = instance.Name;
 			view.Description.Text = instance.Description;
 			view.Icon.Text = instance.Icon;
