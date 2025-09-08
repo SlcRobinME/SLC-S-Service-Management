@@ -42,6 +42,7 @@
 
 			view.IndefiniteRuntime.Changed += (sender, args) => view.End.IsEnabled = !args.IsChecked;
 			view.TboxName.Changed += (sender, args) => ValidateLabel(args.Value);
+			view.Specs.Changed += Specs_Changed;
 		}
 
 		public string Name => String.IsNullOrWhiteSpace(view.TboxName.Text) ? view.TboxName.PlaceHolder : view.TboxName.Text;
@@ -76,7 +77,6 @@
 			var specs = repo.ServiceSpecifications.Read().OrderBy(x => x.Name).Select(x => new Option<Models.ServiceSpecification>(x.Name, x)).ToList();
 			specs.Insert(0, new Option<Models.ServiceSpecification>("-None-", null));
 			view.Specs.SetOptions(specs);
-			view.Specs.Changed += Specs_Changed;
 
 			var orgs = new DataHelperOrganization(Engine.SLNetRaw).Read()
 				.OrderBy(x => x.Name)
