@@ -44,7 +44,7 @@
 			// Load correct types
 			LoadFromModel();
 
-			view.BtnAdd.Text = "Edit";
+			view.BtnAdd.Text = "Save";
 			view.ServiceProperty.Selected = servicePropertiesInstances.FirstOrDefault(x => x.ID.Id == section.Property);
 			OnUpdateServiceProperty(view.ServiceProperty.Selected);
 			if (view.DdValue.IsEnabled)
@@ -82,7 +82,7 @@
 			{
 				view.TBoxValue.Text = String.Empty;
 				view.TBoxValue.IsEnabled = false;
-				view.DdValue.SetOptions(servicePropertySelected.DiscreteServicePropertyValueOptions.Select(x => x.DiscreteValue));
+				view.DdValue.SetOptions(servicePropertySelected.DiscreteServicePropertyValueOptionses.Select(x => x.DiscreteValue));
 				view.DdValue.IsEnabled = true;
 			}
 		}

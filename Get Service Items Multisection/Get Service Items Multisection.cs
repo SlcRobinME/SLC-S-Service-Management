@@ -5,11 +5,13 @@ namespace Get_ServiceItemsMultipleSections_1
 	using System.Collections.Generic;
 	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
+	using DomHelpers.SlcWorkflow;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.ResourceManager.Objects;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using SLDataGateway.API.Querying;
 
 	// Required to mark the interface as a GQI data source
@@ -103,18 +105,18 @@ namespace Get_ServiceItemsMultipleSections_1
 				return Array.Empty<GQIRow>();
 			}
 
-			// Service item list to fill with either service or service specifiation's service items
+			// Service item list to fill with either service or service specification's service items
 			IList<ServiceItemsSection> serviceItems = new List<ServiceItemsSection>();
 
 			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
 			{
 				var instance = new ServicesInstance(domInstance);
-				serviceItems = instance.ServiceItems;
+				serviceItems = instance.ServiceItemses;
 			}
 			else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
 			{
 				var instance = new ServiceSpecificationsInstance(domInstance);
-				serviceItems = instance.ServiceItems;
+				serviceItems = instance.ServiceItemses;
 			}
 			else
 			{
@@ -151,10 +153,16 @@ namespace Get_ServiceItemsMultipleSections_1
 				return String.Empty;
 			}
 
-			var inst = new DomHelper(dms.SendMessages, "(slc)workflow").DomInstances.Read(DomInstanceExposers.Id.Equal(id)).FirstOrDefault();
+			var inst = new DomHelper(dms.SendMessages, SlcWorkflowIds.ModuleId).DomInstances.Read(DomInstanceExposers.Id.Equal(id)).FirstOrDefault();
 			if (inst != null)
 			{
 				return inst.Name;
+			}
+
+			var serv = new DataHelperService(dms.GetConnection()).Read(ServiceExposers.Guid.Equal(id)).FirstOrDefault();
+			if (serv != null)
+			{
+				return serv.Name;
 			}
 
 			var request = new ManagerStoreStartPagingRequest<ReservationInstance>(ReservationInstanceExposers.ID.Equal(id).ToQuery(), 1000);

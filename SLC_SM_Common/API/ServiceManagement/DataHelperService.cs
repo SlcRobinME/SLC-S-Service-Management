@@ -39,6 +39,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			instance.ServiceInfo.ServiceID = item.ServiceID;
 			instance.ServiceInfo.ServiceStartTime = item.StartTime;
 			instance.ServiceInfo.ServiceEndTime = item.EndTime;
+			instance.ServiceInfo.GenerateMonitoringService = item.GenerateMonitoringService;
 			instance.ServiceInfo.ServiceProperties = item.Properties?.ID;
 			instance.ServiceInfo.ServiceCategory = item.Category?.ID;
 			instance.ServiceInfo.ServiceSpecifcation = item.ServiceSpecificationId;
@@ -57,12 +58,12 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				dataHelperServiceCategory.CreateOrUpdate(item.Category);
 			}
 
-			instance.ServiceItemRelationship.Clear();
+			instance.ServiceItemRelationships.Clear();
 			if (item.ServiceItemsRelationships != null)
 			{
 				foreach (var relationship in item.ServiceItemsRelationships)
 				{
-					instance.ServiceItemRelationship.Add(
+					instance.ServiceItemRelationships.Add(
 						new ServiceItemRelationshipSection
 						{
 							ParentServiceItem = relationship.ParentServiceItem,
@@ -74,9 +75,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				}
 			}
 
-			if (!instance.ServiceItemRelationship.Any())
+			if (!instance.ServiceItemRelationships.Any())
 			{
-				instance.ServiceItemRelationship.Add(new ServiceItemRelationshipSection());
+				instance.ServiceItemRelationships.Add(new ServiceItemRelationshipSection());
 			}
 
 			var dataHelperConfigurations = new DataHelperServiceConfigurationValue(_connection);
@@ -89,12 +90,12 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				}
 			}
 
-			instance.ServiceItems.Clear();
+			instance.ServiceItemses.Clear();
 			if (item.ServiceItems != null)
 			{
 				foreach (var si in item.ServiceItems)
 				{
-					instance.ServiceItems.Add(
+					instance.ServiceItemses.Add(
 						new ServiceItemsSection
 						{
 							ServiceItemID = si.ID,
@@ -103,13 +104,14 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 							ServiceItemType = si.Type,
 							DefinitionReference = si.DefinitionReference,
 							ImplementationReference = si.ImplementationReference,
+							Icon = si.Icon,
 						});
 				}
 			}
 
-			if (!instance.ServiceItems.Any())
+			if (!instance.ServiceItemses.Any())
 			{
-				instance.ServiceItems.Add(new ServiceItemsSection());
+				instance.ServiceItemses.Add(new ServiceItemsSection());
 			}
 
 			return CreateOrUpdateInstance(instance);
@@ -239,13 +241,14 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				Description = domInstance.ServiceInfo.Description,
 				StartTime = domInstance.ServiceInfo.ServiceStartTime,
 				EndTime = domInstance.ServiceInfo.ServiceEndTime,
+				GenerateMonitoringService = domInstance.ServiceInfo.GenerateMonitoringService,
 				Icon = domInstance.ServiceInfo.Icon,
 				Category = serviceCategories.Find(c => c.ID == domInstance.ServiceInfo.ServiceCategory),
 				ServiceSpecificationId = domInstance.ServiceInfo.ServiceSpecifcation,
 				OrganizationId = domInstance.ServiceInfo.RelatedOrganization,
 				Properties = serviceProperties.Find(p => p.ID == domInstance.ServiceInfo.ServiceProperties) ?? new Models.ServicePropertyValues { Values = new List<Models.ServicePropertyValue>() },
 				Configurations = serviceConfigurations.Where(p => domInstance.ServiceInfo.ServiceConfigurationParameters.Contains(p.ID)).ToList(),
-				ServiceItems = domInstance.ServiceItems.Select(
+				ServiceItems = domInstance.ServiceItemses.Select(
 						s => new Models.ServiceItem
 						{
 							ID = s.ServiceItemID ?? 1,
@@ -257,7 +260,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 						})
 					.Where(s => !String.IsNullOrEmpty(s.Label))
 					.ToList(),
-				ServiceItemsRelationships = domInstance.ServiceItemRelationship.Select(
+				ServiceItemsRelationships = domInstance.ServiceItemRelationships.Select(
 						r => new Models.ServiceItemRelationShip
 						{
 							ParentServiceItem = r.ParentServiceItem,

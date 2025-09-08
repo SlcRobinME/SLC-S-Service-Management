@@ -53,13 +53,15 @@ namespace SLC_SM_Create_Service_Inventory_Item
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
+	using System.Threading;
 	using DomHelpers.SlcServicemanagement;
 
 	using Library;
 	using Library.Views;
 
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -104,7 +106,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			try
 			{
 				_engine = engine;
-				_controller = new InteractiveController(engine);
+				_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 				InitHelpers();
 
 				RunSafe();
@@ -130,6 +132,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			{
 				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
 				_controller.ShowDialog(errorView);
+				engine.Log(e.ToString());
 			}
 		}
 
@@ -143,7 +146,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			var serviceSpecificationInstance = repo.ServiceSpecifications.Read().First(x => x.ID == instance.ServiceSpecificationId);
 
-			instance.Icon = serviceSpecificationInstance.Icon;
+			//instance.Icon = serviceSpecificationInstance.Icon;
 			instance.Description = serviceSpecificationInstance.Description;
 			instance.Properties = serviceSpecificationInstance.Properties ?? new Models.ServicePropertyValues();
 			instance.Properties.ID = Guid.NewGuid();
@@ -203,12 +206,67 @@ namespace SLC_SM_Create_Service_Inventory_Item
 							item.Script = String.Empty;
 						}
 
+						item.Icon = instance.Icon; // inherit icon from service
 						instance.ServiceItems.Add(item);
 					}
 				}
 			}
 
 			repo.Services.CreateOrUpdate(instance);
+
+			if (instance.GenerateMonitoringService == true)
+			{
+				TryCreateDmsService(instance);
+			}
+		}
+
+		private void TryCreateDmsService(Models.Service instance)
+		{
+			var dms = _engine.GetDms();
+			var agent = dms.GetAgents().SingleOrDefault();
+			if (agent == null)
+			{
+				throw new InvalidOperationException($"This operation is valid only on single agent dataminer systems.");
+			}
+
+			if (_engine.FindService(instance.Name) != null) // agent.ServiceExists() throws when service doesn't exist :(
+			{
+				throw new InvalidOperationException($"A dataminer service with name {instance.Name} already exists.");
+			}
+
+			var serviceConfiguration = new ServiceConfiguration(dms, instance.Name);
+			var serviceId = agent.CreateService(serviceConfiguration);
+
+			SetServiceIcon(agent, serviceId, instance.Icon);
+		}
+
+		private void SetServiceIcon(IDma agent, DmsServiceId serviceId, string icon)
+		{
+			if (!agent.Dms.PropertyExists("Logo", PropertyType.Service))
+			{
+				agent.Dms.CreateProperty("Logo", PropertyType.Service, false, false, false);
+			}
+
+			WaitUntilServiceCreated(agent, serviceId, 5000);
+			var service = agent.GetService(serviceId);
+
+			var property = service.Properties.SingleOrDefault(p => p.Definition.Name == "Logo").AsWritable();
+
+			property.Value = icon;
+			service.Update();
+		}
+
+		private void WaitUntilServiceCreated(IDma agent, DmsServiceId serviceId, int timeout)
+		{
+			var sw = System.Diagnostics.Stopwatch.StartNew();
+
+			while (_engine.FindServiceByKey(serviceId.Value) == null)
+			{
+				if (sw.ElapsedMilliseconds > timeout)
+					throw new TimeoutException($"Service {serviceId} was not created within {timeout} ms.");
+
+				Thread.Sleep(100);
+			}
 		}
 
 		private void CreateNewServiceAndLinkItToServiceOrder(DataHelpersServiceManagement repo, Models.ServiceOrderItem serviceOrder)
@@ -402,7 +460,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			}
 			else
 			{
-				view.BtnAdd.Text = "Edit Service";
+				view.BtnAdd.Text = "Save";
 				presenter.LoadFromModel(GetService(repo, domId));
 				view.BtnAdd.Pressed += (sender, args) =>
 				{

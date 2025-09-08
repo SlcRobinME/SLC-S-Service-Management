@@ -55,7 +55,6 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 	using System.Linq;
 
 	using DomHelpers.SlcServicemanagement;
-
 	using Library.Views;
 
 	using Newtonsoft.Json;
@@ -68,6 +67,7 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 
 	using SLC_SM_IAS_Add_Service_Item_1.Presenters;
 	using SLC_SM_IAS_Add_Service_Item_1.Views;
+	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship.Models;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
@@ -104,7 +104,7 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 			try
 			{
 				_engine = engine;
-				_controller = new InteractiveController(engine);
+				_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 				RunSafe();
 			}
 			catch (ScriptAbortException)
@@ -138,21 +138,24 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 				var instance = new ServicesInstance(domInstance);
 
 				// Remove old instance first in case of edit
-				var oldItem = instance.ServiceItems.FirstOrDefault(x => x.Label == oldLabel);
+				var oldItem = instance.ServiceItemses.FirstOrDefault(x => x.Label == oldLabel);
 				if (oldItem != null)
 				{
-					instance.ServiceItems.Remove(oldItem);
+					newSection.ServiceItemID = oldItem.ServiceItemID;
+					instance.ServiceItemses.Remove(oldItem);
 				}
 				else
 				{
 					// Auto assign new ID
-					long[] ids = instance.ServiceItems.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
+					long[] ids = instance.ServiceItemses.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
 					newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
 				}
 
+				newSection.Icon = instance.ServiceInfo.Icon; // inherit icon from service.
+
 				AddServiceLink(instance.ID.Id, instance.ServiceInfo.ServiceName, newSection);
 
-				instance.ServiceItems.Add(newSection);
+				instance.ServiceItemses.Add(newSection);
 				instance.Save(helper);
 			}
 			else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
@@ -160,19 +163,20 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 				var instance = new ServiceSpecificationsInstance(domInstance);
 
 				// Remove old instance first in case of edit
-				var oldItem = instance.ServiceItems.FirstOrDefault(x => x.Label == oldLabel);
+				var oldItem = instance.ServiceItemses.FirstOrDefault(x => x.Label == oldLabel);
 				if (oldItem != null)
 				{
-					instance.ServiceItems.Remove(oldItem);
+					newSection.ServiceItemID = oldItem.ServiceItemID;
+					instance.ServiceItemses.Remove(oldItem);
 				}
 				else
 				{
 					// Auto assign new ID
-					long[] ids = instance.ServiceItems.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
+					long[] ids = instance.ServiceItemses.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
 					newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
 				}
 
-				instance.ServiceItems.Add(newSection);
+				instance.ServiceItemses.Add(newSection);
 				instance.Save(helper);
 			}
 			else
@@ -206,25 +210,11 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 				});
 		}
 
-		private static string[] GetServiceItemLabels(DomInstance domInstance, string oldLbl)
+		private static string[] GetServiceItemLabels(IServiceInstanceBase domInstance, string oldLbl)
 		{
-			List<string> items = new List<string>();
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
-			{
-				var instance = new ServicesInstance(domInstance);
-				items = instance.ServiceItems.Select(x => x.Label).ToList();
-			}
-			else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-			{
-				var instance = new ServiceSpecificationsInstance(domInstance);
-				items = instance.ServiceItems.Select(x => x.Label).ToList();
-			}
-			else
-			{
-				return items.ToArray();
-			}
-
+			var items = domInstance.GetServiceItems().Select(x => x.Label).ToList();
 			items.Remove(oldLbl);
+
 			return items.ToArray();
 		}
 
@@ -253,12 +243,13 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 			var domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
 			var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
 							  ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
+			IServiceInstanceBase serviceInstance = ServiceInstancesExtentions.GetTypedInstance(domInstance);
 
 			string label = _engine.GetScriptParam("Service Item Label").Value.Trim('"', '[', ']');
 
 			// Init views
 			var view = new ServiceItemView(_engine);
-			var presenter = new ServiceItemPresenter(_engine, view, GetServiceItemLabels(domInstance, label), domInstance);
+			var presenter = new ServiceItemPresenter(_engine, view, GetServiceItemLabels(serviceInstance, label), serviceInstance);
 
 			// Events
 			view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");

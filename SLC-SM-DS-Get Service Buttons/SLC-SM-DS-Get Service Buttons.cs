@@ -1,10 +1,10 @@
-using System;
-using System.Collections.Generic;
-using DomHelpers.SlcServicemanagement;
-using Skyline.DataMiner.Analytics.GenericInterface;
-
 namespace SLCSMDSGetServiceButtons
 {
+	using System;
+	using System.Collections.Generic;
+	using DomHelpers.SlcServicemanagement;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+
 	/// <summary>
 	/// Represents a data source.
 	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
@@ -65,7 +65,7 @@ namespace SLCSMDSGetServiceButtons
 			public static readonly ItemState designedState = new ItemState { Name = "Designed", NameId = "designed", Id = SlcServicemanagementIds.Behaviors.Service_Behavior.Statuses.Designed };
 			public static readonly ItemState reservedState = new ItemState { Name = "Reserved", NameId = "reserved", Id = SlcServicemanagementIds.Behaviors.Service_Behavior.Statuses.Reserved };
 			public static readonly ItemState activeState = new ItemState { Name = "Active", NameId = "active", Id = SlcServicemanagementIds.Behaviors.Service_Behavior.Statuses.Active };
-			public static readonly ItemState terminatedState = new ItemState { Name = "Terminated", NameId = "terminated", Id = SlcServicemanagementIds.Behaviors.Service_Behavior.Statuses.Teminated };
+			public static readonly ItemState terminatedState = new ItemState { Name = "Terminated", NameId = "terminated", Id = SlcServicemanagementIds.Behaviors.Service_Behavior.Statuses.Terminated };
 			public static readonly ItemState retiredState = new ItemState { Name = "Retired", NameId = "Retired", Id = SlcServicemanagementIds.Behaviors.Service_Behavior.Statuses.Retired };
 		}
 

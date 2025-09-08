@@ -42,6 +42,7 @@
 
 			view.IndefiniteRuntime.Changed += (sender, args) => view.End.IsEnabled = !args.IsChecked;
 			view.TboxName.Changed += (sender, args) => ValidateLabel(args.Value);
+			view.Specs.Changed += Specs_Changed;
 		}
 
 		public string Name => String.IsNullOrWhiteSpace(view.TboxName.Text) ? view.TboxName.PlaceHolder : view.TboxName.Text;
@@ -55,11 +56,12 @@
 				instanceToReturn.Description = instanceToReturn.Description ?? String.Empty;
 				instanceToReturn.StartTime = view.Start.DateTime.ToUniversalTime();
 				instanceToReturn.EndTime = view.IndefiniteRuntime.IsChecked ? default(DateTime?) : view.End.DateTime.ToUniversalTime();
-				instanceToReturn.Icon = instanceToReturn.Icon ?? String.Empty;
+				instanceToReturn.GenerateMonitoringService = view.GenerateMonitoringService.IsChecked;
 				instanceToReturn.Description = instanceToReturn.Description ?? String.Empty;
 				instanceToReturn.Category = view.ServiceCategory.Selected;
 				instanceToReturn.ServiceSpecificationId = view.Specs.Selected?.ID;
 				instanceToReturn.OrganizationId = view.Organizations.Selected?.ID;
+				instanceToReturn.Icon = view.ServiceCategory?.Selected?.Icon ?? string.Empty;
 
 				return instanceToReturn;
 			}
@@ -87,6 +89,15 @@
 			view.End.DateTime = view.Start.DateTime + TimeSpan.FromHours(1);
 		}
 
+		private void Specs_Changed(object sender, DropDown<Models.ServiceSpecification>.DropDownChangedEventArgs e)
+		{
+			view.GenerateMonitoringService.IsEnabled = e.SelectedOption?.Value != null;
+			if (e.SelectedOption?.Value == null)
+			{
+				view.GenerateMonitoringService.IsChecked = false;
+			}
+		}
+
 		public void LoadFromModel(Models.Service instance)
 		{
 			instanceToReturn = instance;
@@ -96,7 +107,7 @@
 			// Load correct types
 			LoadFromModel();
 
-			view.BtnAdd.Text = "Edit Service Inventory Item";
+			view.BtnAdd.Text = "Save";
 			view.TboxName.Text = instance.Name;
 			if (!String.IsNullOrEmpty(instance.ServiceID))
 			{
@@ -135,6 +146,8 @@
 			{
 				view.Organizations.SelectedOption = view.Organizations.Options.First(x => x.Value?.ID == instance.OrganizationId);
 			}
+
+			view.GenerateMonitoringService.IsVisible = false;
 		}
 
 		public bool Validate()

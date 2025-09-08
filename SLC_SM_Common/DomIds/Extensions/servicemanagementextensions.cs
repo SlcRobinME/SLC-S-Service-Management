@@ -15,29 +15,41 @@
 
 		string GetName();
 
+		DateTime? GetStartTime();
+
+		DateTime? GetEndTime();
+
 		void Save(DomHelper domHelper);
 	}
 
 	public partial class ServiceSpecificationsInstance : IServiceInstanceBase
 	{
-		public IList<ServiceItemsSection> GetServiceItems() => ServiceItems;
+		public IList<ServiceItemsSection> GetServiceItems() => ServiceItemses;
 
-		public IList<ServiceItemRelationshipSection> GetServiceItemRelationships() => ServiceItemRelationship;
+		public IList<ServiceItemRelationshipSection> GetServiceItemRelationships() => ServiceItemRelationships;
 
 		public DomInstanceId GetId() => ID;
 
-		public string GetName() => Name;
+		public string GetName() => ServiceSpecificationInfo.SpecificationName;
+
+		public DateTime? GetStartTime() => null;
+
+		public DateTime? GetEndTime() => null;
 	}
 
 	public partial class ServicesInstance : IServiceInstanceBase
 	{
-		public IList<ServiceItemsSection> GetServiceItems() => ServiceItems;
+		public IList<ServiceItemsSection> GetServiceItems() => ServiceItemses;
 
-		public IList<ServiceItemRelationshipSection> GetServiceItemRelationships() => ServiceItemRelationship;
+		public IList<ServiceItemRelationshipSection> GetServiceItemRelationships() => ServiceItemRelationships;
 
 		public DomInstanceId GetId() => ID;
 
-		public string GetName() => Name;
+		public string GetName() => ServiceInfo.ServiceName;
+
+		public DateTime? GetStartTime() => ServiceInfo.ServiceStartTime;
+
+		public DateTime? GetEndTime() => ServiceInfo.ServiceEndTime;
 	}
 
 	public class ServiceInstancesExtentions

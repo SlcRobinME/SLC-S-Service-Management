@@ -53,18 +53,10 @@ namespace SLC_SM_IAS_Add_Service_Specification
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
-	using DomHelpers.SlcServicemanagement;
-
 	using Library.Views;
-
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
-
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using SLC_SM_IAS_Add_Service_Specification.Presenters;
 	using SLC_SM_IAS_Add_Service_Specification.Views;
 
@@ -103,7 +95,7 @@ namespace SLC_SM_IAS_Add_Service_Specification
 			try
 			{
 				_engine = engine;
-				_controller = new InteractiveController(engine);
+				_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 				RunSafe();
 			}
 			catch (ScriptAbortException)

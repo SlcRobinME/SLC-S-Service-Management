@@ -103,7 +103,7 @@ namespace Get_ServiceOrderItemsMultipleSections_1
 
 			var instance = new ServiceOrdersInstance(_domInstance);
 
-			var serviceItems = instance.ServiceOrderItems;
+			var serviceItems = instance.ServiceOrderItemses;
 
 			serviceItems.ForEach(
 				item =>
