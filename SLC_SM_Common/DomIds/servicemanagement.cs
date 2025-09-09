@@ -1582,6 +1582,10 @@ namespace DomHelpers.SlcServicemanagement
 					public const string Reserved_To_Active = "reserved_to_active";
 					public const string Active_To_Terminated = "active_to_terminated";
 					public const string Terminated_To_Retired = "terminated_to_retired";
+					public const string New_To_Retired = "new_to_retired";
+					public const string Designed_To_Retired = "designed_to_retired";
+					public const string Reserved_To_Retired = "reserved_to_retired";
+					public const string Terminated_To_Active = "terminated_to_active";
 					public static string ToValue(TransitionsEnum @enum)
 					{
 						switch (@enum)
@@ -1596,6 +1600,14 @@ namespace DomHelpers.SlcServicemanagement
 								return Active_To_Terminated;
 							case TransitionsEnum.Terminated_To_Retired:
 								return Terminated_To_Retired;
+							case TransitionsEnum.New_To_Retired:
+								return New_To_Retired;
+							case TransitionsEnum.Designed_To_Retired:
+								return Designed_To_Retired;
+							case TransitionsEnum.Reserved_To_Retired:
+								return Reserved_To_Retired;
+							case TransitionsEnum.Terminated_To_Active:
+								return Terminated_To_Active;
 							default:
 								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
 						}
@@ -1615,6 +1627,14 @@ namespace DomHelpers.SlcServicemanagement
 								return TransitionsEnum.Active_To_Terminated;
 							case Terminated_To_Retired:
 								return TransitionsEnum.Terminated_To_Retired;
+							case New_To_Retired:
+								return TransitionsEnum.New_To_Retired;
+							case Designed_To_Retired:
+								return TransitionsEnum.Designed_To_Retired;
+							case Reserved_To_Retired:
+								return TransitionsEnum.Reserved_To_Retired;
+							case Terminated_To_Active:
+								return TransitionsEnum.Terminated_To_Active;
 							default:
 								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
 						}
@@ -1627,7 +1647,11 @@ namespace DomHelpers.SlcServicemanagement
 					Designed_To_Reserved,
 					Reserved_To_Active,
 					Active_To_Terminated,
-					Terminated_To_Retired
+					Terminated_To_Retired,
+					New_To_Retired,
+					Designed_To_Retired,
+					Reserved_To_Retired,
+					Terminated_To_Active
 				}
 
 				public static class Actions
