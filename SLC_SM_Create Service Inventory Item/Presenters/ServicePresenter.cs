@@ -42,7 +42,6 @@
 
 			view.IndefiniteRuntime.Changed += (sender, args) => view.End.IsEnabled = !args.IsChecked;
 			view.TboxName.Changed += (sender, args) => ValidateLabel(args.Value);
-			view.Specs.Changed += Specs_Changed;
 		}
 
 		public string Name => String.IsNullOrWhiteSpace(view.TboxName.Text) ? view.TboxName.PlaceHolder : view.TboxName.Text;
@@ -87,6 +86,8 @@
 
 			view.Start.DateTime = DateTime.Now + TimeSpan.FromHours(1);
 			view.End.DateTime = view.Start.DateTime + TimeSpan.FromHours(1);
+
+			view.Specs.Changed += Specs_Changed;
 		}
 
 		private void Specs_Changed(object sender, DropDown<Models.ServiceSpecification>.DropDownChangedEventArgs e)
@@ -147,6 +148,7 @@
 				view.Organizations.SelectedOption = view.Organizations.Options.First(x => x.Value?.ID == instance.OrganizationId);
 			}
 
+			view.GenerateMonitoringService.IsChecked = instance.GenerateMonitoringService.GetValueOrDefault();
 			view.GenerateMonitoringService.IsVisible = false;
 		}
 
