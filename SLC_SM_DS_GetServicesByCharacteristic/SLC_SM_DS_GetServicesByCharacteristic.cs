@@ -1,14 +1,15 @@
-using System;
-using System.Collections.Generic;
-using DomHelpers.SlcConfigurations;
-using Library;
-using Skyline.DataMiner.Analytics.GenericInterface;
-using Skyline.DataMiner.Automation;
-using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-//using Skyline.DataMiner.ProjectApi.ServiceManagement;
-
 namespace SLCSMDSGetServicesByCharacteristic
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Library;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+
 	/// <summary>
 	/// Represents a data source.
 	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
@@ -22,9 +23,12 @@ namespace SLCSMDSGetServicesByCharacteristic
 		private string _serviceCharacteristic;
 		private string _serviceCharacteristicValue;
 
-		DataHelpersServiceManagement _serviceHelper;
+		private DataHelpersServiceManagement _serviceHelper;
 
-		private GQIDMS dms;
+		private GQIDMS gqiDms;
+		private IConnection _connection;
+		private IDms _dms;
+		private IDma _agent;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -38,6 +42,7 @@ namespace SLCSMDSGetServicesByCharacteristic
 				new GQIStringColumn("Service Category"),
 				new GQIStringColumn("Service Logo"),
 				new GQIStringColumn("Service Specification"),
+				new GQIIntColumn("Alarm Level"),
 			};
 		}
 
@@ -66,17 +71,20 @@ namespace SLCSMDSGetServicesByCharacteristic
 			_serviceCharacteristic = args.GetArgumentValue(serviceCharacteristicArg);
 			_serviceCharacteristicValue = args.GetArgumentValue(serviceCharacteristicValueArg);
 
-			//if (!Guid.TryParse(args.GetArgumentValue(domIdArg), out instanceDomId))
-			//{
-			//	instanceDomId = Guid.Empty;
-			//}
-
 			return new OnArgumentsProcessedOutputArgs();
 		}
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			dms = args.DMS;
+			gqiDms = args.DMS;
+
+			_connection = gqiDms.GetConnection();
+			_dms = _connection.GetDms();
+			_agent = _dms.GetAgents().SingleOrDefault();
+			if (_agent == null)
+			{
+				throw new InvalidOperationException("This operation is supported only on single agent dataminer systems");
+			}
 
 			_serviceHelper = new DataHelpersServiceManagement(args.DMS.GetConnection());
 
@@ -85,59 +93,38 @@ namespace SLCSMDSGetServicesByCharacteristic
 
 		private GQIRow[] BuildPage()
 		{
-			var rows = new List<GQIRow>();
+			List<Models.Service> returnedServices;
 
-			// if one of the input strings is not provided --> return empty list (can be changed to fetch all services that contain a service characteristic) 
-			if (_serviceCharacteristic == null) {
-			}
-			else if (_serviceCharacteristicValue == null)
+			if (_serviceCharacteristic == null && _serviceCharacteristicValue == null)
 			{
-				return Array.Empty<GQIRow>();
-			} else
-			{
-
-			}
-
-			var returnedServices = new List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service>();
-
-			if (_serviceCharacteristic == null)
-			{
+				// fetch all
 				returnedServices = _serviceHelper.Services.Read();
 			}
-			else if (_serviceCharacteristicValue == null)
+			else if (_serviceCharacteristic != null && _serviceCharacteristicValue == null)
 			{
-				returnedServices = _serviceHelper.Services.GetServicesByCharacteristic(_serviceCharacteristic, null, null);
+				// characteristc provided but no value
+				return Array.Empty<GQIRow>();
 			}
 			else
 			{
+				// both provided
 				returnedServices = _serviceHelper.Services.GetServicesByCharacteristic(_serviceCharacteristic, null, _serviceCharacteristicValue);
 			}
 
-			foreach (var service in returnedServices)
-			{
-				BuildRow(service, rows);
-			}
-
-			return rows.ToArray();
+			return returnedServices.Select(BuildRow).ToArray();
 		}
 
-		private void BuildRow(Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service service, List<GQIRow> rows)
+		private GQIRow BuildRow(Models.Service service)
 		{
 
-			//var testId = Guid.Parse("1bb40d7f-cf16-4f26-8426-cb3e910322a5");
-
-			var domInstanceId = new DomInstanceId(service.ID) { ModuleId = "(slc)servicemanagement"};
-
-			// var domInstanceId = new DomInstanceId(testId);
-
-			// domInstanceId.ModuleId = "(slc)servicemanagement"; 
-
+			var domInstanceId = new DomInstanceId(service.ID) { ModuleId = "(slc)servicemanagement" };
 			var objectRefMetadata = new ObjectRefMetadata { Object = domInstanceId };
 
-			rows.Add(
-				new GQIRow(
-					new[]
-					{
+			var alarmLevel = TryGetAlarmLevel(service);
+
+			return new GQIRow(
+				new[]
+				{
 						new GQICell { Value = domInstanceId?.Id.ToString() ?? String.Empty},
 						new GQICell { Value = service.ServiceID ?? String.Empty},
 						new GQICell { Value = service.Name ?? String.Empty },
@@ -146,9 +133,34 @@ namespace SLCSMDSGetServicesByCharacteristic
 						new GQICell { Value = service.Category?.Name ?? String.Empty },
 						new GQICell { Value = service.Icon ?? String.Empty },
 						new GQICell { Value = service.ServiceSpecificationId?.ToString() ?? String.Empty },
-					})
-				{ Metadata = new GenIfRowMetadata(new[] { objectRefMetadata } )}
-				);
+						new GQICell { Value = (int) alarmLevel },
+				})
+			{ Metadata = new GenIfRowMetadata(new[] { objectRefMetadata }) };
+		}
+
+		private AlarmLevel TryGetAlarmLevel(Models.Service service)
+		{
+			if (_agent.ServiceExistsSafe(service.Name))
+			{
+				return _agent.GetService(service.Name).GetState().Level;
+			}
+
+			return AlarmLevel.Undefined;
+		}
+	}
+
+	public static class DmaExtensions
+	{
+		public static bool ServiceExistsSafe(this IDma agent, string serviceName)
+		{
+			try
+			{
+				return agent.ServiceExists(serviceName);
+			}
+			catch
+			{
+				return false;
+			}
 		}
 	}
 }
