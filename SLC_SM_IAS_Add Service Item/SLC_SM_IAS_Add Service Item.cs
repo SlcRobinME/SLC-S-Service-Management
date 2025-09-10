@@ -144,7 +144,8 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 					newSection.ServiceItemID = oldItem.ServiceItemID;
 					instance.ServiceItemses.Remove(oldItem);
 				}
-				else
+
+				if (newSection.ServiceItemID == null)
 				{
 					// Auto assign new ID
 					long[] ids = instance.ServiceItemses.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
@@ -169,7 +170,8 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 					newSection.ServiceItemID = oldItem.ServiceItemID;
 					instance.ServiceItemses.Remove(oldItem);
 				}
-				else
+
+				if (newSection.ServiceItemID == null)
 				{
 					// Auto assign new ID
 					long[] ids = instance.ServiceItemses.Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();

@@ -99,5 +99,14 @@ namespace SLCSMIASManageRelationships
 			var type = _engine.GetScriptParam("Type").Value;
 			Type = JsonConvert.DeserializeObject<List<string>>(type).FirstOrDefault();
 		}
+
+		public override string ToString()
+		{
+			return $@"Dom ID:			{DomId}
+Service IDs:	{String.Join(", ", ServiceIds)}
+Def Ref:		{DefinitionReference}
+Has Def Ref:	{HasDefinitionReference}
+Type:			{Type}";
+		}
 	}
 }

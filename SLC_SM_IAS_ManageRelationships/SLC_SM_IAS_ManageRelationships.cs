@@ -105,6 +105,7 @@ namespace SLCSMIASManageRelationships
 		private void RunSafe(IEngine engine)
 		{
 			var data = new ScriptData(engine);
+			////engine.GenerateInformation(data.ToString());
 			data.Validate();
 
 			var controller = new ManageConnectionsController(engine, data);

@@ -14,10 +14,10 @@
 		private readonly List<Models.Link> _existingRelationships;
 		private readonly IServiceInstanceBase _serviceItem;
 
-		public ServiceLink(IServiceInstanceBase serviceInfo)
+		public ServiceLink(IEngine engine, IServiceInstanceBase serviceInfo)
 		{
 			_serviceItem = serviceInfo;
-			_existingRelationships = new DataHelperLink(Engine.SLNetRaw).Read();
+			_existingRelationships = new DataHelperLink(engine.GetUserConnection()).Read();
 		}
 
 		IEnumerable<NodesSection> IDefinitionObject.GetAvailableInputs()
@@ -29,9 +29,10 @@
 
 		IEnumerable<NodesSection> IDefinitionObject.GetAvailableOutputs()
 		{
-			return _existingRelationships.Any(r => r.ParentID == _serviceItem.GetId().Id.ToString())
-				? Enumerable.Empty<NodesSection>()
-				: new[] { new NodesSection { NodeID = "1", NodeAlias = "Default Service Link Output" } };
+			//return _existingRelationships.Any(r => r.ParentID == _serviceItem.GetId().Id.ToString())
+			//	? Enumerable.Empty<NodesSection>()
+			//	: new[] { new NodesSection { NodeID = "1", NodeAlias = "Default Service Link Output" } };
+			return new[] { new NodesSection { NodeID = "1", NodeAlias = "Default Service Link Output" } };
 		}
 	}
 }

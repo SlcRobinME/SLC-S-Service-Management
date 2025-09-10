@@ -3,10 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
-
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -14,7 +12,6 @@
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Workflows;
-
 	using SLC_SM_IAS_Add_Service_Item_1.Views;
 
 	public class ServiceItemPresenter
@@ -143,6 +140,13 @@
 			return ok;
 		}
 
+		private static bool FallsWithTimeRange(Models.Service service, DateTime? currentStart, DateTime? currentEnd)
+		{
+			bool endTimeOk = service.EndTime == null || (currentEnd != null && currentEnd < service.EndTime);
+
+			return endTimeOk && currentStart >= service.StartTime;
+		}
+
 		private static string GetServiceDropDownLabel(Models.Service s)
 		{
 			if (s == null)
@@ -250,7 +254,7 @@
 
 			DateTime? currentStart = domInstance.GetStartTime();
 			DateTime? currentEnd = domInstance.GetEndTime();
-			var serviceOptions = services.Where(x => (currentEnd == null || x.EndTime <= currentEnd) && currentStart < x.StartTime)
+			var serviceOptions = services.Where(x => domInstance.GetId().Id != x.ID && FallsWithTimeRange(x, currentStart, currentEnd))
 				.Select(GetServiceDropDownLabel)
 				.OrderBy(s => s)
 				.ToList();
