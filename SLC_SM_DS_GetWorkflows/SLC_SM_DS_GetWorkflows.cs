@@ -97,7 +97,8 @@ namespace SLCSMDSGetWorkflows
 		{
 			var workflowsDomHelper = new DomHelper(_dms.SendMessages, SlcWorkflowIds.ModuleId);
 			var workflowsResult = workflowsDomHelper.DomInstances
-				.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcWorkflowIds.Definitions.Workflows.Id));
+				.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcWorkflowIds.Definitions.Workflows.Id)
+				.AND(DomInstanceExposers.StatusId.Equal(SlcWorkflowIds.Behaviors.Workflow_Behavior.Statuses.Complete)));
 
 			if (workflowsResult == null)
 				return ReturnEmptyResult();
