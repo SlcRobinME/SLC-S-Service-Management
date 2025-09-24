@@ -45,45 +45,36 @@ Revision History:
 
 DATE		VERSION		AUTHOR			COMMENTS
 
-20/06/2025	1.0.0.1		, Skyline	Initial version
+20/06/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using DomHelpers.SlcConfigurations;
-using DomHelpers.SlcServicemanagement;
-using Library;
-using Skyline.DataMiner.Analytics.GenericInterface;
-using Skyline.DataMiner.Net;
-using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-using Skyline.DataMiner.Net.Messages.SLDataGateway;
-using Skyline.DataMiner.ProjectApi.ServiceManagement;
-using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
-using static Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models;
-
-
 namespace SLCSMCOGetWorkflowIcon
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using DomHelpers.SlcConfigurations;
+	using DomHelpers.SlcServicemanagement;
+	using Library;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
+
 	/// <summary>
-	/// Represents a data source.
-	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
+	///     Represents a data source.
+	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
 	[GQIMetaData(Name = "SLC_SM_CO_GetCharacteristics")]
 	public class SLCSMCOGetWorkflowIcon : IGQIColumnOperator, IGQIRowOperator, IGQIOnInit, IGQIInputArguments
 	{
-
 		private readonly GQIStringArgument _characteristicsNamesArg = new GQIStringArgument("Characteristics") { IsRequired = true };
-		private string _DomIdColumnName = "DOM ID";
-
 		private List<string> _characteristicNamesList = new List<string>();
-		private List<GQIStringColumn> _newColumnsList = new List<GQIStringColumn>();
-
-		private GQIDMS _dms;
 		private IConnection _connection;
+		private GQIDMS _dms;
+		private readonly string _DomIdColumnName = "DOM ID";
+		private readonly List<GQIStringColumn> _newColumnsList = new List<GQIStringColumn>();
 		DataHelpersServiceManagement _serviceHelper;
-
 
 		public GQIArgument[] GetInputArguments()
 		{
@@ -95,7 +86,7 @@ namespace SLCSMCOGetWorkflowIcon
 			// add columns for the characterics indicated by the user
 			// column references are stored in separate list _newColumnList
 
-			foreach(var characteristic in _characteristicNamesList)
+			foreach (var characteristic in _characteristicNamesList)
 			{
 				GQIStringColumn newColumn = new GQIStringColumn(characteristic);
 				_newColumnsList.Add(newColumn);
@@ -109,14 +100,17 @@ namespace SLCSMCOGetWorkflowIcon
 
 			if (!Guid.TryParse(row.GetValue(_DomIdColumnName)?.ToString(), out Guid domId))
 			{
-				return; 
+				return;
 			}
 
 			// fetch the service
 			FilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service> filter = ServiceExposers.Guid.Equal(domId);
 			var service = _serviceHelper.Services.Read(filter).FirstOrDefault();
 
-			if (service == null) { return; }
+			if (service == null)
+			{
+				return;
+			}
 
 			var configs = service.Configurations;
 
@@ -128,7 +122,10 @@ namespace SLCSMCOGetWorkflowIcon
 				string characteristicName = _characteristicNamesList[i];
 				Guid characteristicId = GetCharacteristicId(characteristicName);
 
-				if (characteristicId == Guid.Empty) { continue; }
+				if (characteristicId == Guid.Empty)
+				{
+					continue;
+				}
 
 				// Set column with value on the service for the particular service ID
 				GQIStringColumn characteristicColumn = _newColumnsList[i];
@@ -161,13 +158,13 @@ namespace SLCSMCOGetWorkflowIcon
 		private Guid GetCharacteristicId(string characteristicName)
 		{
 			// get characteristic ID
-			Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter characteric = new DataHelperConfigurationParameter(_connection).Read(ConfigurationParameterExposers.Name.Equal(characteristicName)).FirstOrDefault();
+			Models.ConfigurationParameter characteric = new DataHelperConfigurationParameter(_connection).Read(ConfigurationParameterExposers.Name.Equal(characteristicName)).FirstOrDefault();
 
 			if (characteric != null)
 			{
-
 				return characteric.ID;
-			} else
+			}
+			else
 			{
 				return Guid.Empty;
 			}

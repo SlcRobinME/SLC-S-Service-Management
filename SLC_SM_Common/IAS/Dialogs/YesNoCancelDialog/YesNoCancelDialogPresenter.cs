@@ -1,16 +1,12 @@
 ﻿namespace Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs.YesNoCancelDialog
 {
 	using System;
-
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	internal class YesNoCancelDialogPresenter
 	{
-		#region Fields
-		private readonly YesNoCancelDialogView view;
-
 		private readonly YesNoCancelDialogModel model;
-		#endregion
+		private readonly YesNoCancelDialogView view;
 
 		public YesNoCancelDialogPresenter(YesNoCancelDialogView view, YesNoCancelDialogModel model)
 		{
@@ -20,23 +16,20 @@
 			Init();
 		}
 
-		#region Events
 		public event EventHandler<EventArgs> Cancel;
 
-		public event EventHandler<EventArgs> Yes;
-
 		public event EventHandler<EventArgs> No;
-		#endregion
 
-		#region Methods
-		public void LoadFromModel()
-		{
-			view.Message.Text = StringExtensions.Wrap(model.Message, 100);
-		}
+		public event EventHandler<EventArgs> Yes;
 
 		public void BuildView()
 		{
 			view.Build();
+		}
+
+		public void LoadFromModel()
+		{
+			view.Message.Text = StringExtensions.Wrap(model.Message, 100);
 		}
 
 		private void Init()
@@ -60,6 +53,5 @@
 		{
 			Yes?.Invoke(this, EventArgs.Empty);
 		}
-		#endregion
 	}
 }

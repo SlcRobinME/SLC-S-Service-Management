@@ -812,7 +812,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="ExperienceInstance"/> class. Creates an empty <see cref="ExperienceInstance"/> instance with default settings.
         /// </summary>
-        public ExperienceInstance(): base(SlcPeople_OrganizationsIds.Definitions.Experience)
+        public ExperienceInstance() : base(SlcPeople_OrganizationsIds.Definitions.Experience)
         {
             InitializeProperties();
             AfterLoad();
@@ -821,7 +821,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="ExperienceInstance"/> class. Creates an empty <see cref="ExperienceInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public ExperienceInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.Experience, id)
+        public ExperienceInstance(Guid id) : base(SlcPeople_OrganizationsIds.Definitions.Experience, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -831,7 +831,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ExperienceInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="ExperienceInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ExperienceInstance(DomInstance domInstance): base(domInstance)
+        public ExperienceInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.Experience))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.Experience)}'", nameof(domInstance));
@@ -849,8 +849,34 @@ namespace DomHelpers.SlcPeople_Organizations
             return new ExperienceInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ExperienceInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ExperienceInstance"/> object that is a deep copy of this instance.</returns>
+        public ExperienceInstance Clone()
+        {
+            return new ExperienceInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ExperienceInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ExperienceInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public ExperienceInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new ExperienceInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(ExperienceInformation.ToSection());
@@ -858,7 +884,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -872,7 +898,7 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _experienceInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id));
             if (_experienceInformation is null)
@@ -895,7 +921,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="CategoryInstance"/> class. Creates an empty <see cref="CategoryInstance"/> instance with default settings.
         /// </summary>
-        public CategoryInstance(): base(SlcPeople_OrganizationsIds.Definitions.Category)
+        public CategoryInstance() : base(SlcPeople_OrganizationsIds.Definitions.Category)
         {
             InitializeProperties();
             AfterLoad();
@@ -904,7 +930,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="CategoryInstance"/> class. Creates an empty <see cref="CategoryInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public CategoryInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.Category, id)
+        public CategoryInstance(Guid id) : base(SlcPeople_OrganizationsIds.Definitions.Category, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -914,7 +940,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="CategoryInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="CategoryInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public CategoryInstance(DomInstance domInstance): base(domInstance)
+        public CategoryInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.Category))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.Category)}'", nameof(domInstance));
@@ -932,8 +958,34 @@ namespace DomHelpers.SlcPeople_Organizations
             return new CategoryInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="CategoryInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="CategoryInstance"/> object that is a deep copy of this instance.</returns>
+        public CategoryInstance Clone()
+        {
+            return new CategoryInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="CategoryInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="CategoryInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public CategoryInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new CategoryInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(CategoryInformation.ToSection());
@@ -941,7 +993,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -955,7 +1007,7 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _categoryInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id));
             if (_categoryInformation is null)
@@ -973,12 +1025,12 @@ namespace DomHelpers.SlcPeople_Organizations
     /// Represents a wrapper class for accessing a RoleInstance DOM instance.
     /// The <see cref="RoleInstance"/> class provides simplified access to the data and functionality of the underlying DOM instance, allowing for easier manipulation and retrieval of data from DOM.
     /// </summary>
-    public partial class RoleInstance : DomInstanceBase	
+    public partial class RoleInstance : DomInstanceBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleInstance"/> class. Creates an empty <see cref="RoleInstance"/> instance with default settings.
         /// </summary>
-        public RoleInstance(): base(SlcPeople_OrganizationsIds.Definitions.Role)
+        public RoleInstance() : base(SlcPeople_OrganizationsIds.Definitions.Role)
         {
             InitializeProperties();
             AfterLoad();
@@ -987,7 +1039,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleInstance"/> class. Creates an empty <see cref="RoleInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public RoleInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.Role, id)
+        public RoleInstance(Guid id) : base(SlcPeople_OrganizationsIds.Definitions.Role, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -997,7 +1049,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="RoleInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="RoleInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public RoleInstance(DomInstance domInstance): base(domInstance)
+        public RoleInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.Role))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.Role)}'", nameof(domInstance));
@@ -1015,8 +1067,34 @@ namespace DomHelpers.SlcPeople_Organizations
             return new RoleInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="RoleInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="RoleInstance"/> object that is a deep copy of this instance.</returns>
+        public RoleInstance Clone()
+        {
+            return new RoleInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="RoleInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="RoleInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public RoleInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new RoleInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(RoleInformation.ToSection());
@@ -1024,7 +1102,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -1038,7 +1116,7 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _roleInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.RoleInformation.Id));
             if (_roleInformation is null)
@@ -1061,7 +1139,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamsInstance"/> class. Creates an empty <see cref="TeamsInstance"/> instance with default settings.
         /// </summary>
-        public TeamsInstance(): base(SlcPeople_OrganizationsIds.Definitions.Teams)
+        public TeamsInstance() : base(SlcPeople_OrganizationsIds.Definitions.Teams)
         {
             InitializeProperties();
             AfterLoad();
@@ -1070,7 +1148,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamsInstance"/> class. Creates an empty <see cref="TeamsInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public TeamsInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.Teams, id)
+        public TeamsInstance(Guid id) : base(SlcPeople_OrganizationsIds.Definitions.Teams, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -1080,7 +1158,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="TeamsInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="TeamsInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public TeamsInstance(DomInstance domInstance): base(domInstance)
+        public TeamsInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.Teams))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.Teams)}'", nameof(domInstance));
@@ -1114,8 +1192,34 @@ namespace DomHelpers.SlcPeople_Organizations
             return new TeamsInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="TeamsInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="TeamsInstance"/> object that is a deep copy of this instance.</returns>
+        public TeamsInstance Clone()
+        {
+            return new TeamsInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="TeamsInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="TeamsInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public TeamsInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new TeamsInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(ResourcePool.ToSection());
@@ -1124,7 +1228,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -1138,7 +1242,7 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _resourcePool = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id));
             if (_resourcePool is null)
@@ -1171,7 +1275,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="PeopleInstance"/> class. Creates an empty <see cref="PeopleInstance"/> instance with default settings.
         /// </summary>
-        public PeopleInstance(): base(SlcPeople_OrganizationsIds.Definitions.People)
+        public PeopleInstance() : base(SlcPeople_OrganizationsIds.Definitions.People)
         {
             InitializeProperties();
             AfterLoad();
@@ -1180,7 +1284,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="PeopleInstance"/> class. Creates an empty <see cref="PeopleInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public PeopleInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.People, id)
+        public PeopleInstance(Guid id) : base(SlcPeople_OrganizationsIds.Definitions.People, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -1190,7 +1294,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="PeopleInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="PeopleInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public PeopleInstance(DomInstance domInstance): base(domInstance)
+        public PeopleInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.People))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.People)}'", nameof(domInstance));
@@ -1222,7 +1326,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Gets or sets the Team section of the DOM Instance.
         /// </summary>
-        public IList<TeamSection> Team { get; private set; }
+        public IList<TeamSection> Teams { get; private set; }
 
         /// <summary>
         /// Gets or sets the Resource section of the DOM Instance.
@@ -1239,13 +1343,39 @@ namespace DomHelpers.SlcPeople_Organizations
             return new PeopleInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="PeopleInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="PeopleInstance"/> object that is a deep copy of this instance.</returns>
+        public PeopleInstance Clone()
+        {
+            return new PeopleInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="PeopleInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="PeopleInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public PeopleInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new PeopleInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(Organization.ToSection());
             domInstance.Sections.Add(ContactInfo.ToSection());
-            foreach (var item in Team)
+            foreach (var item in Teams)
             {
                 domInstance.Sections.Add(item.ToSection());
             }
@@ -1256,7 +1386,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -1270,7 +1400,7 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _organization = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Organization.Id));
             if (_organization is null)
@@ -1292,7 +1422,7 @@ namespace DomHelpers.SlcPeople_Organizations
                 ContactInfo = new ContactInfoSection(_contactInfo);
             }
 
-            Team = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Team.Id)).Select(section => new TeamSection(section)).ToList();
+            Teams = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Team.Id)).Select(section => new TeamSection(section)).ToList();
             var _resource = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Resource.Id));
             if (_resource is null)
             {
@@ -1324,7 +1454,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="OrganizationsInstance"/> class. Creates an empty <see cref="OrganizationsInstance"/> instance with default settings.
         /// </summary>
-        public OrganizationsInstance(): base(SlcPeople_OrganizationsIds.Definitions.Organizations)
+        public OrganizationsInstance() : base(SlcPeople_OrganizationsIds.Definitions.Organizations)
         {
             InitializeProperties();
             AfterLoad();
@@ -1333,7 +1463,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="OrganizationsInstance"/> class. Creates an empty <see cref="OrganizationsInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public OrganizationsInstance(Guid id): base(SlcPeople_OrganizationsIds.Definitions.Organizations, id)
+        public OrganizationsInstance(Guid id) : base(SlcPeople_OrganizationsIds.Definitions.Organizations, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -1343,7 +1473,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="OrganizationsInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="OrganizationsInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public OrganizationsInstance(DomInstance domInstance): base(domInstance)
+        public OrganizationsInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcPeople_OrganizationsIds.Definitions.Organizations))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcPeople_OrganizationsIds.Definitions.Organizations)}'", nameof(domInstance));
@@ -1365,7 +1495,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Gets or sets the Contracts section of the DOM Instance.
         /// </summary>
-        public IList<ContractsSection> Contracts { get; private set; }
+        public IList<ContractsSection> Contractses { get; private set; }
 
         /// <summary>
         /// Gets or sets the OrganizationInformation section of the DOM Instance.
@@ -1377,11 +1507,37 @@ namespace DomHelpers.SlcPeople_Organizations
             return new OrganizationsInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="OrganizationsInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="OrganizationsInstance"/> object that is a deep copy of this instance.</returns>
+        public OrganizationsInstance Clone()
+        {
+            return new OrganizationsInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="OrganizationsInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="OrganizationsInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public OrganizationsInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new OrganizationsInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
-            foreach (var item in Contracts)
+            foreach (var item in Contractses)
             {
                 domInstance.Sections.Add(item.ToSection());
             }
@@ -1391,7 +1547,7 @@ namespace DomHelpers.SlcPeople_Organizations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -1405,9 +1561,9 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
-            Contracts = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Contracts.Id)).Select(section => new ContractsSection(section)).ToList();
+            Contractses = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.Contracts.Id)).Select(section => new ContractsSection(section)).ToList();
             var _organizationInformation = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id));
             if (_organizationInformation is null)
             {
@@ -1446,7 +1602,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="ContractsSection"/> class. Creates an empty <see cref="ContractsSection"/> object with default settings.
         /// </summary>
-        public ContractsSection(): base(SlcPeople_OrganizationsIds.Sections.Contracts.Id)
+        public ContractsSection() : base(SlcPeople_OrganizationsIds.Sections.Contracts.Id)
         {
         }
 
@@ -1454,7 +1610,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ContractsSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ContractsSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ContractsSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.Contracts.Id)
+        public ContractsSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Contracts.Id)
         {
         }
 
@@ -1500,6 +1656,26 @@ namespace DomHelpers.SlcPeople_Organizations
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ContractsSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ContractsSection"/> object that is a deep copy of this section.</returns>
+        public ContractsSection Clone()
+        {
+            return new ContractsSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ContractsSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ContractsSection"/> object that is a copy of this section but with a different id.</returns>
+        public ContractsSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new ContractsSection(section);
+        }
     }
 
     /// <summary>
@@ -1511,7 +1687,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="OrganizationSection"/> class. Creates an empty <see cref="OrganizationSection"/> object with default settings.
         /// </summary>
-        public OrganizationSection(): base(SlcPeople_OrganizationsIds.Sections.Organization.Id)
+        public OrganizationSection() : base(SlcPeople_OrganizationsIds.Sections.Organization.Id)
         {
         }
 
@@ -1519,7 +1695,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="OrganizationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="OrganizationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public OrganizationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.Organization.Id)
+        public OrganizationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Organization.Id)
         {
         }
 
@@ -1565,6 +1741,26 @@ namespace DomHelpers.SlcPeople_Organizations
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="OrganizationSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="OrganizationSection"/> object that is a deep copy of this section.</returns>
+        public OrganizationSection Clone()
+        {
+            return new OrganizationSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="OrganizationSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="OrganizationSection"/> object that is a copy of this section but with a different id.</returns>
+        public OrganizationSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new OrganizationSection(section);
+        }
     }
 
     /// <summary>
@@ -1576,7 +1772,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleInformationSection"/> class. Creates an empty <see cref="RoleInformationSection"/> object with default settings.
         /// </summary>
-        public RoleInformationSection(): base(SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)
+        public RoleInformationSection() : base(SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)
         {
         }
 
@@ -1584,7 +1780,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="RoleInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="RoleInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public RoleInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)
+        public RoleInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.RoleInformation.Id)
         {
         }
 
@@ -1631,6 +1827,26 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="RoleInformationSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="RoleInformationSection"/> object that is a deep copy of this section.</returns>
+        public RoleInformationSection Clone()
+        {
+            return new RoleInformationSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="RoleInformationSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="RoleInformationSection"/> object that is a copy of this section but with a different id.</returns>
+        public RoleInformationSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new RoleInformationSection(section);
+        }
+
         /// <inheritdoc />
         protected override Section InternalToSection()
         {
@@ -1649,7 +1865,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourcePoolSection"/> class. Creates an empty <see cref="ResourcePoolSection"/> object with default settings.
         /// </summary>
-        public ResourcePoolSection(): base(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)
+        public ResourcePoolSection() : base(SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)
         {
         }
 
@@ -1657,7 +1873,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ResourcePoolSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ResourcePoolSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ResourcePoolSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)
+        public ResourcePoolSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.ResourcePool.Id)
         {
         }
 
@@ -1703,6 +1919,26 @@ namespace DomHelpers.SlcPeople_Organizations
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ResourcePoolSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ResourcePoolSection"/> object that is a deep copy of this section.</returns>
+        public ResourcePoolSection Clone()
+        {
+            return new ResourcePoolSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ResourcePoolSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ResourcePoolSection"/> object that is a copy of this section but with a different id.</returns>
+        public ResourcePoolSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new ResourcePoolSection(section);
+        }
     }
 
     /// <summary>
@@ -1714,7 +1950,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="ContactInfoSection"/> class. Creates an empty <see cref="ContactInfoSection"/> object with default settings.
         /// </summary>
-        public ContactInfoSection(): base(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)
+        public ContactInfoSection() : base(SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)
         {
         }
 
@@ -1722,7 +1958,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ContactInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ContactInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ContactInfoSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)
+        public ContactInfoSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.ContactInfo.Id)
         {
         }
 
@@ -1983,6 +2219,26 @@ namespace DomHelpers.SlcPeople_Organizations
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ContactInfoSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ContactInfoSection"/> object that is a deep copy of this section.</returns>
+        public ContactInfoSection Clone()
+        {
+            return new ContactInfoSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ContactInfoSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ContactInfoSection"/> object that is a copy of this section but with a different id.</returns>
+        public ContactInfoSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new ContactInfoSection(section);
+        }
     }
 
     /// <summary>
@@ -1994,7 +2250,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="ExperienceInformationSection"/> class. Creates an empty <see cref="ExperienceInformationSection"/> object with default settings.
         /// </summary>
-        public ExperienceInformationSection(): base(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)
+        public ExperienceInformationSection() : base(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)
         {
         }
 
@@ -2002,7 +2258,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ExperienceInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ExperienceInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ExperienceInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)
+        public ExperienceInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Id)
         {
         }
 
@@ -2049,6 +2305,26 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ExperienceInformationSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ExperienceInformationSection"/> object that is a deep copy of this section.</returns>
+        public ExperienceInformationSection Clone()
+        {
+            return new ExperienceInformationSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ExperienceInformationSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ExperienceInformationSection"/> object that is a copy of this section but with a different id.</returns>
+        public ExperienceInformationSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new ExperienceInformationSection(section);
+        }
+
         /// <inheritdoc />
         protected override Section InternalToSection()
         {
@@ -2067,7 +2343,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="CategoryInformationSection"/> class. Creates an empty <see cref="CategoryInformationSection"/> object with default settings.
         /// </summary>
-        public CategoryInformationSection(): base(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)
+        public CategoryInformationSection() : base(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)
         {
         }
 
@@ -2075,7 +2351,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="CategoryInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="CategoryInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public CategoryInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)
+        public CategoryInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.CategoryInformation.Id)
         {
         }
 
@@ -2122,6 +2398,26 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="CategoryInformationSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="CategoryInformationSection"/> object that is a deep copy of this section.</returns>
+        public CategoryInformationSection Clone()
+        {
+            return new CategoryInformationSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="CategoryInformationSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="CategoryInformationSection"/> object that is a copy of this section but with a different id.</returns>
+        public CategoryInformationSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new CategoryInformationSection(section);
+        }
+
         /// <inheritdoc />
         protected override Section InternalToSection()
         {
@@ -2140,7 +2436,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamSection"/> class. Creates an empty <see cref="TeamSection"/> object with default settings.
         /// </summary>
-        public TeamSection(): base(SlcPeople_OrganizationsIds.Sections.Team.Id)
+        public TeamSection() : base(SlcPeople_OrganizationsIds.Sections.Team.Id)
         {
         }
 
@@ -2148,7 +2444,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="TeamSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="TeamSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public TeamSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.Team.Id)
+        public TeamSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Team.Id)
         {
         }
 
@@ -2237,6 +2533,26 @@ namespace DomHelpers.SlcPeople_Organizations
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="TeamSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="TeamSection"/> object that is a deep copy of this section.</returns>
+        public TeamSection Clone()
+        {
+            return new TeamSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="TeamSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="TeamSection"/> object that is a copy of this section but with a different id.</returns>
+        public TeamSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new TeamSection(section);
+        }
     }
 
     /// <summary>
@@ -2248,7 +2564,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamInformationSection"/> class. Creates an empty <see cref="TeamInformationSection"/> object with default settings.
         /// </summary>
-        public TeamInformationSection(): base(SlcPeople_OrganizationsIds.Sections.TeamInformation.Id)
+        public TeamInformationSection() : base(SlcPeople_OrganizationsIds.Sections.TeamInformation.Id)
         {
         }
 
@@ -2256,7 +2572,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="TeamInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="TeamInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public TeamInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.TeamInformation.Id)
+        public TeamInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.TeamInformation.Id)
         {
         }
 
@@ -2518,6 +2834,26 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="TeamInformationSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="TeamInformationSection"/> object that is a deep copy of this section.</returns>
+        public TeamInformationSection Clone()
+        {
+            return new TeamInformationSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="TeamInformationSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="TeamInformationSection"/> object that is a copy of this section but with a different id.</returns>
+        public TeamInformationSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new TeamInformationSection(section);
+        }
+
         /// <inheritdoc />
         protected override Section InternalToSection()
         {
@@ -2536,7 +2872,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="OrganizationInformationSection"/> class. Creates an empty <see cref="OrganizationInformationSection"/> object with default settings.
         /// </summary>
-        public OrganizationInformationSection(): base(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id)
+        public OrganizationInformationSection() : base(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id)
         {
         }
 
@@ -2544,7 +2880,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="OrganizationInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="OrganizationInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public OrganizationInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id)
+        public OrganizationInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Id)
         {
         }
 
@@ -2677,6 +3013,26 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="OrganizationInformationSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="OrganizationInformationSection"/> object that is a deep copy of this section.</returns>
+        public OrganizationInformationSection Clone()
+        {
+            return new OrganizationInformationSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="OrganizationInformationSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="OrganizationInformationSection"/> object that is a copy of this section but with a different id.</returns>
+        public OrganizationInformationSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new OrganizationInformationSection(section);
+        }
+
         /// <inheritdoc />
         protected override Section InternalToSection()
         {
@@ -2697,7 +3053,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceSection"/> class. Creates an empty <see cref="ResourceSection"/> object with default settings.
         /// </summary>
-        public ResourceSection(): base(SlcPeople_OrganizationsIds.Sections.Resource.Id)
+        public ResourceSection() : base(SlcPeople_OrganizationsIds.Sections.Resource.Id)
         {
         }
 
@@ -2705,7 +3061,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="ResourceSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ResourceSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ResourceSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.Resource.Id)
+        public ResourceSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Resource.Id)
         {
         }
 
@@ -2751,6 +3107,26 @@ namespace DomHelpers.SlcPeople_Organizations
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ResourceSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ResourceSection"/> object that is a deep copy of this section.</returns>
+        public ResourceSection Clone()
+        {
+            return new ResourceSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ResourceSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ResourceSection"/> object that is a copy of this section but with a different id.</returns>
+        public ResourceSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new ResourceSection(section);
+        }
     }
 
     /// <summary>
@@ -2762,7 +3138,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="BillingSection"/> class. Creates an empty <see cref="BillingSection"/> object with default settings.
         /// </summary>
-        public BillingSection(): base(SlcPeople_OrganizationsIds.Sections.Billing.Id)
+        public BillingSection() : base(SlcPeople_OrganizationsIds.Sections.Billing.Id)
         {
         }
 
@@ -2770,7 +3146,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="BillingSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="BillingSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public BillingSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.Billing.Id)
+        public BillingSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.Billing.Id)
         {
         }
 
@@ -3032,6 +3408,26 @@ namespace DomHelpers.SlcPeople_Organizations
             }
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="BillingSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="BillingSection"/> object that is a deep copy of this section.</returns>
+        public BillingSection Clone()
+        {
+            return new BillingSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="BillingSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="BillingSection"/> object that is a copy of this section but with a different id.</returns>
+        public BillingSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new BillingSection(section);
+        }
+
         /// <inheritdoc />
         protected override Section InternalToSection()
         {
@@ -3050,7 +3446,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// <summary>
         /// Initializes a new instance of the <see cref="PeopleInformationSection"/> class. Creates an empty <see cref="PeopleInformationSection"/> object with default settings.
         /// </summary>
-        public PeopleInformationSection(): base(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)
+        public PeopleInformationSection() : base(SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)
         {
         }
 
@@ -3058,7 +3454,7 @@ namespace DomHelpers.SlcPeople_Organizations
         /// Initializes a new instance of the <see cref="PeopleInformationSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="PeopleInformationSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public PeopleInformationSection(Section section): base(section, SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)
+        public PeopleInformationSection(Section section) : base(section, SlcPeople_OrganizationsIds.Sections.PeopleInformation.Id)
         {
         }
 
@@ -3232,6 +3628,26 @@ namespace DomHelpers.SlcPeople_Organizations
                     section.AddOrUpdateValue(SlcPeople_OrganizationsIds.Sections.PeopleInformation.PersonalSkills, (String)value);
                 }
             }
+        }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="PeopleInformationSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="PeopleInformationSection"/> object that is a deep copy of this section.</returns>
+        public PeopleInformationSection Clone()
+        {
+            return new PeopleInformationSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="PeopleInformationSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="PeopleInformationSection"/> object that is a copy of this section but with a different id.</returns>
+        public PeopleInformationSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new PeopleInformationSection(section);
         }
 
         /// <inheritdoc />

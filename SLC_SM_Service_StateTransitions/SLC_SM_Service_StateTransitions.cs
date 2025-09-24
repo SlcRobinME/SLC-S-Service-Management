@@ -76,7 +76,6 @@ namespace SLCSMServiceStateTransitions
 							transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Reserved_To_Active;
 							break;
 
-
 						default:
 							throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");
 					}
@@ -89,7 +88,6 @@ namespace SLCSMServiceStateTransitions
 						case "terminated":
 							transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Active_To_Terminated;
 							break;
-
 
 						default:
 							throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");

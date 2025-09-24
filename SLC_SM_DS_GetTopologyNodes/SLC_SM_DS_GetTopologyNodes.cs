@@ -248,7 +248,7 @@ namespace SLCSMDSGetTopologyNodes
 
 				return propertyValues
 					.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())?
-					.PropertyValue.FirstOrDefault(v => v.PropertyName == "Icon")?.Value ?? String.Empty;
+					.PropertyValues.FirstOrDefault(v => v.PropertyName == "Icon")?.Value ?? String.Empty;
 			}
 
 			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)

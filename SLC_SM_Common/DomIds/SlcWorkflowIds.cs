@@ -89,6 +89,12 @@ namespace DomHelpers.SlcWorkflow
                 Invoiced = 7
             }
 
+            public enum Desiredjobstatus
+            {
+                Draft = 0,
+                Tentative = 1
+            }
+
             public enum Nodetype
             {
                 Source = 0,
@@ -136,13 +142,6 @@ namespace DomHelpers.SlcWorkflow
             {
                 DeleteServiceIfOneExists = 0,
                 DonTDeleteService = 1
-            }
-
-            public enum Filtertype
-            {
-                Capability = 0,
-                Capacity = 1,
-                Domain = 2
             }
 
             public enum Replaceaction
@@ -265,6 +264,14 @@ namespace DomHelpers.SlcWorkflow
                 AllValuesProvided = 3
             }
 
+            public enum Processstatus
+            {
+                NA = 0,
+                UpdatingSeries = 1,
+                SeriesUpdated = 2,
+                UpdateFailed = 3
+            }
+
             public enum Priority
             {
                 High = 1,
@@ -312,13 +319,6 @@ namespace DomHelpers.SlcWorkflow
                 public static FieldDescriptorID JobDuration { get; } = new FieldDescriptorID(new Guid("0711ae78-8cd2-463b-908d-6ab6a5a839e1"));
             }
 
-            public static class SessionDataStore
-            {
-                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("3c203118-c2ae-42ad-9f95-808fd988dabb"))
-                {ModuleId = "(slc)workflow"};
-                public static FieldDescriptorID JobId { get; } = new FieldDescriptorID(new Guid("f3b60386-20cd-41da-953a-4a8ace65ad43"));
-            }
-
             public static class JobSettings
             {
                 public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("19f2d7c6-ed16-4e05-bd02-78016a4c8a9d"))
@@ -328,6 +328,9 @@ namespace DomHelpers.SlcWorkflow
                 public static FieldDescriptorID JobIDStartingSeed { get; } = new FieldDescriptorID(new Guid("9778566b-422f-4908-a05f-e56a93037779"));
                 public static FieldDescriptorID JobIDIncrement { get; } = new FieldDescriptorID(new Guid("1a55336d-d207-48ed-9c56-3d43219f8f7b"));
                 public static FieldDescriptorID JobIDNextSequence { get; } = new FieldDescriptorID(new Guid("3e07caec-bb58-4870-997c-42f0bcd7bc63"));
+                public static FieldDescriptorID DefaultPreroll { get; } = new FieldDescriptorID(new Guid("e9d15d74-a962-45e2-9698-2df0092068af"));
+                public static FieldDescriptorID DefaultPostroll { get; } = new FieldDescriptorID(new Guid("081457ee-2c47-4296-8852-492fbd8548c9"));
+                public static FieldDescriptorID DesiredJobStatus { get; } = new FieldDescriptorID(new Guid("05457f82-4f6e-416e-ab79-6c0afb4f557f"));
             }
 
             public static class Nodes
@@ -387,15 +390,6 @@ namespace DomHelpers.SlcWorkflow
                 public static FieldDescriptorID MonitoringServiceID { get; } = new FieldDescriptorID(new Guid("e67d43c5-5efc-4254-b837-049d45cb548e"));
             }
 
-            public static class SessionFilter
-            {
-                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("17b3fc7e-089d-4855-b7fe-07df846fa933"))
-                {ModuleId = "(slc)workflow"};
-                public static FieldDescriptorID FilterType { get; } = new FieldDescriptorID(new Guid("acb54b31-a34c-4861-980e-5ef6d6094df8"));
-                public static FieldDescriptorID FilterKey { get; } = new FieldDescriptorID(new Guid("c77a5add-1607-484b-941c-c53531a87d27"));
-                public static FieldDescriptorID FilterValues { get; } = new FieldDescriptorID(new Guid("e9fed5ae-2702-42f2-962b-48bb5280b4df"));
-            }
-
             public static class JobNodeRelationshipReplaceActions
             {
                 public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("76908a6e-09bc-490a-ba34-2e7e23acd450"))
@@ -442,6 +436,9 @@ namespace DomHelpers.SlcWorkflow
                 public static FieldDescriptorID JobCancellation { get; } = new FieldDescriptorID(new Guid("7ec04ba8-a457-4390-b756-3d1afb8e9c71"));
                 public static FieldDescriptorID ActionNeeded { get; } = new FieldDescriptorID(new Guid("d9afd738-5c54-4d14-b287-b4ecc663d204"));
                 public static FieldDescriptorID LockedBy { get; } = new FieldDescriptorID(new Guid("841be21d-4de0-46d0-8a97-ff57dbfa87a0"));
+                public static FieldDescriptorID Preroll { get; } = new FieldDescriptorID(new Guid("0ca0cc12-cb87-46a6-b27b-b87ab0dd2632"));
+                public static FieldDescriptorID Postroll { get; } = new FieldDescriptorID(new Guid("07b1ade4-2aa8-48a2-a462-e5f60829f521"));
+                public static FieldDescriptorID JobSeriesID { get; } = new FieldDescriptorID(new Guid("e35a308c-c342-4d61-b53e-744ffdeda9b9"));
             }
 
             public static class CostingAndBillingDetails
@@ -476,13 +473,6 @@ namespace DomHelpers.SlcWorkflow
                 public static FieldDescriptorID ReferenceID { get; } = new FieldDescriptorID(new Guid("60badcf5-0ec0-4b01-83f0-7c78cc7b0867"));
             }
 
-            public static class SessionDataUser
-            {
-                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("45c92fe1-0b64-47dc-b76b-5a9fb5329fb1"))
-                {ModuleId = "(slc)workflow"};
-                public static FieldDescriptorID User { get; } = new FieldDescriptorID(new Guid("5ea43113-88eb-4a05-8046-b9ad27b5f198"));
-            }
-
             public static class JobExecution
             {
                 public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("43a36804-3409-4498-8620-eaec80238fcc"))
@@ -490,6 +480,17 @@ namespace DomHelpers.SlcWorkflow
                 public static FieldDescriptorID JobExecutionScript { get; } = new FieldDescriptorID(new Guid("4a9bf831-b5cd-4cb1-a25b-f1967a2e177c"));
                 public static FieldDescriptorID JobConfiguration { get; } = new FieldDescriptorID(new Guid("7f98a626-bce5-4c78-8ced-387f75f27914"));
                 public static FieldDescriptorID JobConfigurationStatus { get; } = new FieldDescriptorID(new Guid("21e962f1-6cce-4e73-8088-3ae37a1922c3"));
+            }
+
+            public static class RecurringInfo
+            {
+                public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("5d0df0b7-38ee-4297-851c-df6b616bddaa"))
+                {ModuleId = "(slc)workflow"};
+                public static FieldDescriptorID Duration { get; } = new FieldDescriptorID(new Guid("be066907-2644-4ba5-a9c6-78bb1fc69a53"));
+                public static FieldDescriptorID TimeZone { get; } = new FieldDescriptorID(new Guid("ad3c9b87-a4ee-475e-a5c5-205079076720"));
+                public static FieldDescriptorID RecurringPattern { get; } = new FieldDescriptorID(new Guid("4316ef7b-5463-48e2-9bdc-066186558958"));
+                public static FieldDescriptorID ProcessStatus { get; } = new FieldDescriptorID(new Guid("7888de95-5599-4571-9237-ced251d2700b"));
+                public static FieldDescriptorID DesiredJobStatus { get; } = new FieldDescriptorID(new Guid("4bf84f0d-09a5-4ac6-b291-92537cea7af3"));
             }
 
             public static class NodeRelationships
@@ -516,7 +517,7 @@ namespace DomHelpers.SlcWorkflow
         {
             public static DomDefinitionId AppSettings { get; } = new DomDefinitionId(new Guid("e1ed621e-197d-4003-95f2-5c0722e37c75"))
             {ModuleId = "(slc)workflow"};
-            public static DomDefinitionId SessionData { get; } = new DomDefinitionId(new Guid("67e8ba7f-4518-4b7f-ab43-075c2f9c1c87"))
+            public static DomDefinitionId RecurringJobs { get; } = new DomDefinitionId(new Guid("03a014b3-0a74-4abd-aefd-ead1f50c27d3"))
             {ModuleId = "(slc)workflow"};
             public static DomDefinitionId Jobs { get; } = new DomDefinitionId(new Guid("094b7503-2cd8-4e86-a189-c33076cabfbc"))
             {ModuleId = "(slc)workflow"};
@@ -662,6 +663,116 @@ namespace DomHelpers.SlcWorkflow
                 }
             }
 
+            public static class Recurringjob_Behavior
+            {
+                public static DomBehaviorDefinitionId Id { get; } = new DomBehaviorDefinitionId(new Guid("7d764b5d-37fc-4b74-b9a3-22183b4162f7"))
+                {ModuleId = "(slc)workflow"};
+                public static class Statuses
+                {
+                    public const string Active = "922c0cfc-1bd4-41d3-9025-d0c0a28bce0f";
+                    public const string Cancelled = "31d3f50e-f824-4c23-986c-d31872a88dc9";
+                    public const string Completed = "70ab823c-9f6c-49b7-9f77-197bf8b7e7ed";
+                    public static string ToValue(StatusesEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case StatusesEnum.Active:
+                                return Active;
+                            case StatusesEnum.Cancelled:
+                                return Cancelled;
+                            case StatusesEnum.Completed:
+                                return Completed;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static StatusesEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Active:
+                                return StatusesEnum.Active;
+                            case Cancelled:
+                                return StatusesEnum.Cancelled;
+                            case Completed:
+                                return StatusesEnum.Completed;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum StatusesEnum
+                {
+                    Active,
+                    Cancelled,
+                    Completed
+                }
+
+                public static class Transitions
+                {
+                    public const string Active_To_Completed = "active_to_completed";
+                    public const string Active_To_Cancelled = "active_to_cancelled";
+                    public static string ToValue(TransitionsEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case TransitionsEnum.Active_To_Completed:
+                                return Active_To_Completed;
+                            case TransitionsEnum.Active_To_Cancelled:
+                                return Active_To_Cancelled;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static TransitionsEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Active_To_Completed:
+                                return TransitionsEnum.Active_To_Completed;
+                            case Active_To_Cancelled:
+                                return TransitionsEnum.Active_To_Cancelled;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum TransitionsEnum
+                {
+                    Active_To_Completed,
+                    Active_To_Cancelled
+                }
+
+                public static class Actions
+                {
+                    public static string ToValue(ActionsEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static ActionsEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum ActionsEnum
+                {
+                }
+            }
+
             public static class Job_Behavior
             {
                 public static DomBehaviorDefinitionId Id { get; } = new DomBehaviorDefinitionId(new Guid("4db4650b-c81b-48df-b48f-d6f47e69a829"))
@@ -746,13 +857,11 @@ namespace DomHelpers.SlcWorkflow
                     public const string Tentative_To_Confirmed = "tentative_to_confirmed";
                     public const string Confirmed_To_Running = "confirmed_to_running";
                     public const string Running_To_Completed = "running_to_completed";
-                    public const string Completed_To_Readyforinvoice = "completed_to_readyforinvoice";
-                    public const string Readyforinvoice_To_Invoiced = "readyforinvoice_to_invoiced";
                     public const string Confirmed_To_Canceled = "confirmed_to_canceled";
-                    public const string Canceled_To_Readyforinvoice = "canceled_to_readyforinvoice";
                     public const string Tentative_To_Canceled = "tentative_to_canceled";
                     public const string Draft_To_Completed = "draft_to_completed";
                     public const string Tentative_To_Completed = "tentative_to_completed";
+                    public const string Confirmed_To_Tentative = "confirmed_to_tentative";
                     public static string ToValue(TransitionsEnum @enum)
                     {
                         switch (@enum)
@@ -765,20 +874,16 @@ namespace DomHelpers.SlcWorkflow
                                 return Confirmed_To_Running;
                             case TransitionsEnum.Running_To_Completed:
                                 return Running_To_Completed;
-                            case TransitionsEnum.Completed_To_Readyforinvoice:
-                                return Completed_To_Readyforinvoice;
-                            case TransitionsEnum.Readyforinvoice_To_Invoiced:
-                                return Readyforinvoice_To_Invoiced;
                             case TransitionsEnum.Confirmed_To_Canceled:
                                 return Confirmed_To_Canceled;
-                            case TransitionsEnum.Canceled_To_Readyforinvoice:
-                                return Canceled_To_Readyforinvoice;
                             case TransitionsEnum.Tentative_To_Canceled:
                                 return Tentative_To_Canceled;
                             case TransitionsEnum.Draft_To_Completed:
                                 return Draft_To_Completed;
                             case TransitionsEnum.Tentative_To_Completed:
                                 return Tentative_To_Completed;
+                            case TransitionsEnum.Confirmed_To_Tentative:
+                                return Confirmed_To_Tentative;
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
                         }
@@ -796,20 +901,16 @@ namespace DomHelpers.SlcWorkflow
                                 return TransitionsEnum.Confirmed_To_Running;
                             case Running_To_Completed:
                                 return TransitionsEnum.Running_To_Completed;
-                            case Completed_To_Readyforinvoice:
-                                return TransitionsEnum.Completed_To_Readyforinvoice;
-                            case Readyforinvoice_To_Invoiced:
-                                return TransitionsEnum.Readyforinvoice_To_Invoiced;
                             case Confirmed_To_Canceled:
                                 return TransitionsEnum.Confirmed_To_Canceled;
-                            case Canceled_To_Readyforinvoice:
-                                return TransitionsEnum.Canceled_To_Readyforinvoice;
                             case Tentative_To_Canceled:
                                 return TransitionsEnum.Tentative_To_Canceled;
                             case Draft_To_Completed:
                                 return TransitionsEnum.Draft_To_Completed;
                             case Tentative_To_Completed:
                                 return TransitionsEnum.Tentative_To_Completed;
+                            case Confirmed_To_Tentative:
+                                return TransitionsEnum.Confirmed_To_Tentative;
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
                         }
@@ -822,13 +923,11 @@ namespace DomHelpers.SlcWorkflow
                     Tentative_To_Confirmed,
                     Confirmed_To_Running,
                     Running_To_Completed,
-                    Completed_To_Readyforinvoice,
-                    Readyforinvoice_To_Invoiced,
                     Confirmed_To_Canceled,
-                    Canceled_To_Readyforinvoice,
                     Tentative_To_Canceled,
                     Draft_To_Completed,
-                    Tentative_To_Completed
+                    Tentative_To_Completed,
+                    Confirmed_To_Tentative
                 }
 
                 public static class Actions
@@ -983,75 +1082,116 @@ namespace DomHelpers.SlcWorkflow
     }
 
     /// <summary>
-    /// Represents a wrapper class for accessing a SessionDataInstance DOM instance.
-    /// The <see cref="SessionDataInstance"/> class provides simplified access to the data and functionality of the underlying DOM instance, allowing for easier manipulation and retrieval of data from DOM.
+    /// Represents a wrapper class for accessing a RecurringJobsInstance DOM instance.
+    /// The <see cref="RecurringJobsInstance"/> class provides simplified access to the data and functionality of the underlying DOM instance, allowing for easier manipulation and retrieval of data from DOM.
     /// </summary>
-    public partial class SessionDataInstance : DomInstanceBase
+    public partial class RecurringJobsInstance : DomInstanceBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SessionDataInstance"/> class. Creates an empty <see cref="SessionDataInstance"/> instance with default settings.
+        /// Initializes a new instance of the <see cref="RecurringJobsInstance"/> class. Creates an empty <see cref="RecurringJobsInstance"/> instance with default settings.
         /// </summary>
-        public SessionDataInstance() : base(SlcWorkflowIds.Definitions.SessionData)
+        public RecurringJobsInstance() : base(SlcWorkflowIds.Definitions.RecurringJobs)
         {
             InitializeProperties();
             AfterLoad();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SessionDataInstance"/> class. Creates an empty <see cref="SessionDataInstance"/> instance with default settings and a specific ID.
+        /// Initializes a new instance of the <see cref="RecurringJobsInstance"/> class. Creates an empty <see cref="RecurringJobsInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public SessionDataInstance(Guid id) : base(SlcWorkflowIds.Definitions.SessionData, id)
+        public RecurringJobsInstance(Guid id) : base(SlcWorkflowIds.Definitions.RecurringJobs, id)
         {
             InitializeProperties();
             AfterLoad();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SessionDataInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
+        /// Initializes a new instance of the <see cref="RecurringJobsInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
-        /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="SessionDataInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public SessionDataInstance(DomInstance domInstance) : base(domInstance)
+        /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="RecurringJobsInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+        public RecurringJobsInstance(DomInstance domInstance) : base(domInstance)
         {
-            if (!domInstance.DomDefinitionId.Equals(SlcWorkflowIds.Definitions.SessionData))
-                throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcWorkflowIds.Definitions.SessionData)}'", nameof(domInstance));
+            if (!domInstance.DomDefinitionId.Equals(SlcWorkflowIds.Definitions.RecurringJobs))
+                throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcWorkflowIds.Definitions.RecurringJobs)}'", nameof(domInstance));
             InitializeProperties();
             AfterLoad();
         }
 
         /// <summary>
-        /// Gets or sets the SessionDataStore section of the DOM Instance.
+        /// Gets the Status ID of the DOM Instance.
         /// </summary>
-        public SessionDataStoreSection SessionDataStore { get; set; }
-
-        /// <summary>
-        /// Gets or sets the SessionFilter section of the DOM Instance.
-        /// </summary>
-        public IList<SessionFilterSection> SessionFilters { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the SessionDataUser section of the DOM Instance.
-        /// </summary>
-        public SessionDataUserSection SessionDataUser { get; set; }
-
-        public static explicit operator SessionDataInstance(DomInstance instance)
+        public SlcWorkflowIds.Behaviors.Recurringjob_Behavior.StatusesEnum Status
         {
-            return new SessionDataInstance(instance);
+            get
+            {
+                return SlcWorkflowIds.Behaviors.Recurringjob_Behavior.Statuses.ToEnum(StatusId);
+            }
         }
 
         /// <summary>
-        /// Creates a deep copy of the current <see cref="SessionDataInstance"/>.
+        /// Gets or sets the Errors section of the DOM Instance.
         /// </summary>
-        /// <returns>A new <see cref="SessionDataInstance"/> object that is a deep copy of this instance.</returns>
-        public SessionDataInstance Clone()
+        public IList<ErrorsSection> Errorses { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the Nodes section of the DOM Instance.
+        /// </summary>
+        public IList<NodesSection> Nodeses { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the CostingAndBilling section of the DOM Instance.
+        /// </summary>
+        public CostingAndBillingSection CostingAndBilling { get; set; }
+
+        /// <summary>
+        /// Gets or sets the MonitoringSettings section of the DOM Instance.
+        /// </summary>
+        public MonitoringSettingsSection MonitoringSettings { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Connections section of the DOM Instance.
+        /// </summary>
+        public IList<ConnectionsSection> Connectionses { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the JobInfo section of the DOM Instance.
+        /// </summary>
+        public JobInfoSection JobInfo { get; set; }
+
+        /// <summary>
+        /// Gets or sets the JobExecution section of the DOM Instance.
+        /// </summary>
+        public JobExecutionSection JobExecution { get; set; }
+
+        /// <summary>
+        /// Gets or sets the RecurringInfo section of the DOM Instance.
+        /// </summary>
+        public RecurringInfoSection RecurringInfo { get; set; }
+
+        /// <summary>
+        /// Gets or sets the NodeRelationships section of the DOM Instance.
+        /// </summary>
+        public IList<NodeRelationshipsSection> NodeRelationshipses { get; private set; }
+
+        public static explicit operator RecurringJobsInstance(DomInstance instance)
         {
-            return new SessionDataInstance((DomInstance)this.ToInstance().Clone());
+            return new RecurringJobsInstance(instance);
         }
 
         /// <summary>
-        /// Creates a duplicate of the current <see cref="SessionDataInstance"/> with a new id.
+        /// Creates a deep copy of the current <see cref="RecurringJobsInstance"/>.
         /// </summary>
-        /// <returns>A new <see cref="SessionDataInstance"/> object that is a copy of this instance but with a different id.</returns>
-        public SessionDataInstance Duplicate()
+        /// <returns>A new <see cref="RecurringJobsInstance"/> object that is a deep copy of this instance.</returns>
+        public RecurringJobsInstance Clone()
+        {
+            return new RecurringJobsInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="RecurringJobsInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="RecurringJobsInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public RecurringJobsInstance Duplicate()
         {
             var instance = (DomInstance)this.ToInstance().Clone();
             instance.ID = new DomInstanceId(Guid.NewGuid())
@@ -1061,24 +1201,42 @@ namespace DomHelpers.SlcWorkflow
                 section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
             }
 
-            return new SessionDataInstance(instance);
+            return new RecurringJobsInstance(instance);
         }
 
         /// <inheritdoc />
         protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
-            if (SessionDataStore != null && !SessionDataStore.IsEmpty)
-            {
-                domInstance.Sections.Add(SessionDataStore.ToSection());
-            }
-
-            foreach (var item in SessionFilters)
+            foreach (var item in Errorses)
             {
                 domInstance.Sections.Add(item.ToSection());
             }
 
-            domInstance.Sections.Add(SessionDataUser.ToSection());
+            foreach (var item in Nodeses)
+            {
+                domInstance.Sections.Add(item.ToSection());
+            }
+
+            if (CostingAndBilling != null && !CostingAndBilling.IsEmpty)
+            {
+                domInstance.Sections.Add(CostingAndBilling.ToSection());
+            }
+
+            domInstance.Sections.Add(MonitoringSettings.ToSection());
+            foreach (var item in Connectionses)
+            {
+                domInstance.Sections.Add(item.ToSection());
+            }
+
+            domInstance.Sections.Add(JobInfo.ToSection());
+            domInstance.Sections.Add(JobExecution.ToSection());
+            domInstance.Sections.Add(RecurringInfo.ToSection());
+            foreach (var item in NodeRelationshipses)
+            {
+                domInstance.Sections.Add(item.ToSection());
+            }
+
             return domInstance;
         }
 
@@ -1099,26 +1257,60 @@ namespace DomHelpers.SlcWorkflow
 
         protected sealed override void InitializeProperties()
         {
-            var _sessionDataStore = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.SessionDataStore.Id));
-            if (_sessionDataStore is null)
+            Errorses = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.Errors.Id)).Select(section => new ErrorsSection(section)).ToList();
+            Nodeses = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.Nodes.Id)).Select(section => new NodesSection(section)).ToList();
+            var _costingAndBilling = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.CostingAndBilling.Id));
+            if (_costingAndBilling is null)
             {
-                SessionDataStore = new SessionDataStoreSection();
+                CostingAndBilling = new CostingAndBillingSection();
             }
             else
             {
-                SessionDataStore = new SessionDataStoreSection(_sessionDataStore);
+                CostingAndBilling = new CostingAndBillingSection(_costingAndBilling);
             }
 
-            SessionFilters = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.SessionFilter.Id)).Select(section => new SessionFilterSection(section)).ToList();
-            var _sessionDataUser = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.SessionDataUser.Id));
-            if (_sessionDataUser is null)
+            var _monitoringSettings = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.MonitoringSettings.Id));
+            if (_monitoringSettings is null)
             {
-                SessionDataUser = new SessionDataUserSection();
+                MonitoringSettings = new MonitoringSettingsSection();
             }
             else
             {
-                SessionDataUser = new SessionDataUserSection(_sessionDataUser);
+                MonitoringSettings = new MonitoringSettingsSection(_monitoringSettings);
             }
+
+            Connectionses = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.Connections.Id)).Select(section => new ConnectionsSection(section)).ToList();
+            var _jobInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.JobInfo.Id));
+            if (_jobInfo is null)
+            {
+                JobInfo = new JobInfoSection();
+            }
+            else
+            {
+                JobInfo = new JobInfoSection(_jobInfo);
+            }
+
+            var _jobExecution = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.JobExecution.Id));
+            if (_jobExecution is null)
+            {
+                JobExecution = new JobExecutionSection();
+            }
+            else
+            {
+                JobExecution = new JobExecutionSection(_jobExecution);
+            }
+
+            var _recurringInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.RecurringInfo.Id));
+            if (_recurringInfo is null)
+            {
+                RecurringInfo = new RecurringInfoSection();
+            }
+            else
+            {
+                RecurringInfo = new RecurringInfoSection(_recurringInfo);
+            }
+
+            NodeRelationshipses = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.NodeRelationships.Id)).Select(section => new NodeRelationshipsSection(section)).ToList();
         }
     }
 
@@ -1790,7 +1982,7 @@ namespace DomHelpers.SlcWorkflow
         /// <summary>
         /// Gets or sets the Nodes section of the DOM Instance.
         /// </summary>
-        public IList<NodesSection> Nodes { get; private set; }
+        public IList<NodesSection> Nodeses { get; private set; }
 
         /// <summary>
         /// Gets or sets the MonitoringSettings section of the DOM Instance.
@@ -1847,7 +2039,7 @@ namespace DomHelpers.SlcWorkflow
         protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
-            foreach (var item in Nodes)
+            foreach (var item in Nodeses)
             {
                 domInstance.Sections.Add(item.ToSection());
             }
@@ -1880,7 +2072,7 @@ namespace DomHelpers.SlcWorkflow
 
         protected sealed override void InitializeProperties()
         {
-            Nodes = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.Nodes.Id)).Select(section => new NodesSection(section)).ToList();
+            Nodeses = domInstance.Sections.Where(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.Nodes.Id)).Select(section => new NodesSection(section)).ToList();
             var _monitoringSettings = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcWorkflowIds.Sections.MonitoringSettings.Id));
             if (_monitoringSettings is null)
             {
@@ -2802,91 +2994,6 @@ namespace DomHelpers.SlcWorkflow
     }
 
     /// <summary>
-    /// Represents a wrapper class for accessing a SessionDataStoreSection section.
-    /// The <see cref="SessionDataStoreSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-    /// </summary>
-    public partial class SessionDataStoreSection : DomSectionBase
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SessionDataStoreSection"/> class. Creates an empty <see cref="SessionDataStoreSection"/> object with default settings.
-        /// </summary>
-        public SessionDataStoreSection() : base(SlcWorkflowIds.Sections.SessionDataStore.Id)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SessionDataStoreSection"/> class using the specified <paramref name="section"/> for initializing the object.
-        /// </summary>
-        /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="SessionDataStoreSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public SessionDataStoreSection(Section section) : base(section, SlcWorkflowIds.Sections.SessionDataStore.Id)
-        {
-        }
-
-        /// <summary>
-        /// Gets or sets the JobId field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-        /// </list>
-        /// </remarks>
-        public String JobId
-        {
-            get
-            {
-                var wrapper = section.GetValue<String>(SlcWorkflowIds.Sections.SessionDataStore.JobId);
-                if (wrapper != null)
-                {
-                    return (String)wrapper.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.SessionDataStore.JobId);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.SessionDataStore.JobId, (String)value);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Creates a deep copy of the current <see cref="SessionDataStoreSection"/>.
-        /// </summary>
-        /// <returns>A new <see cref="SessionDataStoreSection"/> object that is a deep copy of this section.</returns>
-        public SessionDataStoreSection Clone()
-        {
-            return new SessionDataStoreSection((Section)this.ToSection().Clone());
-        }
-
-        /// <summary>
-        /// Creates a duplicate of the current <see cref="SessionDataStoreSection"/> with a new id.
-        /// </summary>
-        /// <returns>A new <see cref="SessionDataStoreSection"/> object that is a copy of this section but with a different id.</returns>
-        public SessionDataStoreSection Duplicate()
-        {
-            var section = (Section)this.ToSection().Clone();
-            section.ID = new SectionID(Guid.NewGuid());
-            return new SessionDataStoreSection(section);
-        }
-    }
-
-    /// <summary>
     /// Represents a wrapper class for accessing a JobSettingsSection section.
     /// The <see cref="JobSettingsSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
     /// </summary>
@@ -3118,6 +3225,135 @@ namespace DomHelpers.SlcWorkflow
                 else
                 {
                     section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobSettings.JobIDNextSequence, (Int64)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the DefaultPreroll field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public TimeSpan? DefaultPreroll
+        {
+            get
+            {
+                var wrapper = section.GetValue<TimeSpan>(SlcWorkflowIds.Sections.JobSettings.DefaultPreroll);
+                if (wrapper != null)
+                {
+                    return (TimeSpan? )wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobSettings.DefaultPreroll);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobSettings.DefaultPreroll, (TimeSpan)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the DefaultPostroll field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public TimeSpan? DefaultPostroll
+        {
+            get
+            {
+                var wrapper = section.GetValue<TimeSpan>(SlcWorkflowIds.Sections.JobSettings.DefaultPostroll);
+                if (wrapper != null)
+                {
+                    return (TimeSpan? )wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobSettings.DefaultPostroll);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobSettings.DefaultPostroll, (TimeSpan)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the DesiredJobStatus field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public SlcWorkflowIds.Enums.Desiredjobstatus? DesiredJobStatus
+        {
+            get
+            {
+                var wrapper = section.GetValue<Int32>(SlcWorkflowIds.Sections.JobSettings.DesiredJobStatus);
+                if (wrapper != null)
+                {
+                    return (SlcWorkflowIds.Enums.Desiredjobstatus? )wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobSettings.DesiredJobStatus);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobSettings.DesiredJobStatus, (Int32)value);
                 }
             }
         }
@@ -4934,177 +5170,6 @@ namespace DomHelpers.SlcWorkflow
     }
 
     /// <summary>
-    /// Represents a wrapper class for accessing a SessionFilterSection section.
-    /// The <see cref="SessionFilterSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-    /// </summary>
-    public partial class SessionFilterSection : DomSectionBase
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SessionFilterSection"/> class. Creates an empty <see cref="SessionFilterSection"/> object with default settings.
-        /// </summary>
-        public SessionFilterSection() : base(SlcWorkflowIds.Sections.SessionFilter.Id)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SessionFilterSection"/> class using the specified <paramref name="section"/> for initializing the object.
-        /// </summary>
-        /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="SessionFilterSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public SessionFilterSection(Section section) : base(section, SlcWorkflowIds.Sections.SessionFilter.Id)
-        {
-        }
-
-        /// <summary>
-        /// Gets or sets the FilterType field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>If a valid value is assigned, the field value will be added or updated in the section.</item>
-        /// </list>
-        /// </remarks>
-        public SlcWorkflowIds.Enums.Filtertype? FilterType
-        {
-            get
-            {
-                var wrapper = section.GetValue<Int32>(SlcWorkflowIds.Sections.SessionFilter.FilterType);
-                if (wrapper != null)
-                {
-                    return (SlcWorkflowIds.Enums.Filtertype? )wrapper.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.SessionFilter.FilterType);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.SessionFilter.FilterType, (Int32)value);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the FilterKey field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-        /// </list>
-        /// </remarks>
-        public String FilterKey
-        {
-            get
-            {
-                var wrapper = section.GetValue<String>(SlcWorkflowIds.Sections.SessionFilter.FilterKey);
-                if (wrapper != null)
-                {
-                    return (String)wrapper.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.SessionFilter.FilterKey);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.SessionFilter.FilterKey, (String)value);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the FilterValues field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-        /// </list>
-        /// </remarks>
-        public String FilterValues
-        {
-            get
-            {
-                var wrapper = section.GetValue<String>(SlcWorkflowIds.Sections.SessionFilter.FilterValues);
-                if (wrapper != null)
-                {
-                    return (String)wrapper.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.SessionFilter.FilterValues);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.SessionFilter.FilterValues, (String)value);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Creates a deep copy of the current <see cref="SessionFilterSection"/>.
-        /// </summary>
-        /// <returns>A new <see cref="SessionFilterSection"/> object that is a deep copy of this section.</returns>
-        public SessionFilterSection Clone()
-        {
-            return new SessionFilterSection((Section)this.ToSection().Clone());
-        }
-
-        /// <summary>
-        /// Creates a duplicate of the current <see cref="SessionFilterSection"/> with a new id.
-        /// </summary>
-        /// <returns>A new <see cref="SessionFilterSection"/> object that is a copy of this section but with a different id.</returns>
-        public SessionFilterSection Duplicate()
-        {
-            var section = (Section)this.ToSection().Clone();
-            section.ID = new SectionID(Guid.NewGuid());
-            return new SessionFilterSection(section);
-        }
-    }
-
-    /// <summary>
     /// Represents a wrapper class for accessing a JobNodeRelationshipReplaceActionsSection section.
     /// The <see cref="JobNodeRelationshipReplaceActionsSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
     /// </summary>
@@ -6034,19 +6099,15 @@ namespace DomHelpers.SlcWorkflow
             }
         }
 
+        [Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
         /// <summary>
-        /// Gets or sets the ApproxOutDuration field of the DOM Instance.
+        /// Gets the ApproxOutDuration field of the DOM Instance.
         /// </summary>
         /// <remarks>
         /// When retrieving the value:
         /// <list type="bullet">
         /// <item>If the field has been set, it will return the value.</item>
         /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
         public TimeSpan? ApproxOutDuration
@@ -6063,33 +6124,17 @@ namespace DomHelpers.SlcWorkflow
                     return null;
                 }
             }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobInfo.ApproxOutDuration);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobInfo.ApproxOutDuration, (TimeSpan)value);
-                }
-            }
         }
 
+        [Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
         /// <summary>
-        /// Gets or sets the ApproxOutTime field of the DOM Instance.
+        /// Gets the ApproxOutTime field of the DOM Instance.
         /// </summary>
         /// <remarks>
         /// When retrieving the value:
         /// <list type="bullet">
         /// <item>If the field has been set, it will return the value.</item>
         /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
         public DateTime? ApproxOutTime
@@ -6104,18 +6149,6 @@ namespace DomHelpers.SlcWorkflow
                 else
                 {
                     return null;
-                }
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobInfo.ApproxOutTime);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobInfo.ApproxOutTime, (DateTime)value);
                 }
             }
         }
@@ -6249,19 +6282,15 @@ namespace DomHelpers.SlcWorkflow
             }
         }
 
+        [Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
         /// <summary>
-        /// Gets or sets the OriginalJobStart field of the DOM Instance.
+        /// Gets the OriginalJobStart field of the DOM Instance.
         /// </summary>
         /// <remarks>
         /// When retrieving the value:
         /// <list type="bullet">
         /// <item>If the field has been set, it will return the value.</item>
         /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
         public DateTime? OriginalJobStart
@@ -6278,33 +6307,17 @@ namespace DomHelpers.SlcWorkflow
                     return null;
                 }
             }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobInfo.OriginalJobStart);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobInfo.OriginalJobStart, (DateTime)value);
-                }
-            }
         }
 
+        [Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
         /// <summary>
-        /// Gets or sets the OriginalJobEnd field of the DOM Instance.
+        /// Gets the OriginalJobEnd field of the DOM Instance.
         /// </summary>
         /// <remarks>
         /// When retrieving the value:
         /// <list type="bullet">
         /// <item>If the field has been set, it will return the value.</item>
         /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
         public DateTime? OriginalJobEnd
@@ -6321,33 +6334,17 @@ namespace DomHelpers.SlcWorkflow
                     return null;
                 }
             }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobInfo.OriginalJobEnd);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobInfo.OriginalJobEnd, (DateTime)value);
-                }
-            }
         }
 
+        [Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
         /// <summary>
-        /// Gets or sets the JobConfirmation field of the DOM Instance.
+        /// Gets the JobConfirmation field of the DOM Instance.
         /// </summary>
         /// <remarks>
         /// When retrieving the value:
         /// <list type="bullet">
         /// <item>If the field has been set, it will return the value.</item>
         /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
         public DateTime? JobConfirmation
@@ -6364,33 +6361,17 @@ namespace DomHelpers.SlcWorkflow
                     return null;
                 }
             }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobInfo.JobConfirmation);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobInfo.JobConfirmation, (DateTime)value);
-                }
-            }
         }
 
+        [Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
         /// <summary>
-        /// Gets or sets the JobCancellation field of the DOM Instance.
+        /// Gets the JobCancellation field of the DOM Instance.
         /// </summary>
         /// <remarks>
         /// When retrieving the value:
         /// <list type="bullet">
         /// <item>If the field has been set, it will return the value.</item>
         /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
         /// </list>
         /// </remarks>
         public DateTime? JobCancellation
@@ -6405,18 +6386,6 @@ namespace DomHelpers.SlcWorkflow
                 else
                 {
                     return null;
-                }
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobInfo.JobCancellation);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobInfo.JobCancellation, (DateTime)value);
                 }
             }
         }
@@ -6503,6 +6472,135 @@ namespace DomHelpers.SlcWorkflow
                 else
                 {
                     section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobInfo.LockedBy, (String)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the Preroll field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public DateTime? Preroll
+        {
+            get
+            {
+                var wrapper = section.GetValue<DateTime>(SlcWorkflowIds.Sections.JobInfo.Preroll);
+                if (wrapper != null)
+                {
+                    return (DateTime? )wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobInfo.Preroll);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobInfo.Preroll, (DateTime)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the Postroll field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public DateTime? Postroll
+        {
+            get
+            {
+                var wrapper = section.GetValue<DateTime>(SlcWorkflowIds.Sections.JobInfo.Postroll);
+                if (wrapper != null)
+                {
+                    return (DateTime? )wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobInfo.Postroll);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobInfo.Postroll, (DateTime)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the JobSeriesID field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public String JobSeriesID
+        {
+            get
+            {
+                var wrapper = section.GetValue<String>(SlcWorkflowIds.Sections.JobInfo.JobSeriesID);
+                if (wrapper != null)
+                {
+                    return (String)wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.JobInfo.JobSeriesID);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.JobInfo.JobSeriesID, (String)value);
                 }
             }
         }
@@ -7264,91 +7362,6 @@ namespace DomHelpers.SlcWorkflow
     }
 
     /// <summary>
-    /// Represents a wrapper class for accessing a SessionDataUserSection section.
-    /// The <see cref="SessionDataUserSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
-    /// </summary>
-    public partial class SessionDataUserSection : DomSectionBase
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SessionDataUserSection"/> class. Creates an empty <see cref="SessionDataUserSection"/> object with default settings.
-        /// </summary>
-        public SessionDataUserSection() : base(SlcWorkflowIds.Sections.SessionDataUser.Id)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SessionDataUserSection"/> class using the specified <paramref name="section"/> for initializing the object.
-        /// </summary>
-        /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="SessionDataUserSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public SessionDataUserSection(Section section) : base(section, SlcWorkflowIds.Sections.SessionDataUser.Id)
-        {
-        }
-
-        /// <summary>
-        /// Gets or sets the User field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-        /// </list>
-        /// </remarks>
-        public String User
-        {
-            get
-            {
-                var wrapper = section.GetValue<String>(SlcWorkflowIds.Sections.SessionDataUser.User);
-                if (wrapper != null)
-                {
-                    return (String)wrapper.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.SessionDataUser.User);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.SessionDataUser.User, (String)value);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Creates a deep copy of the current <see cref="SessionDataUserSection"/>.
-        /// </summary>
-        /// <returns>A new <see cref="SessionDataUserSection"/> object that is a deep copy of this section.</returns>
-        public SessionDataUserSection Clone()
-        {
-            return new SessionDataUserSection((Section)this.ToSection().Clone());
-        }
-
-        /// <summary>
-        /// Creates a duplicate of the current <see cref="SessionDataUserSection"/> with a new id.
-        /// </summary>
-        /// <returns>A new <see cref="SessionDataUserSection"/> object that is a copy of this section but with a different id.</returns>
-        public SessionDataUserSection Duplicate()
-        {
-            var section = (Section)this.ToSection().Clone();
-            section.ID = new SectionID(Guid.NewGuid());
-            return new SessionDataUserSection(section);
-        }
-    }
-
-    /// <summary>
     /// Represents a wrapper class for accessing a JobExecutionSection section.
     /// The <see cref="JobExecutionSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
     /// </summary>
@@ -7516,6 +7529,279 @@ namespace DomHelpers.SlcWorkflow
             var section = (Section)this.ToSection().Clone();
             section.ID = new SectionID(Guid.NewGuid());
             return new JobExecutionSection(section);
+        }
+    }
+
+    /// <summary>
+    /// Represents a wrapper class for accessing a RecurringInfoSection section.
+    /// The <see cref="RecurringInfoSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+    /// </summary>
+    public partial class RecurringInfoSection : DomSectionBase
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RecurringInfoSection"/> class. Creates an empty <see cref="RecurringInfoSection"/> object with default settings.
+        /// </summary>
+        public RecurringInfoSection() : base(SlcWorkflowIds.Sections.RecurringInfo.Id)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RecurringInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
+        /// </summary>
+        /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="RecurringInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+        public RecurringInfoSection(Section section) : base(section, SlcWorkflowIds.Sections.RecurringInfo.Id)
+        {
+        }
+
+        /// <summary>
+        /// Gets or sets the Duration field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public TimeSpan? Duration
+        {
+            get
+            {
+                var wrapper = section.GetValue<TimeSpan>(SlcWorkflowIds.Sections.RecurringInfo.Duration);
+                if (wrapper != null)
+                {
+                    return (TimeSpan? )wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.RecurringInfo.Duration);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.RecurringInfo.Duration, (TimeSpan)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the TimeZone field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public String TimeZone
+        {
+            get
+            {
+                var wrapper = section.GetValue<String>(SlcWorkflowIds.Sections.RecurringInfo.TimeZone);
+                if (wrapper != null)
+                {
+                    return (String)wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.RecurringInfo.TimeZone);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.RecurringInfo.TimeZone, (String)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the RecurringPattern field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public String RecurringPattern
+        {
+            get
+            {
+                var wrapper = section.GetValue<String>(SlcWorkflowIds.Sections.RecurringInfo.RecurringPattern);
+                if (wrapper != null)
+                {
+                    return (String)wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.RecurringInfo.RecurringPattern);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.RecurringInfo.RecurringPattern, (String)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the ProcessStatus field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public SlcWorkflowIds.Enums.Processstatus? ProcessStatus
+        {
+            get
+            {
+                var wrapper = section.GetValue<Int32>(SlcWorkflowIds.Sections.RecurringInfo.ProcessStatus);
+                if (wrapper != null)
+                {
+                    return (SlcWorkflowIds.Enums.Processstatus? )wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.RecurringInfo.ProcessStatus);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.RecurringInfo.ProcessStatus, (Int32)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the DesiredJobStatus field of the DOM Instance.
+        /// </summary>
+        /// <remarks>
+        /// When retrieving the value:
+        /// <list type="bullet">
+        /// <item>If the field has been set, it will return the value.</item>
+        /// <item>If the field is not set it will return <see langword="null"/>.</item>
+        /// </list>
+        /// When setting the value:
+        /// <list type="bullet">
+        /// <item>If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+        /// <item>If a valid value is assigned, the field value will be added or updated in the section.</item>
+        /// </list>
+        /// </remarks>
+        public SlcWorkflowIds.Enums.Desiredjobstatus? DesiredJobStatus
+        {
+            get
+            {
+                var wrapper = section.GetValue<Int32>(SlcWorkflowIds.Sections.RecurringInfo.DesiredJobStatus);
+                if (wrapper != null)
+                {
+                    return (SlcWorkflowIds.Enums.Desiredjobstatus? )wrapper.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    section.RemoveFieldValueById(SlcWorkflowIds.Sections.RecurringInfo.DesiredJobStatus);
+                }
+                else
+                {
+                    section.AddOrUpdateValue(SlcWorkflowIds.Sections.RecurringInfo.DesiredJobStatus, (Int32)value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="RecurringInfoSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="RecurringInfoSection"/> object that is a deep copy of this section.</returns>
+        public RecurringInfoSection Clone()
+        {
+            return new RecurringInfoSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="RecurringInfoSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="RecurringInfoSection"/> object that is a copy of this section but with a different id.</returns>
+        public RecurringInfoSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new RecurringInfoSection(section);
+        }
+
+        /// <inheritdoc />
+        protected override Section InternalToSection()
+        {
+            if (section.GetValue<TimeSpan>(SlcWorkflowIds.Sections.RecurringInfo.Duration) == null)
+                throw new InvalidOperationException("'Duration' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+            if (section.GetValue<String>(SlcWorkflowIds.Sections.RecurringInfo.TimeZone) == null)
+                throw new InvalidOperationException("'TimeZone' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+            if (section.GetValue<String>(SlcWorkflowIds.Sections.RecurringInfo.RecurringPattern) == null)
+                throw new InvalidOperationException("'RecurringPattern' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+            if (section.GetValue<Int32>(SlcWorkflowIds.Sections.RecurringInfo.ProcessStatus) == null)
+                throw new InvalidOperationException("'ProcessStatus' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+            if (section.GetValue<Int32>(SlcWorkflowIds.Sections.RecurringInfo.DesiredJobStatus) == null)
+                throw new InvalidOperationException("'DesiredJobStatus' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+            return section;
         }
     }
 

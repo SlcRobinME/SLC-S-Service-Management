@@ -48,7 +48,7 @@ short_description: This is a prototype for an upcoming Standard Solution for Ser
 #   A valid URL
 #   Max length: 2048 characters
 #   Note: When Skyline Communications Reusable GitHub workflows are used, this will be automatically filled in.
-source_code_url: 'https://github.com/SkylineCommunications/SLC-Service-Management'
+source_code_url: 'https://github.com/SkylineCommunications/SLC-S-Service-Management'
 # [Optional]
 # A valid URL that points to documentation.
 #   A valid URL

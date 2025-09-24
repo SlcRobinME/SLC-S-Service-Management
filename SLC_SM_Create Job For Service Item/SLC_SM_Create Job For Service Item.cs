@@ -56,8 +56,6 @@ namespace SLCSMCreateJobForServiceItem
 
 	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
-	using Library.Views;
-
 	using Newtonsoft.Json;
 
 	using Skyline.DataMiner.Automation;
@@ -68,6 +66,8 @@ namespace SLCSMCreateJobForServiceItem
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Relationships;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Workflows;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using OutputData = Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler.OutputData;
 
 	/// <summary>
@@ -111,8 +111,7 @@ namespace SLCSMCreateJobForServiceItem
 			}
 			catch (Exception e)
 			{
-				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-				new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways }.ShowDialog(errorView);
+				engine.ShowErrorDialog(e);
 				engine.Log(e.ToString());
 			}
 		}

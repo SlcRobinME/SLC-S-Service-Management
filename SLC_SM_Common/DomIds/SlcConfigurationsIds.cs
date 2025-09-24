@@ -8,7 +8,6 @@ namespace DomHelpers.SlcConfigurations
 {
     using System;
     using System.ComponentModel;
-
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Sections;
 
@@ -136,7 +135,6 @@ namespace DomHelpers.SlcConfigurations
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages;
 
@@ -149,7 +147,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationParameterValueInstance"/> class. Creates an empty <see cref="ConfigurationParameterValueInstance"/> instance with default settings.
         /// </summary>
-        public ConfigurationParameterValueInstance(): base(SlcConfigurationsIds.Definitions.ConfigurationParameterValue)
+        public ConfigurationParameterValueInstance() : base(SlcConfigurationsIds.Definitions.ConfigurationParameterValue)
         {
             InitializeProperties();
             AfterLoad();
@@ -158,7 +156,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationParameterValueInstance"/> class. Creates an empty <see cref="ConfigurationParameterValueInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public ConfigurationParameterValueInstance(Guid id): base(SlcConfigurationsIds.Definitions.ConfigurationParameterValue, id)
+        public ConfigurationParameterValueInstance(Guid id) : base(SlcConfigurationsIds.Definitions.ConfigurationParameterValue, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -168,7 +166,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="ConfigurationParameterValueInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="ConfigurationParameterValueInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ConfigurationParameterValueInstance(DomInstance domInstance): base(domInstance)
+        public ConfigurationParameterValueInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.ConfigurationParameterValue))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.ConfigurationParameterValue)}'", nameof(domInstance));
@@ -186,8 +184,34 @@ namespace DomHelpers.SlcConfigurations
             return new ConfigurationParameterValueInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ConfigurationParameterValueInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationParameterValueInstance"/> object that is a deep copy of this instance.</returns>
+        public ConfigurationParameterValueInstance Clone()
+        {
+            return new ConfigurationParameterValueInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ConfigurationParameterValueInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationParameterValueInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public ConfigurationParameterValueInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new ConfigurationParameterValueInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(ConfigurationParameterValue.ToSection());
@@ -195,7 +219,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -209,7 +233,7 @@ namespace DomHelpers.SlcConfigurations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _configurationParameterValue = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id));
             if (_configurationParameterValue is null)
@@ -232,7 +256,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="TextParameterOptionsInstance"/> class. Creates an empty <see cref="TextParameterOptionsInstance"/> instance with default settings.
         /// </summary>
-        public TextParameterOptionsInstance(): base(SlcConfigurationsIds.Definitions.TextParameterOptions)
+        public TextParameterOptionsInstance() : base(SlcConfigurationsIds.Definitions.TextParameterOptions)
         {
             InitializeProperties();
             AfterLoad();
@@ -241,7 +265,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="TextParameterOptionsInstance"/> class. Creates an empty <see cref="TextParameterOptionsInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public TextParameterOptionsInstance(Guid id): base(SlcConfigurationsIds.Definitions.TextParameterOptions, id)
+        public TextParameterOptionsInstance(Guid id) : base(SlcConfigurationsIds.Definitions.TextParameterOptions, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -251,7 +275,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="TextParameterOptionsInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="TextParameterOptionsInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public TextParameterOptionsInstance(DomInstance domInstance): base(domInstance)
+        public TextParameterOptionsInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.TextParameterOptions))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.TextParameterOptions)}'", nameof(domInstance));
@@ -269,8 +293,34 @@ namespace DomHelpers.SlcConfigurations
             return new TextParameterOptionsInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="TextParameterOptionsInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="TextParameterOptionsInstance"/> object that is a deep copy of this instance.</returns>
+        public TextParameterOptionsInstance Clone()
+        {
+            return new TextParameterOptionsInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="TextParameterOptionsInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="TextParameterOptionsInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public TextParameterOptionsInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new TextParameterOptionsInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(TextParameterOptions.ToSection());
@@ -278,7 +328,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -292,7 +342,7 @@ namespace DomHelpers.SlcConfigurations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _textParameterOptions = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.TextParameterOptions.Id));
             if (_textParameterOptions is null)
@@ -315,7 +365,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationParametersInstance"/> class. Creates an empty <see cref="ConfigurationParametersInstance"/> instance with default settings.
         /// </summary>
-        public ConfigurationParametersInstance(): base(SlcConfigurationsIds.Definitions.ConfigurationParameters)
+        public ConfigurationParametersInstance() : base(SlcConfigurationsIds.Definitions.ConfigurationParameters)
         {
             InitializeProperties();
             AfterLoad();
@@ -324,7 +374,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationParametersInstance"/> class. Creates an empty <see cref="ConfigurationParametersInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public ConfigurationParametersInstance(Guid id): base(SlcConfigurationsIds.Definitions.ConfigurationParameters, id)
+        public ConfigurationParametersInstance(Guid id) : base(SlcConfigurationsIds.Definitions.ConfigurationParameters, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -334,7 +384,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="ConfigurationParametersInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="ConfigurationParametersInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ConfigurationParametersInstance(DomInstance domInstance): base(domInstance)
+        public ConfigurationParametersInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.ConfigurationParameters))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.ConfigurationParameters)}'", nameof(domInstance));
@@ -352,8 +402,34 @@ namespace DomHelpers.SlcConfigurations
             return new ConfigurationParametersInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ConfigurationParametersInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationParametersInstance"/> object that is a deep copy of this instance.</returns>
+        public ConfigurationParametersInstance Clone()
+        {
+            return new ConfigurationParametersInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ConfigurationParametersInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationParametersInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public ConfigurationParametersInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new ConfigurationParametersInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(ConfigurationParameterInfo.ToSection());
@@ -361,7 +437,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -375,7 +451,7 @@ namespace DomHelpers.SlcConfigurations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _configurationParameterInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id));
             if (_configurationParameterInfo is null)
@@ -398,7 +474,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscreteValuesInstance"/> class. Creates an empty <see cref="DiscreteValuesInstance"/> instance with default settings.
         /// </summary>
-        public DiscreteValuesInstance(): base(SlcConfigurationsIds.Definitions.DiscreteValues)
+        public DiscreteValuesInstance() : base(SlcConfigurationsIds.Definitions.DiscreteValues)
         {
             InitializeProperties();
             AfterLoad();
@@ -407,7 +483,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscreteValuesInstance"/> class. Creates an empty <see cref="DiscreteValuesInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public DiscreteValuesInstance(Guid id): base(SlcConfigurationsIds.Definitions.DiscreteValues, id)
+        public DiscreteValuesInstance(Guid id) : base(SlcConfigurationsIds.Definitions.DiscreteValues, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -417,7 +493,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="DiscreteValuesInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="DiscreteValuesInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public DiscreteValuesInstance(DomInstance domInstance): base(domInstance)
+        public DiscreteValuesInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.DiscreteValues))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.DiscreteValues)}'", nameof(domInstance));
@@ -435,8 +511,34 @@ namespace DomHelpers.SlcConfigurations
             return new DiscreteValuesInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="DiscreteValuesInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="DiscreteValuesInstance"/> object that is a deep copy of this instance.</returns>
+        public DiscreteValuesInstance Clone()
+        {
+            return new DiscreteValuesInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="DiscreteValuesInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="DiscreteValuesInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public DiscreteValuesInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new DiscreteValuesInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(DiscreteValue.ToSection());
@@ -444,7 +546,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -458,7 +560,7 @@ namespace DomHelpers.SlcConfigurations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _discreteValue = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.DiscreteValue.Id));
             if (_discreteValue is null)
@@ -481,7 +583,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscreteParameterOptionsInstance"/> class. Creates an empty <see cref="DiscreteParameterOptionsInstance"/> instance with default settings.
         /// </summary>
-        public DiscreteParameterOptionsInstance(): base(SlcConfigurationsIds.Definitions.DiscreteParameterOptions)
+        public DiscreteParameterOptionsInstance() : base(SlcConfigurationsIds.Definitions.DiscreteParameterOptions)
         {
             InitializeProperties();
             AfterLoad();
@@ -490,7 +592,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscreteParameterOptionsInstance"/> class. Creates an empty <see cref="DiscreteParameterOptionsInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public DiscreteParameterOptionsInstance(Guid id): base(SlcConfigurationsIds.Definitions.DiscreteParameterOptions, id)
+        public DiscreteParameterOptionsInstance(Guid id) : base(SlcConfigurationsIds.Definitions.DiscreteParameterOptions, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -500,7 +602,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="DiscreteParameterOptionsInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="DiscreteParameterOptionsInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public DiscreteParameterOptionsInstance(DomInstance domInstance): base(domInstance)
+        public DiscreteParameterOptionsInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.DiscreteParameterOptions))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.DiscreteParameterOptions)}'", nameof(domInstance));
@@ -518,8 +620,34 @@ namespace DomHelpers.SlcConfigurations
             return new DiscreteParameterOptionsInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="DiscreteParameterOptionsInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="DiscreteParameterOptionsInstance"/> object that is a deep copy of this instance.</returns>
+        public DiscreteParameterOptionsInstance Clone()
+        {
+            return new DiscreteParameterOptionsInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="DiscreteParameterOptionsInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="DiscreteParameterOptionsInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public DiscreteParameterOptionsInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new DiscreteParameterOptionsInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(DiscreteParameterOptions.ToSection());
@@ -527,7 +655,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -541,7 +669,7 @@ namespace DomHelpers.SlcConfigurations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _discreteParameterOptions = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id));
             if (_discreteParameterOptions is null)
@@ -564,7 +692,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="NumberParameterOptionsInstance"/> class. Creates an empty <see cref="NumberParameterOptionsInstance"/> instance with default settings.
         /// </summary>
-        public NumberParameterOptionsInstance(): base(SlcConfigurationsIds.Definitions.NumberParameterOptions)
+        public NumberParameterOptionsInstance() : base(SlcConfigurationsIds.Definitions.NumberParameterOptions)
         {
             InitializeProperties();
             AfterLoad();
@@ -573,7 +701,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="NumberParameterOptionsInstance"/> class. Creates an empty <see cref="NumberParameterOptionsInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public NumberParameterOptionsInstance(Guid id): base(SlcConfigurationsIds.Definitions.NumberParameterOptions, id)
+        public NumberParameterOptionsInstance(Guid id) : base(SlcConfigurationsIds.Definitions.NumberParameterOptions, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -583,7 +711,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="NumberParameterOptionsInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="NumberParameterOptionsInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public NumberParameterOptionsInstance(DomInstance domInstance): base(domInstance)
+        public NumberParameterOptionsInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.NumberParameterOptions))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.NumberParameterOptions)}'", nameof(domInstance));
@@ -601,8 +729,34 @@ namespace DomHelpers.SlcConfigurations
             return new NumberParameterOptionsInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="NumberParameterOptionsInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="NumberParameterOptionsInstance"/> object that is a deep copy of this instance.</returns>
+        public NumberParameterOptionsInstance Clone()
+        {
+            return new NumberParameterOptionsInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="NumberParameterOptionsInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="NumberParameterOptionsInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public NumberParameterOptionsInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new NumberParameterOptionsInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(NumberParameterOptions.ToSection());
@@ -610,7 +764,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -624,7 +778,7 @@ namespace DomHelpers.SlcConfigurations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _numberParameterOptions = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.NumberParameterOptions.Id));
             if (_numberParameterOptions is null)
@@ -647,7 +801,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationUnitInstance"/> class. Creates an empty <see cref="ConfigurationUnitInstance"/> instance with default settings.
         /// </summary>
-        public ConfigurationUnitInstance(): base(SlcConfigurationsIds.Definitions.ConfigurationUnit)
+        public ConfigurationUnitInstance() : base(SlcConfigurationsIds.Definitions.ConfigurationUnit)
         {
             InitializeProperties();
             AfterLoad();
@@ -656,7 +810,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationUnitInstance"/> class. Creates an empty <see cref="ConfigurationUnitInstance"/> instance with default settings and a specific ID.
         /// </summary>
-        public ConfigurationUnitInstance(Guid id): base(SlcConfigurationsIds.Definitions.ConfigurationUnit, id)
+        public ConfigurationUnitInstance(Guid id) : base(SlcConfigurationsIds.Definitions.ConfigurationUnit, id)
         {
             InitializeProperties();
             AfterLoad();
@@ -666,7 +820,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="ConfigurationUnitInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
         /// </summary>
         /// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="ConfigurationUnitInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ConfigurationUnitInstance(DomInstance domInstance): base(domInstance)
+        public ConfigurationUnitInstance(DomInstance domInstance) : base(domInstance)
         {
             if (!domInstance.DomDefinitionId.Equals(SlcConfigurationsIds.Definitions.ConfigurationUnit))
                 throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcConfigurationsIds.Definitions.ConfigurationUnit)}'", nameof(domInstance));
@@ -684,8 +838,34 @@ namespace DomHelpers.SlcConfigurations
             return new ConfigurationUnitInstance(instance);
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ConfigurationUnitInstance"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationUnitInstance"/> object that is a deep copy of this instance.</returns>
+        public ConfigurationUnitInstance Clone()
+        {
+            return new ConfigurationUnitInstance((DomInstance)this.ToInstance().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ConfigurationUnitInstance"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationUnitInstance"/> object that is a copy of this instance but with a different id.</returns>
+        public ConfigurationUnitInstance Duplicate()
+        {
+            var instance = (DomInstance)this.ToInstance().Clone();
+            instance.ID = new DomInstanceId(Guid.NewGuid())
+            {ModuleId = ModuleId};
+            foreach (var section in instance.Sections)
+            {
+                section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+            }
+
+            return new ConfigurationUnitInstance(instance);
+        }
+
         /// <inheritdoc />
-        protected override DomInstance InternalToInstance()
+        protected sealed override DomInstance InternalToInstance()
         {
             domInstance.Sections.Clear();
             domInstance.Sections.Add(ConfigurationUnitInfo.ToSection());
@@ -693,7 +873,7 @@ namespace DomHelpers.SlcConfigurations
         }
 
         /// <inheritdoc />
-        public override void Save(DomHelper helper)
+        public sealed override void Save(DomHelper helper)
         {
             var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
             var instance = ToInstance();
@@ -707,7 +887,7 @@ namespace DomHelpers.SlcConfigurations
             }
         }
 
-        protected override void InitializeProperties()
+        protected sealed override void InitializeProperties()
         {
             var _configurationUnitInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id));
             if (_configurationUnitInfo is null)
@@ -733,7 +913,6 @@ namespace DomHelpers.SlcConfigurations
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
-
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Messages;
@@ -748,7 +927,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationParameterInfoSection"/> class. Creates an empty <see cref="ConfigurationParameterInfoSection"/> object with default settings.
         /// </summary>
-        public ConfigurationParameterInfoSection(): base(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id)
+        public ConfigurationParameterInfoSection() : base(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id)
         {
         }
 
@@ -756,7 +935,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="ConfigurationParameterInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ConfigurationParameterInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ConfigurationParameterInfoSection(Section section): base(section, SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id)
+        public ConfigurationParameterInfoSection(Section section) : base(section, SlcConfigurationsIds.Sections.ConfigurationParameterInfo.Id)
         {
         }
 
@@ -975,6 +1154,26 @@ namespace DomHelpers.SlcConfigurations
             }
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ConfigurationParameterInfoSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationParameterInfoSection"/> object that is a deep copy of this section.</returns>
+        public ConfigurationParameterInfoSection Clone()
+        {
+            return new ConfigurationParameterInfoSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ConfigurationParameterInfoSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationParameterInfoSection"/> object that is a copy of this section but with a different id.</returns>
+        public ConfigurationParameterInfoSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new ConfigurationParameterInfoSection(section);
+        }
+
         /// <inheritdoc />
         protected override Section InternalToSection()
         {
@@ -995,7 +1194,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationParameterValueSection"/> class. Creates an empty <see cref="ConfigurationParameterValueSection"/> object with default settings.
         /// </summary>
-        public ConfigurationParameterValueSection(): base(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id)
+        public ConfigurationParameterValueSection() : base(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id)
         {
         }
 
@@ -1003,7 +1202,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="ConfigurationParameterValueSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ConfigurationParameterValueSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ConfigurationParameterValueSection(Section section): base(section, SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id)
+        public ConfigurationParameterValueSection(Section section) : base(section, SlcConfigurationsIds.Sections.ConfigurationParameterValue.Id)
         {
         }
 
@@ -1479,6 +1678,26 @@ namespace DomHelpers.SlcConfigurations
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ConfigurationParameterValueSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationParameterValueSection"/> object that is a deep copy of this section.</returns>
+        public ConfigurationParameterValueSection Clone()
+        {
+            return new ConfigurationParameterValueSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ConfigurationParameterValueSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationParameterValueSection"/> object that is a copy of this section but with a different id.</returns>
+        public ConfigurationParameterValueSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new ConfigurationParameterValueSection(section);
+        }
     }
 
     /// <summary>
@@ -1490,7 +1709,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscreteValueSection"/> class. Creates an empty <see cref="DiscreteValueSection"/> object with default settings.
         /// </summary>
-        public DiscreteValueSection(): base(SlcConfigurationsIds.Sections.DiscreteValue.Id)
+        public DiscreteValueSection() : base(SlcConfigurationsIds.Sections.DiscreteValue.Id)
         {
         }
 
@@ -1498,7 +1717,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="DiscreteValueSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="DiscreteValueSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public DiscreteValueSection(Section section): base(section, SlcConfigurationsIds.Sections.DiscreteValue.Id)
+        public DiscreteValueSection(Section section) : base(section, SlcConfigurationsIds.Sections.DiscreteValue.Id)
         {
         }
 
@@ -1544,6 +1763,26 @@ namespace DomHelpers.SlcConfigurations
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="DiscreteValueSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="DiscreteValueSection"/> object that is a deep copy of this section.</returns>
+        public DiscreteValueSection Clone()
+        {
+            return new DiscreteValueSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="DiscreteValueSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="DiscreteValueSection"/> object that is a copy of this section but with a different id.</returns>
+        public DiscreteValueSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new DiscreteValueSection(section);
+        }
     }
 
     /// <summary>
@@ -1555,7 +1794,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationUnitInfoSection"/> class. Creates an empty <see cref="ConfigurationUnitInfoSection"/> object with default settings.
         /// </summary>
-        public ConfigurationUnitInfoSection(): base(SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id)
+        public ConfigurationUnitInfoSection() : base(SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id)
         {
         }
 
@@ -1563,7 +1802,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="ConfigurationUnitInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="ConfigurationUnitInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public ConfigurationUnitInfoSection(Section section): base(section, SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id)
+        public ConfigurationUnitInfoSection(Section section) : base(section, SlcConfigurationsIds.Sections.ConfigurationUnitInfo.Id)
         {
         }
 
@@ -1696,6 +1935,26 @@ namespace DomHelpers.SlcConfigurations
             }
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="ConfigurationUnitInfoSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationUnitInfoSection"/> object that is a deep copy of this section.</returns>
+        public ConfigurationUnitInfoSection Clone()
+        {
+            return new ConfigurationUnitInfoSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="ConfigurationUnitInfoSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="ConfigurationUnitInfoSection"/> object that is a copy of this section but with a different id.</returns>
+        public ConfigurationUnitInfoSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new ConfigurationUnitInfoSection(section);
+        }
+
         /// <inheritdoc />
         protected override Section InternalToSection()
         {
@@ -1714,7 +1973,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="TextParameterOptionsSection"/> class. Creates an empty <see cref="TextParameterOptionsSection"/> object with default settings.
         /// </summary>
-        public TextParameterOptionsSection(): base(SlcConfigurationsIds.Sections.TextParameterOptions.Id)
+        public TextParameterOptionsSection() : base(SlcConfigurationsIds.Sections.TextParameterOptions.Id)
         {
         }
 
@@ -1722,7 +1981,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="TextParameterOptionsSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="TextParameterOptionsSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public TextParameterOptionsSection(Section section): base(section, SlcConfigurationsIds.Sections.TextParameterOptions.Id)
+        public TextParameterOptionsSection(Section section) : base(section, SlcConfigurationsIds.Sections.TextParameterOptions.Id)
         {
         }
 
@@ -1854,6 +2113,26 @@ namespace DomHelpers.SlcConfigurations
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="TextParameterOptionsSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="TextParameterOptionsSection"/> object that is a deep copy of this section.</returns>
+        public TextParameterOptionsSection Clone()
+        {
+            return new TextParameterOptionsSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="TextParameterOptionsSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="TextParameterOptionsSection"/> object that is a copy of this section but with a different id.</returns>
+        public TextParameterOptionsSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new TextParameterOptionsSection(section);
+        }
     }
 
     /// <summary>
@@ -1865,7 +2144,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="NumberParameterOptionsSection"/> class. Creates an empty <see cref="NumberParameterOptionsSection"/> object with default settings.
         /// </summary>
-        public NumberParameterOptionsSection(): base(SlcConfigurationsIds.Sections.NumberParameterOptions.Id)
+        public NumberParameterOptionsSection() : base(SlcConfigurationsIds.Sections.NumberParameterOptions.Id)
         {
             Units = new List<Guid>();
         }
@@ -1874,7 +2153,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="NumberParameterOptionsSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="NumberParameterOptionsSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public NumberParameterOptionsSection(Section section): base(section, SlcConfigurationsIds.Sections.NumberParameterOptions.Id)
+        public NumberParameterOptionsSection(Section section) : base(section, SlcConfigurationsIds.Sections.NumberParameterOptions.Id)
         {
             var units = section.GetListValue<Guid>(SlcConfigurationsIds.Sections.NumberParameterOptions.Units);
             Units = units != null ? units.Values : new List<Guid>();
@@ -2155,6 +2434,26 @@ namespace DomHelpers.SlcConfigurations
             }
         }
 
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="NumberParameterOptionsSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="NumberParameterOptionsSection"/> object that is a deep copy of this section.</returns>
+        public NumberParameterOptionsSection Clone()
+        {
+            return new NumberParameterOptionsSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="NumberParameterOptionsSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="NumberParameterOptionsSection"/> object that is a copy of this section but with a different id.</returns>
+        public NumberParameterOptionsSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new NumberParameterOptionsSection(section);
+        }
+
         /// <inheritdoc />
         protected override Section InternalToSection()
         {
@@ -2175,7 +2474,7 @@ namespace DomHelpers.SlcConfigurations
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscreteParameterOptionsSection"/> class. Creates an empty <see cref="DiscreteParameterOptionsSection"/> object with default settings.
         /// </summary>
-        public DiscreteParameterOptionsSection(): base(SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id)
+        public DiscreteParameterOptionsSection() : base(SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id)
         {
             DiscreteValues = new List<Guid>();
         }
@@ -2184,7 +2483,7 @@ namespace DomHelpers.SlcConfigurations
         /// Initializes a new instance of the <see cref="DiscreteParameterOptionsSection"/> class using the specified <paramref name="section"/> for initializing the object.
         /// </summary>
         /// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="DiscreteParameterOptionsSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-        public DiscreteParameterOptionsSection(Section section): base(section, SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id)
+        public DiscreteParameterOptionsSection(Section section) : base(section, SlcConfigurationsIds.Sections.DiscreteParameterOptions.Id)
         {
             var discreteValues = section.GetListValue<Guid>(SlcConfigurationsIds.Sections.DiscreteParameterOptions.DiscreteValues);
             DiscreteValues = discreteValues != null ? discreteValues.Values : new List<Guid>();
@@ -2249,6 +2548,26 @@ namespace DomHelpers.SlcConfigurations
         /// </list>
         /// </remarks>
         public IList<Guid> DiscreteValues { get; private set; }
+
+        /// <summary>
+        /// Creates a deep copy of the current <see cref="DiscreteParameterOptionsSection"/>.
+        /// </summary>
+        /// <returns>A new <see cref="DiscreteParameterOptionsSection"/> object that is a deep copy of this section.</returns>
+        public DiscreteParameterOptionsSection Clone()
+        {
+            return new DiscreteParameterOptionsSection((Section)this.ToSection().Clone());
+        }
+
+        /// <summary>
+        /// Creates a duplicate of the current <see cref="DiscreteParameterOptionsSection"/> with a new id.
+        /// </summary>
+        /// <returns>A new <see cref="DiscreteParameterOptionsSection"/> object that is a copy of this section but with a different id.</returns>
+        public DiscreteParameterOptionsSection Duplicate()
+        {
+            var section = (Section)this.ToSection().Clone();
+            section.ID = new SectionID(Guid.NewGuid());
+            return new DiscreteParameterOptionsSection(section);
+        }
 
         /// <inheritdoc />
         protected override Section InternalToSection()

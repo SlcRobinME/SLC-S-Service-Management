@@ -59,7 +59,6 @@ namespace GetServiceItemRelationshipMultisection
 
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	/// <summary>
@@ -202,7 +201,7 @@ namespace GetServiceItemRelationshipMultisection
 		{
 			var workflowName = GetReferencedObjectName(serviceItemId);
 			var node = _workflows
-				.FirstOrDefault(w => w.Name == workflowName)?.Nodes
+				.FirstOrDefault(w => w.Name == workflowName)?.Nodeses
 				.FirstOrDefault(n => n.NodeID == interfaceId);
 
 			return node?.NodeAlias ?? string.Empty;

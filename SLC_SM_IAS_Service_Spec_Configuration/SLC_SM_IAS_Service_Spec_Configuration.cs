@@ -54,11 +54,12 @@ namespace SLC_SM_IAS_Service_Spec_Configuration
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Library.Views;
 	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Service_Spec_Configuration.Presenters;
 	using SLC_SM_IAS_Service_Spec_Configuration.Views;
 
@@ -109,8 +110,7 @@ namespace SLC_SM_IAS_Service_Spec_Configuration
 			}
 			catch (Exception e)
 			{
-				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-				_controller.ShowDialog(errorView);
+				engine.ShowErrorDialog(e);
 			}
 		}
 

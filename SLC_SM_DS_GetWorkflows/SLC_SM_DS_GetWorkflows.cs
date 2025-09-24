@@ -149,7 +149,7 @@ namespace SLCSMDSGetWorkflows
 		{
 			return propertyValues
 				.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())?
-				.PropertyValue.FirstOrDefault(v => v.PropertyName == "Category")?.Value ?? string.Empty;
+				.PropertyValues.FirstOrDefault(v => v.PropertyName == "Category")?.Value ?? string.Empty;
 		}
 
 		private GQIRow BuildRow(WorkflowsInstance workflow, string category)

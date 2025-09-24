@@ -54,23 +54,23 @@ dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 */
 namespace SLC_SM_IAS_Add_Service_Property_1
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using DomHelpers.SlcServicemanagement;
-    using Library.Views;
-    using Newtonsoft.Json;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-    using SLC_SM_IAS_Add_Service_Property_1.Presenters;
-    using SLC_SM_IAS_Add_Service_Property_1.Views;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using DomHelpers.SlcServicemanagement;
+	using Newtonsoft.Json;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
+	using SLC_SM_IAS_Add_Service_Property_1.Presenters;
+	using SLC_SM_IAS_Add_Service_Property_1.Views;
 
-    /// <summary>
-    ///     Represents a DataMiner Automation script.
-    /// </summary>
-    public class Script
+	/// <summary>
+	///     Represents a DataMiner Automation script.
+	/// </summary>
+	public class Script
     {
         private InteractiveController _controller;
         private IEngine _engine;
@@ -124,8 +124,7 @@ namespace SLC_SM_IAS_Add_Service_Property_1
             }
             catch (Exception e)
             {
-                var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-                _controller.ShowDialog(errorView);
+	            engine.ShowErrorDialog(e);
             }
         }
 

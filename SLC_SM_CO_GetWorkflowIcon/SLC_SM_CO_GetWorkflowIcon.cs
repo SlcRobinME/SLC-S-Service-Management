@@ -127,7 +127,7 @@ namespace SLCSMCOGetWorkflowIcon
 		{
 			return _propertyValues
 				.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())?
-				.PropertyValue.FirstOrDefault(v => v.PropertyName == "Icon")?.Value ?? string.Empty;
+				.PropertyValues.FirstOrDefault(v => v.PropertyName == "Icon")?.Value ?? string.Empty;
 		}
 	}
 }

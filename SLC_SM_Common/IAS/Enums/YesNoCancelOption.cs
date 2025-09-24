@@ -3,9 +3,7 @@
 	public enum YesNoCancelOption
 	{
 		Yes,
-
 		No,
-
 		Cancel,
 	}
 }

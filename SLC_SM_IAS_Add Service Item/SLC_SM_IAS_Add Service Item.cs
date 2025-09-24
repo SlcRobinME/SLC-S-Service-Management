@@ -55,8 +55,6 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 	using System.Linq;
 
 	using DomHelpers.SlcServicemanagement;
-	using Library.Views;
-
 	using Newtonsoft.Json;
 
 	using Skyline.DataMiner.Automation;
@@ -64,7 +62,8 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Add_Service_Item_1.Presenters;
 	using SLC_SM_IAS_Add_Service_Item_1.Views;
 	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship.Models;
@@ -126,8 +125,7 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 			}
 			catch (Exception e)
 			{
-				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-				_controller.ShowDialog(errorView);
+				engine.ShowErrorDialog(e);
 			}
 		}
 

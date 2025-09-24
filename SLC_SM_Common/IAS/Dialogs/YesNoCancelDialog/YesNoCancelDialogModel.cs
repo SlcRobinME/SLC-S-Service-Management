@@ -2,13 +2,11 @@
 {
 	internal class YesNoCancelDialogModel
 	{
-		private readonly string message;
-
 		public YesNoCancelDialogModel(string message)
 		{
-			this.message =	message;
+			Message = message;
 		}
 
-		public string Message => message;
+		public string Message { get; }
 	}
 }

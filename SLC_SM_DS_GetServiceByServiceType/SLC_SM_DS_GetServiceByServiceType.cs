@@ -67,9 +67,7 @@ namespace SLCSMDSGetServiceByServiceType
 	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
 	[GQIMetaData(Name = "SLC_SM_DS_GetServiceByServiceType")]
-	public sealed class SLCSMDSGetServiceByServiceType : IGQIDataSource
-		, IGQIOnInit
-		, IGQIInputArguments
+	public sealed class SLCSMDSGetServiceByServiceType : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
 		private readonly Arguments _arguments = new Arguments();
 		private DomHelper _serviceMangerDomHelper;
@@ -171,10 +169,10 @@ namespace SLCSMDSGetServiceByServiceType
 
 		private void Compose(
 			ServiceRow serviceRow,
-			IEnumerable<ServiceConfigurationValueInstance> allServiceConfigurationValues,
-			IEnumerable<ConfigurationParameterValueInstance> allConfigurationParametersValues,
-			IEnumerable<ConfigurationParametersInstance> allConfigurationParameterInfos,
-			IEnumerable<string> targetParameterNames)
+			List<ServiceConfigurationValueInstance> allServiceConfigurationValues,
+			List<ConfigurationParameterValueInstance> allConfigurationParametersValues,
+			List<ConfigurationParametersInstance> allConfigurationParameterInfos,
+			string[] targetParameterNames)
 		{
 			// Pre-index for performance
 			var scvLookup = allServiceConfigurationValues.ToDictionary(scv => scv.ID.Id);
@@ -222,7 +220,7 @@ namespace SLCSMDSGetServiceByServiceType
 			});
 		}
 
-		private IEnumerable<ConfigurationParametersInstance> GetConfigurationParameterInfos()
+		private List<ConfigurationParametersInstance> GetConfigurationParameterInfos()
 		{
 			var filters = new[]
 			{
@@ -236,11 +234,10 @@ namespace SLCSMDSGetServiceByServiceType
 			};
 
 			var results = _configurationDomHelper.DomInstances.Read(filters.Aggregate((f1, f2) => f1.OR(f2)));
-			return results.Select(r => new ConfigurationParametersInstance(r));
+			return results.Select(r => new ConfigurationParametersInstance(r)).ToList();
 		}
 
-		private IEnumerable<ConfigurationParameterValueInstance> GetConfigurationParameterValues(
-			IEnumerable<ConfigurationParametersInstance> configurationParameterInfos)
+		private List<ConfigurationParameterValueInstance> GetConfigurationParameterValues(List<ConfigurationParametersInstance> configurationParameterInfos)
 		{
 			var serviceTypeInfo = configurationParameterInfos
 				.SingleOrDefault(i => i.ConfigurationParameterInfo.ParameterName == "Service Type");
@@ -282,14 +279,13 @@ namespace SLCSMDSGetServiceByServiceType
 
 			// If no filters at all, return empty sequence
 			if (finalFilter == null)
-				return Enumerable.Empty<ConfigurationParameterValueInstance>();
+				return new List<ConfigurationParameterValueInstance>();
 
 			var results = _configurationDomHelper.DomInstances.Read(finalFilter);
-			return results.Select(r => new ConfigurationParameterValueInstance(r));
+			return results.Select(r => new ConfigurationParameterValueInstance(r)).ToList();
 		}
 
-		private IEnumerable<ServiceConfigurationValueInstance> GetServiceConfigurationValues(
-			IEnumerable<ConfigurationParameterValueInstance> configurationParameterValues)
+		private List<ServiceConfigurationValueInstance> GetServiceConfigurationValues(List<ConfigurationParameterValueInstance> configurationParameterValues)
 		{
 			var filters = configurationParameterValues
 				.Select(configValue =>
@@ -303,7 +299,7 @@ namespace SLCSMDSGetServiceByServiceType
 				: new FALSEFilterElement<DomInstance>();
 
 			var results = _serviceMangerDomHelper.DomInstances.Read(filter);
-			return results.Select(r => new ServiceConfigurationValueInstance(r));
+			return results.Select(r => new ServiceConfigurationValueInstance(r)).ToList();
 		}
 
 		private IEnumerable<ServicesInstance> GetServices(

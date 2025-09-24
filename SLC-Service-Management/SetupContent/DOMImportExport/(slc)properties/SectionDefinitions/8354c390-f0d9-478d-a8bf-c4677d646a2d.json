@@ -1,1 +1,39 @@
-{"$type":"Skyline.DataMiner.Net.Sections.CustomSectionDefinition, SLNetTypes","ID":{"$type":"Skyline.DataMiner.Net.Sections.SectionDefinitionID, SLNetTypes","Id":"8354c390-f0d9-478d-a8bf-c4677d646a2d","ModuleId":"(slc)properties"},"Name":"Discrete","FieldDescriptors":{"$type":"System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.FieldDescriptor, SLNetTypes]], mscorlib","$values":[{"$type":"Skyline.DataMiner.Net.Sections.FieldDescriptor, SLNetTypes","ID":{"$type":"Skyline.DataMiner.Net.Sections.FieldDescriptorID, SLNetTypes","Id":"14e1d9ba-a103-4353-a96b-3bd73ccd99db"},"Name":"Option","Validators":{"$type":"System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.IFieldValidator, SLNetTypes]], mscorlib","$values":[]},"FieldType":"System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089","IsOptional":false,"IsHidden":false,"IsReadonly":false,"Tooltip":"","DefaultValue":null,"IsSoftDeleted":false}]},"SectionValidators":{"$type":"System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.ISectionValidator, SLNetTypes]], mscorlib","$values":[]},"ReservationLinkInfo":null,"IsHidden":false,"SyncLastModified":"2025-05-26T12:07:26.4209611Z","LastModifiedBy":"Admin","CreatedAt":"2025-05-26T12:07:26.4209611Z","CreatedBy":"Admin"}
+{
+  "$type": "Skyline.DataMiner.Net.Sections.CustomSectionDefinition, SLNetTypes",
+  "FieldDescriptors": {
+    "$type": "System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.FieldDescriptor, SLNetTypes]], mscorlib",
+    "$values": [
+      {
+        "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptor, SLNetTypes",
+        "DefaultValue": null,
+        "FieldType": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+        "ID": {
+          "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptorID, SLNetTypes",
+          "Id": "14e1d9ba-a103-4353-a96b-3bd73ccd99db"
+        },
+        "IsHidden": false,
+        "IsOptional": false,
+        "IsReadonly": false,
+        "IsSoftDeleted": false,
+        "Name": "Option",
+        "Tooltip": "",
+        "Validators": {
+          "$type": "System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.IFieldValidator, SLNetTypes]], mscorlib",
+          "$values": []
+        }
+      }
+    ]
+  },
+  "ID": {
+    "$type": "Skyline.DataMiner.Net.Sections.SectionDefinitionID, SLNetTypes",
+    "Id": "8354c390-f0d9-478d-a8bf-c4677d646a2d",
+    "ModuleId": "(slc)properties"
+  },
+  "IsHidden": false,
+  "Name": "Discrete",
+  "ReservationLinkInfo": null,
+  "SectionValidators": {
+    "$type": "System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.ISectionValidator, SLNetTypes]], mscorlib",
+    "$values": []
+  }
+}

@@ -5,26 +5,20 @@
 
 	internal class ConfirmDialogView : ScriptDialog
 	{
-		public ConfirmDialogView(IEngine engine)
-			: base(engine)
+		public ConfirmDialogView(IEngine engine) : base(engine)
 		{
-			InitWidgets();
 		}
 
-		#region Properties
-		public Label ConfirmationMessage { get; set; }
+		public Label ConfirmationMessage { get; } = new Label();
 
-		public Button CancelButton { get; set; }
+		public Button CancelButton { get; } = new Button("Cancel") { Width = 150, Height = 25 };
 
-		public Button ConfirmButton { get; set; }
-		#endregion
+		public Button ConfirmButton { get; } = new Button("Confirm") { Width = 150, Height = 25, Style = ButtonStyle.CallToAction };
 
-		#region Methods
 		public override void Build()
 		{
 			Clear();
-
-			Width = 600;
+			Layout.RowPosition = 0;
 
 			Title = "Confirmation required";
 
@@ -32,19 +26,10 @@
 
 			AddWidget(new WhiteSpace { Height = 25 }, ++Layout.RowPosition, 0);
 
-			AddWidget(CancelButton, ++Layout.RowPosition, 0);
-			AddWidget(ConfirmButton, Layout.RowPosition, 1);
+			AddWidget(ConfirmButton, ++Layout.RowPosition, 0);
+			AddWidget(CancelButton, Layout.RowPosition, 1);
 
 			SetColumnWidth(0, 160);
 		}
-
-		private void InitWidgets()
-		{
-			ConfirmationMessage = new Label();
-
-			CancelButton = new Button("Cancel") { Width = 150, Height = 25 };
-			ConfirmButton = new Button("Confirm") { Width = 150, Height = 25 };
-		}
-		#endregion
 	}
 }

@@ -53,10 +53,11 @@ namespace SLC_SM_IAS_Add_Service_Specification
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Library.Views;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Add_Service_Specification.Presenters;
 	using SLC_SM_IAS_Add_Service_Specification.Views;
 
@@ -117,8 +118,7 @@ namespace SLC_SM_IAS_Add_Service_Specification
 			}
 			catch (Exception e)
 			{
-				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-				_controller.ShowDialog(errorView);
+				engine.ShowErrorDialog(e);
 			}
 		}
 
