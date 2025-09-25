@@ -1,44 +1,103 @@
-﻿namespace Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs.ErrorDialog
+﻿namespace Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs
 {
+	using System;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
-	internal class ErrorDialogView : ScriptDialog
+	public sealed class ErrorDialogView : ScriptDialog
 	{
-		public ErrorDialogView(IEngine engine)
-			: base(engine)
+		private const int ButtonHeight = 30;
+		private const int ButtonWidth = 110;
+		private const int DetailsButtonWidth = 30;
+		private const int DetailsColumnWidth = 40;
+
+		public ErrorDialogView(IEngine engine) : base(engine)
 		{
-			InitWidgets();
 		}
 
-		#region Properties
-		public Label ErrorMessage { get; set; }
+		internal Button CloseButton { get; } = new Button("Close") { Height = ButtonHeight, Width = ButtonWidth, Style = ButtonStyle.CallToAction };
 
-		public Button CloseButton { get; set; }
-		#endregion
+		internal TextBox DetailsBox { get; } = new TextBox { MaxWidth = 800, IsMultiline = true, IsVisible = false, MinHeight = 100, MaxHeight = 250 };
 
-		#region Methods
+		internal Button DetailsButton { get; } = new Button("+") { Height = ButtonHeight, Width = DetailsButtonWidth };
+
+		internal Label MessageLabel { get; } = new Label { MinWidth = 400, MaxWidth = 850 };
+
 		public override void Build()
 		{
-			Clear();
+			MinWidth = 850;
+			Layout.RowPosition = 0;
 
-			Width = 600;
+			AddWidget(MessageLabel, Layout.RowPosition, 0, 1, 2, HorizontalAlignment.Stretch, VerticalAlignment.Stretch);
+			SetColumnWidth(0, DetailsColumnWidth);
+			SetColumnWidthStretch(1);
 
-			Title = "Script execution failed";
+			AddWidget(new WhiteSpace(), ++Layout.RowPosition, 0);
+			AddWidget(DetailsButton, ++Layout.RowPosition, 0, verticalAlignment: VerticalAlignment.Top);
+			AddWidget(DetailsBox, ++Layout.RowPosition, 1, HorizontalAlignment.Stretch, VerticalAlignment.Stretch);
 
-			AddWidget(ErrorMessage, Layout.RowPosition, 0);
-
-			AddWidget(new WhiteSpace { Height = 25 }, ++Layout.RowPosition, 0);
-
-			AddWidget(CloseButton, ++Layout.RowPosition, 0);
+			AddWidget(new WhiteSpace(), ++Layout.RowPosition, 0);
+			AddWidget(CloseButton, ++Layout.RowPosition, 1);
 		}
+	}
 
-		private void InitWidgets()
+	internal sealed class ErrorDialogModel
+	{
+		public ErrorDialogModel(string title, string message, string detailedMessage)
 		{
-			ErrorMessage = new Label();
-
-			CloseButton = new Button("Close") { Width = 150, Height = 25 };
+			Title = title;
+			Message = message;
+			DetailedMessage = detailedMessage;
 		}
-		#endregion
+
+		public string Title { get; }
+
+		public string Message { get; }
+
+		public string DetailedMessage { get; }
+	}
+
+	internal class ErrorDialogPresenter
+	{
+		private readonly ErrorDialogModel model;
+		private readonly ErrorDialogView view;
+
+		public ErrorDialogPresenter(ErrorDialogView view, ErrorDialogModel model)
+		{
+			this.view = view ?? throw new ArgumentNullException(nameof(view));
+			this.model = model ?? throw new ArgumentNullException(nameof(model));
+
+			view.CloseButton.Pressed += OnCloseButtonPressed;
+			view.DetailsButton.Pressed += OnDetailsButtonPressed;
+		}
+
+		public void LoadFromModel()
+		{
+			view.Title = model.Title ?? "Error";
+			view.DetailsBox.Text = model.DetailedMessage ?? String.Empty;
+			view.MessageLabel.Text = model.Message ?? String.Empty;
+
+			if (!String.IsNullOrEmpty(model.DetailedMessage))
+			{
+				view.DetailsBox.IsVisible = false;
+				view.DetailsButton.IsVisible = false;
+			}
+		}
+
+		private static void OnCloseButtonPressed(object sender, EventArgs e)
+		{
+			throw new ScriptAbortException("close");
+		}
+
+		private void OnDetailsButtonPressed(object sender, EventArgs e)
+		{
+			view.DetailsBox.IsVisible = !view.DetailsBox.IsVisible;
+			UpdateDetailsButton();
+		}
+
+		private void UpdateDetailsButton()
+		{
+			view.DetailsButton.Text = view.DetailsBox.IsVisible ? "-" : "+";
+		}
 	}
 }

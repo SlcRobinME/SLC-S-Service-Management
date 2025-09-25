@@ -2,13 +2,11 @@
 {
 	internal class ConfirmDialogModel
 	{
-		private readonly string confirmationMessage;
-
 		public ConfirmDialogModel(string confirmationMessage)
 		{
-			this.confirmationMessage = confirmationMessage;
+			ConfirmationMessage = confirmationMessage;
 		}
 
-		public string ConfirmationMessage => confirmationMessage;
+		public string ConfirmationMessage { get; }
 	}
 }

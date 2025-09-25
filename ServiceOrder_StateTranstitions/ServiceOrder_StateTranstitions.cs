@@ -56,10 +56,6 @@ namespace ServiceOrder_StateTranstitions_1
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel.Actions;
 
-	/// <summary>
-	///     The script entry point.
-	/// </summary>
-	/// <param name="engine">Link with SLAutomation process.</param>
 	public class Script
 	{
 		[AutomationEntryPoint(AutomationEntryPointType.Types.OnDomAction)]

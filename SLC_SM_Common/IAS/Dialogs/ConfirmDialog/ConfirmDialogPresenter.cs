@@ -5,11 +5,8 @@
 
 	internal class ConfirmDialogPresenter
 	{
-		#region Fields
-		private readonly ConfirmDialogView view;
-
 		private readonly ConfirmDialogModel model;
-		#endregion
+		private readonly ConfirmDialogView view;
 
 		public ConfirmDialogPresenter(ConfirmDialogView view, ConfirmDialogModel model)
 		{
@@ -19,21 +16,18 @@
 			Init();
 		}
 
-		#region Events
-		public event EventHandler<EventArgs> Confirm;
-
 		public event EventHandler<EventArgs> Cancel;
-		#endregion
 
-		#region Methods
-		public void LoadFromModel()
-		{
-			view.ConfirmationMessage.Text = StringExtensions.Wrap(model.ConfirmationMessage, 100);
-		}
+		public event EventHandler<EventArgs> Confirm;
 
 		public void BuildView()
 		{
 			view.Build();
+		}
+
+		public void LoadFromModel()
+		{
+			view.ConfirmationMessage.Text = StringExtensions.Wrap(model.ConfirmationMessage, 100);
 		}
 
 		private void Init()
@@ -51,6 +45,5 @@
 		{
 			Confirm?.Invoke(this, EventArgs.Empty);
 		}
-		#endregion
 	}
 }

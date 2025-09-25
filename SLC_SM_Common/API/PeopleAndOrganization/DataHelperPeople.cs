@@ -28,10 +28,10 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganizati
 			instance.PeopleInformation.ProfileImage = String.Empty;
 			instance.ContactInfo.Email = item.Mail ?? String.Empty;
 			instance.ContactInfo.Phone = item.Phone ?? String.Empty;
-			instance.ContactInfo.StreetAddress = "";
-			instance.ContactInfo.City = "";
+			instance.ContactInfo.StreetAddress = String.Empty;
+			instance.ContactInfo.City = String.Empty;
 			instance.ContactInfo.Country = SlcPeople_OrganizationsIds.Enums.Country.Belgium;
-			instance.ContactInfo.ZIP = "";
+			instance.ContactInfo.ZIP = String.Empty;
 			instance.Organization.Organization_57695f03 = item.OrganizationId;
 
 			var id = CreateOrUpdateInstance(instance);

@@ -23,10 +23,6 @@ namespace SLCSMDSGetServiceOrderItemButtons
 
 		public GQIColumn[] GetColumns()
 		{
-			// Define data source columns
-			// See: https://aka.dataminer.services/igqidatasource-getcolumns
-			// return Array.Empty<GQIColumn>();
-
 			return new GQIColumn[]
 			{
 				new GQIStringColumn("Button Label"),
@@ -38,11 +34,6 @@ namespace SLCSMDSGetServiceOrderItemButtons
 
 		public GQIArgument[] GetInputArguments()
 		{
-			// Define data source input arguments
-			// See: https://aka.dataminer.services/igqiinputarguments-getinputarguments
-			// return Array.Empty<GQIArgument>();
-
-			// input argument is the current DOM stateId of the service order item you want to fetch buttons for
 			return new GQIArgument[]
 			{
 				currentStateArg,
@@ -51,10 +42,7 @@ namespace SLCSMDSGetServiceOrderItemButtons
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			// Define data source rows
-			// See: https://aka.dataminer.services/igqidatasource-getnextpage
-
-			ItemState currentState = itemStateList.Where(state => state.Id == currentStateIdInput).Single();
+			ItemState currentState = itemStateList.Single(state => state.Id == currentStateIdInput);
 
 			List<ButtonConfig> activeButtons = ButtonCollection.ButtonList.Where(button => button.ApplicableStates.Contains(currentState)).ToList();
 
@@ -77,9 +65,6 @@ namespace SLCSMDSGetServiceOrderItemButtons
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
-			// Process input argument values
-			// See: https://aka.dataminer.services/igqiinputarguments-onargumentsprocessed
-
 			currentStateIdInput = args.GetArgumentValue(currentStateArg);
 
 			return default;
@@ -87,16 +72,11 @@ namespace SLCSMDSGetServiceOrderItemButtons
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			// Initialize the data source
-			// See: https://aka.dataminer.services/igqioninit-oninit
-
 			return default;
 		}
 
 		public OnPrepareFetchOutputArgs OnPrepareFetch(OnPrepareFetchInputArgs args)
 		{
-			// Prepare data source for fetching
-			// See: https://aka.dataminer.services/igqionpreparefetch-onpreparefetch
 			return default;
 		}
 

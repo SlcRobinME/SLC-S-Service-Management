@@ -25,7 +25,7 @@
 					.Where(r => r.ChildServiceItem == _serviceItem.ServiceItemID.ToString())
 					.Select(r => r.ChildServiceItemInterfaceID));
 
-			var availableInputs = _instance.Nodes
+			var availableInputs = _instance.Nodeses
 				.Where(n =>
 					n.NodeType == SlcWorkflowIds.Enums.Nodetype.Source &&
 					!inputsInuse.Contains(n.NodeID));
@@ -35,14 +35,7 @@
 
 		public IEnumerable<NodesSection> GetAvailableOutputs()
 		{
-			//var relationships = GetRelationships(Instance);
-
-			//var outputsInUse = new HashSet<string>(
-			//	relationships
-			//		.Where(r => r.ParentServiceItem == source.ServiceItemID.ToString())
-			//		.Select(r => r.ParentServiceItemInterfaceID));
-
-			var availableOutputs = _instance.Nodes
+			var availableOutputs = _instance.Nodeses
 				.Where(n =>
 					n.NodeType == SlcWorkflowIds.Enums.Nodetype.Destination
 					/*&& !outputsInUse.Contains(n.NodeID)*/);

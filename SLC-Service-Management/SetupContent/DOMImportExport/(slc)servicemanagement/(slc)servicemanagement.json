@@ -1,1 +1,46 @@
-{"ModuleId":"(slc)servicemanagement","DomManagerSettings":{"ModuleSections":[],"ModuleBehaviorDefinition":null,"ScriptSettings":{"OnUpdateTriggerConditions":[],"OnCreate":"","OnUpdate":"","OnDelete":"","ScriptType":0},"SecuritySettings":{"ViewPermissions":0,"CreateAndUpdateDomInstancePermission":0,"DeleteDomInstancePermission":0,"ConfigurePermission":0},"FieldAlias":[],"InformationEventSettings":{"Enable":false},"DomInstanceNameDefinition":{"ConcatenationItems":[]},"TtlSettings":{"DomInstanceTtl":"00:00:00","DomInstanceHistoryTtl":"00:00:00","DomTemplateTtl":"00:00:00"},"StorageSettings":{"CachingSettings":{"DomDefinitionCachingPolicy":0,"DomBehaviorDefinitionCachingPolicy":0,"SectionDefinitionCachingPolicy":0}},"DomInstanceHistorySettings":{"StorageBehavior":0}},"TrackLastModified":"2025-05-26T12:11:47.2169148Z","LastModifiedBy":"Admin","CreatedAt":"2025-05-26T12:11:47.2169148Z","CreatedBy":"Admin"}
+{
+  "DomManagerSettings": {
+    "DomInstanceAttachmentSettings": {
+      "CredentialId": "00000000-0000-0000-0000-000000000000",
+      "NetworkSharePath": ""
+    },
+    "DomInstanceHistorySettings": {
+      "StorageBehavior": 0
+    },
+    "DomInstanceNameDefinition": {
+      "ConcatenationItems": []
+    },
+    "FieldAlias": [],
+    "InformationEventSettings": {
+      "Enable": false
+    },
+    "ModuleBehaviorDefinition": null,
+    "ModuleSections": [],
+    "ScriptSettings": {
+      "OnCreate": "",
+      "OnDelete": "",
+      "OnUpdate": "",
+      "OnUpdateTriggerConditions": [],
+      "ScriptType": 0
+    },
+    "SecuritySettings": {
+      "ConfigurePermission": 0,
+      "CreateAndUpdateDomInstancePermission": 0,
+      "DeleteDomInstancePermission": 0,
+      "ViewPermissions": 0
+    },
+    "StorageSettings": {
+      "CachingSettings": {
+        "DomBehaviorDefinitionCachingPolicy": 0,
+        "DomDefinitionCachingPolicy": 0,
+        "SectionDefinitionCachingPolicy": 0
+      }
+    },
+    "TtlSettings": {
+      "DomInstanceHistoryTtl": "00:00:00",
+      "DomInstanceTtl": "00:00:00",
+      "DomTemplateTtl": "00:00:00"
+    }
+  },
+  "ModuleId": "(slc)servicemanagement"
+}

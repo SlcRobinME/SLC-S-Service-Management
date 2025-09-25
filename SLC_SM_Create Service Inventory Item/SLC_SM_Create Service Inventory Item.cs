@@ -57,15 +57,14 @@ namespace SLC_SM_Create_Service_Inventory_Item
 	using DomHelpers.SlcServicemanagement;
 
 	using Library;
-	using Library.Views;
-
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_Create_Service_Inventory_Item.Presenters;
 	using SLC_SM_Create_Service_Inventory_Item.Views;
 
@@ -130,8 +129,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			}
 			catch (Exception e)
 			{
-				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-				_controller.ShowDialog(errorView);
+				engine.ShowErrorDialog(e);
 				engine.Log(e.ToString());
 			}
 		}

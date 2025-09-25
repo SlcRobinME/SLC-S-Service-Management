@@ -52,12 +52,10 @@ DATE		VERSION		AUTHOR			COMMENTS
 namespace SLC_SM_IAS_Configurations
 {
 	using System;
-
-	using Library.Views;
-
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Configurations.Presenters;
 	using SLC_SM_IAS_Configurations.Views;
 
@@ -108,8 +106,7 @@ namespace SLC_SM_IAS_Configurations
 			}
 			catch (Exception e)
 			{
-				var errorView = new ErrorView(engine, "Error", e.Message, e.ToString());
-				_controller.ShowDialog(errorView);
+				engine.ShowErrorDialog(e);
 			}
 		}
 
