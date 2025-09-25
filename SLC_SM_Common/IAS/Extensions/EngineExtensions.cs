@@ -2,6 +2,7 @@
 {
 	using System;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 
 	public static class EngineExtensions
@@ -32,7 +33,7 @@
 
 			presenter.LoadFromModel();
 
-			view.Show();
+			new InteractiveController(engine).ShowDialog(view);
 		}
 
 		public static YesNoCancelOption ShowYesNoCancelDialog(this IEngine engine, string message)
