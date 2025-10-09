@@ -7,6 +7,7 @@
 	using DomHelpers.SlcWorkflow;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -23,6 +24,7 @@
 		private readonly List<Models.ServiceSpecification> specifications = new List<Models.ServiceSpecification>();
 		private readonly ServiceItemView view;
 		private readonly Workflow[] workflows;
+		private readonly List<Option<string>> allScripts;
 
 		public ServiceItemPresenter(IEngine engine, ServiceItemView view, string[] getServiceItemLabels, IServiceInstanceBase domInstance)
 		{
@@ -33,6 +35,9 @@
 
 			var workflowHelper = new WorkflowHelper(engine);
 			workflows = workflowHelper.GetAllWorkflows().ToArray();
+
+			allScripts = (engine.SendSLNetSingleResponseMessage(new GetInfoMessage(InfoType.Scripts)) as GetScriptsResponseMessage)?.Scripts.OrderBy(x => x).Select(x => new Option<string>(x)).ToList() ?? new List<Option<string>>();
+			allScripts.Insert(0, new Option<string>("-None-", null));
 
 			view.TboxLabel.Changed += (sender, args) => ValidateLabel(args.Value);
 			view.ServiceItemType.Changed += (sender, args) => OnUpdateServiceItemType(args.Selected);
@@ -95,9 +100,9 @@
 				view.ImplementationReferences.Selected = GetServiceDropDownLabel(services.Find(s => s.ID.ToString() == section.ImplementationReference));
 			}
 
-			if (!String.IsNullOrEmpty(section.ServiceItemScript))
+			if (!String.IsNullOrEmpty(section.ServiceItemScript) && view.ScriptSelection.Options.Any(o => o.Value == section.ServiceItemScript))
 			{
-				view.ScriptSelection.SetOptions(new[] { section.ServiceItemScript });
+				view.ScriptSelection.Selected = section.ServiceItemScript;
 			}
 		}
 
@@ -173,7 +178,7 @@
 		{
 			if (String.IsNullOrEmpty(selected))
 			{
-				view.ScriptSelection.SetOptions(new List<string>());
+				view.ScriptSelection.Selected = null;
 				return;
 			}
 
@@ -186,12 +191,18 @@
 				var el = engine.FindElement(selected);
 				if (el == null)
 				{
-					view.ScriptSelection.SetOptions(new List<string>());
+					view.ScriptSelection.Selected = null;
 					return;
 				}
 
 				var scriptName = Convert.ToString(el.GetParameter(195));
-				view.ScriptSelection.SetOptions(new[] { scriptName });
+				if (!view.ScriptSelection.Options.Any(o => o.Value == scriptName))
+				{
+					view.ScriptSelection.Selected = null;
+					return;
+				}
+
+				view.ScriptSelection.Selected = scriptName;
 			}
 		}
 
@@ -228,10 +239,12 @@
 			}
 			else
 			{
+				view.ScriptSelection.SetOptions(allScripts);
+				view.ScriptSelection.IsEnabled = true;
+
 				var bookingManagers = engine.FindElementsByProtocol("Skyline Booking Manager").Where(x => x.IsActive).Select(x => x.ElementName).ToArray();
 				view.DefinitionReferences.SetOptions(bookingManagers);
 				OnUpdateDefinitionReference(view.DefinitionReferences.Selected);
-				view.ScriptSelection.IsEnabled = false;
 			}
 
 			view.LblImplementationReference.IsVisible = serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service;

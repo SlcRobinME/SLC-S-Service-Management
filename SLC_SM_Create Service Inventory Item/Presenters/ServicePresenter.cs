@@ -124,11 +124,13 @@
 			if (instance.EndTime.HasValue)
 			{
 				view.End.DateTime = instance.EndTime.Value.ToLocalTime();
+				view.End.IsEnabled = true;
 				view.IndefiniteRuntime.IsChecked = false;
 			}
 			else
 			{
 				view.End.DateTime = view.Start.DateTime + TimeSpan.FromDays(7);
+				view.End.IsEnabled = false;
 				view.IndefiniteRuntime.IsChecked = true;
 			}
 

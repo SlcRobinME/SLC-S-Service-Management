@@ -59,7 +59,7 @@
 
 		public Label LblScriptSelection { get; } = new Label("Service Item Script");
 
-		public DropDown ScriptSelection { get; } = new DropDown { Width = Defaults.WidgetWidth };
+		public DropDown<string> ScriptSelection { get; } = new DropDown<string> { Width = Defaults.WidgetWidth, IsDisplayFilterShown = true };
 
 		public Button BtnAdd { get; } = new Button("Create") { Style = ButtonStyle.CallToAction };
 	}
