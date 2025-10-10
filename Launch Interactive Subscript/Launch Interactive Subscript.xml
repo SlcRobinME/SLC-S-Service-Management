@@ -11,12 +11,6 @@
 	<Memory>
 	</Memory>
 	<Parameters>
-		<ScriptParameter id="1" type="string" values="">
-			<Description>Script Name</Description>
-		</ScriptParameter>
-		<ScriptParameter id="2" type="string" values="">
-			<Description>Booking Manager Element Name</Description>
-		</ScriptParameter>
 		<ScriptParameter id="3" type="string" values="">
 			<Description>DOM ID</Description>
 		</ScriptParameter>

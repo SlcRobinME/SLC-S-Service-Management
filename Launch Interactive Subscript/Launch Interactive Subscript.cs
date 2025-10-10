@@ -48,30 +48,33 @@ DATE        VERSION        AUTHOR            COMMENTS
 dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 ****************************************************************************
 */
-
 namespace Launch_Interactive_Subscript_1
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using DomHelpers.SlcServicemanagement;
-    using Newtonsoft.Json;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
+	using DomHelpers.SlcConfigurations;
+	using DomHelpers.SlcServicemanagement;
+	using Library;
+	using Newtonsoft.Json;
+	using Newtonsoft.Json.Converters;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 
-    /// <summary>
-    /// Represents a DataMiner Automation script.
-    /// </summary>
-    public class Script
-    {
-        /// <summary>
-        /// The script entry point.
-        /// </summary>
-        /// <param name="engine">Link with SLAutomation process.</param>
-        public void Run(IEngine engine)
-        {
-            /*
+	/// <summary>
+	///     Represents a DataMiner Automation script.
+	/// </summary>
+	public class Script
+	{
+		/// <summary>
+		///     The script entry point.
+		/// </summary>
+		/// <param name="engine">Link with SLAutomation process.</param>
+		public void Run(IEngine engine)
+		{
+			/*
             * Note:
             * Do not remove the commented methods below!
             * The lines are needed to execute an interactive automation script from the non-interactive automation script or from Visio!
@@ -79,61 +82,104 @@ namespace Launch_Interactive_Subscript_1
             * engine.ShowUI();
             */
 
-            try
-            {
-                string scriptNameParam = engine.GetScriptParam("Script Name").Value;
-                string scriptName = JsonConvert.DeserializeObject<List<string>>(scriptNameParam).FirstOrDefault()
-                                    ?? throw new InvalidOperationException("No Service Item Script provided to run the action");
+			try
+			{
+				if (!Guid.TryParse(engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']'), out Guid domId))
+				{
+					return;
+				}
 
-                string bookingManagerElementName = JsonConvert.DeserializeObject<List<string>>(engine.GetScriptParam("Booking Manager Element Name").Value).FirstOrDefault()
-                                                   ?? throw new InvalidOperationException("No Booking Manager Reference provided to run the action");
+				var srvHelper = new DataHelpersServiceManagement(engine.GetUserConnection());
+				Models.Service service = srvHelper.Services.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault()
+										 ?? throw new InvalidOperationException($"No Service exists on the system with ID '{domId}'");
 
-                string scriptOutput = RunScript(engine, scriptName, bookingManagerElementName);
+				string itemLabel = engine.GetScriptParam("Item Label").Value.Trim('"', '[', ']');
+				var serviceItem = service.ServiceItems.Find(s => s.Label == itemLabel);
+				if (serviceItem == null)
+				{
+					return;
+				}
 
-                if (Guid.TryParse(engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']'), out Guid domId))
-                {
-                    string itemLabel = engine.GetScriptParam("Item Label").Value.Trim('"', '[', ']');
+				var configHelper = new DataHelpersConfigurations(engine.GetUserConnection());
+				var configurationParameters = configHelper.ConfigurationParameters.Read();
 
-                    var domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-                    var inst = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
-                               ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system");
-                    if (inst.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
-                    {
-                        var serviceItemInstance = new ServicesInstance(inst);
-                        var serviceItem = serviceItemInstance.ServiceItemses.FirstOrDefault(x => x.Label == itemLabel);
-                        if (serviceItem == null)
-                        {
-                            return;
-                        }
+				List<ServiceCharacteristic> serviceCharacteristics = service.Configurations.Select(
+						x => new ServiceCharacteristic
+						{
+							Id = x.ConfigurationParameter.ConfigurationParameterId,
+							Name = configurationParameters.FirstOrDefault(c => c.ID == x.ConfigurationParameter.ConfigurationParameterId)?.Name ?? String.Empty,
+							Label = x.ConfigurationParameter.Label,
+							Type = x.ConfigurationParameter.Type,
+							StringValue = x.ConfigurationParameter.StringValue,
+							DoubleValue = x.ConfigurationParameter.DoubleValue,
+						})
+					.ToList();
+				var serviceItemDetails = new ServiceItemDetails
+				{
+					Name = service.Name.Split(Path.GetInvalidFileNameChars())[0],
+					Start = new DateTimeOffset(service.StartTime.Value).ToUnixTimeMilliseconds(),
+					End = service.EndTime.HasValue ? new DateTimeOffset(service.EndTime.Value).ToUnixTimeMilliseconds() : default(long?),
+					ServiceCharacteristics = serviceCharacteristics,
+					ServiceItemCharacteristics = new List<ServiceCharacteristic>(),
+				};
 
-                        serviceItem.ImplementationReference = !String.IsNullOrEmpty(scriptOutput) ? scriptOutput : "Reference Unknown";
-                        serviceItemInstance.Save(domHelper);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                engine.ExitFail(e.Message);
-            }
-        }
+				string scriptOutput = RunScript(engine, serviceItem.Script, serviceItem.DefinitionReference, serviceItemDetails);
 
-        private static string RunScript(IEngine engine, string scriptName, string bookingManagerElementName)
-        {
-            var subScript = engine.PrepareSubScript(scriptName);
-            subScript.Synchronous = true;
-            subScript.ExtendedErrorInfo = true;
-            subScript.InheritScriptOutput = true;
+				serviceItem.ImplementationReference = !String.IsNullOrEmpty(scriptOutput) ? scriptOutput : "Reference Unknown";
+				srvHelper.Services.CreateOrUpdate(service);
+			}
+			catch (Exception e)
+			{
+				engine.ExitFail(e.Message);
+			}
+		}
 
-            subScript.SelectScriptParam("Booking Manager Element Info", "{ \"Element\":\"" + bookingManagerElementName + "\",\"TableIndex\":\"\",\"Action\":\"New\"}");
+		private static string RunScript(IEngine engine, string scriptName, string bookingManagerElementName, ServiceItemDetails serviceItemDetails)
+		{
+			var subScript = engine.PrepareSubScript(scriptName);
+			subScript.Synchronous = true;
+			subScript.ExtendedErrorInfo = true;
+			subScript.InheritScriptOutput = true;
 
-            subScript.StartScript();
+			subScript.SelectScriptParam("Booking Manager Element Info", $"{{ \"Element\":\"{bookingManagerElementName}\",\"TableIndex\":\"\",\"Action\":\"New\",{JsonConvert.SerializeObject(serviceItemDetails).TrimStart('{')}");
 
-            if (subScript.HadError)
-            {
-                throw new InvalidOperationException($"Failed to start the Booking Manager script '{scriptName}' due to:\r\n" + String.Join(@"\r\n ->", subScript.GetErrorMessages()));
-            }
+			subScript.StartScript();
 
-            return subScript.GetScriptResult().FirstOrDefault().Value;
-        }
-    }
+			if (subScript.HadError)
+			{
+				throw new InvalidOperationException($"Failed to start the Booking Manager script '{scriptName}' due to:\r\n" + String.Join(@"\r\n ->", subScript.GetErrorMessages()));
+			}
+
+			return subScript.GetScriptResult().FirstOrDefault(x => x.Key == "ReservationID").Value;
+		}
+	}
+
+	internal sealed class ServiceItemDetails
+	{
+		public string Name { get; set; }
+
+		public long Start { get; set; }
+
+		public long? End { get; set; }
+
+		public List<ServiceCharacteristic> ServiceCharacteristics { get; set; }
+
+		public List<ServiceCharacteristic> ServiceItemCharacteristics { get; set; }
+	}
+
+	internal sealed class ServiceCharacteristic
+	{
+		public Guid Id { get; set; }
+
+		public string Name { get; set; }
+
+		public string Label { get; set; }
+
+		[JsonConverter(typeof(StringEnumConverter))]
+		public SlcConfigurationsIds.Enums.Type Type { get; set; }
+
+		public string StringValue { get; set; }
+
+		public double? DoubleValue { get; set; }
+	}
 }
