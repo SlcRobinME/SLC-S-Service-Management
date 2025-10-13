@@ -44,6 +44,7 @@ namespace Get_ServiceItemsMultipleSections_1
 				new GQIStringColumn("Implementation Reference"),
 				new GQIStringColumn("Implementation Reference Name"),
 				new GQIStringColumn("ID"),
+				new GQIStringColumn("Implementation Reference Link"),
 			};
 		}
 
@@ -132,6 +133,7 @@ namespace Get_ServiceItemsMultipleSections_1
 
 		private GQIRow BuildRow(ServiceItemsSection item)
 		{
+			var implementationRef = GetImplementationRefName(item.ImplementationReference);
 			return new GQIRow(
 				new[]
 				{
@@ -141,34 +143,35 @@ namespace Get_ServiceItemsMultipleSections_1
 					new GQICell { Value = item.DefinitionReference ?? String.Empty },
 					new GQICell { Value = item.ServiceItemScript ?? String.Empty },
 					new GQICell { Value = item.ImplementationReference ?? String.Empty },
-					new GQICell { Value = GetImplementationRefName(item.ImplementationReference) },
+					new GQICell { Value = implementationRef.Item1 },
 					new GQICell { Value = item.SectionID.Id.ToString() },
+					new GQICell { Value = implementationRef.Item2 },
 				});
 		}
 
-		private string GetImplementationRefName(string reference)
+		private (string, string) GetImplementationRefName(string reference)
 		{
 			if (String.IsNullOrEmpty(reference) || !Guid.TryParse(reference, out Guid id))
 			{
-				return String.Empty;
+				return (String.Empty, String.Empty);
 			}
 
 			var inst = new DomHelper(dms.SendMessages, SlcWorkflowIds.ModuleId).DomInstances.Read(DomInstanceExposers.Id.Equal(id)).FirstOrDefault();
 			if (inst != null)
 			{
-				return inst.Name;
+				return (inst.Name, String.Empty);
 			}
 
 			var serv = new DataHelperService(dms.GetConnection()).Read(ServiceExposers.Guid.Equal(id)).FirstOrDefault();
 			if (serv != null)
 			{
-				return serv.Name;
+				return (serv.Name, String.Empty);
 			}
 
 			var request = new ManagerStoreStartPagingRequest<ReservationInstance>(ReservationInstanceExposers.ID.Equal(id).ToQuery(), 1000);
-			var response = (ManagerStorePagingResponse<ReservationInstance>)dms.SendMessage(request);
+			var reservation = ((ManagerStorePagingResponse<ReservationInstance>)dms.SendMessage(request))?.Objects?.FirstOrDefault() as ServiceReservationInstance;
 
-			return response?.Objects.FirstOrDefault()?.Name ?? String.Empty;
+			return (reservation?.Name ?? String.Empty, reservation?.ServiceID?.ToString() ?? String.Empty);
 		}
 
 		private void LoadApplicationHandlersAndHelpers()

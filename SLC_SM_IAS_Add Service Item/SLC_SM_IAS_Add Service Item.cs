@@ -248,7 +248,9 @@ namespace SLC_SM_IAS_Add_Service_Item_1
 			string label = _engine.GetScriptParam("Service Item Label").Value.Trim('"', '[', ']');
 
 			// Init views
-			var view = new ServiceItemView(_engine);
+			var view = new ServiceItemView(_engine) { IsEnabled = false };
+			view.Show(false);
+			view.IsEnabled = true;
 			var presenter = new ServiceItemPresenter(_engine, view, GetServiceItemLabels(serviceInstance, label), serviceInstance);
 
 			// Events
