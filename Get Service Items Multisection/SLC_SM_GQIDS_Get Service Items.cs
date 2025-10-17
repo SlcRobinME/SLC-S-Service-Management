@@ -1,4 +1,4 @@
-namespace Get_ServiceItemsMultipleSections_1
+namespace SLC_SM_GQIDS_Get_Service_Items
 {
 	// Used to process the Service Items
 	using System;
@@ -15,7 +15,7 @@ namespace Get_ServiceItemsMultipleSections_1
 	using SLDataGateway.API.Querying;
 
 	// Required to mark the interface as a GQI data source
-	[GQIMetaData(Name = "Get_ServiceItemsMultipleSections")]
+	[GQIMetaData(Name = "Get_ServiceItems")]
 	public class EventManagerGetMultipleSections : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
@@ -45,6 +45,9 @@ namespace Get_ServiceItemsMultipleSections_1
 				new GQIStringColumn("Implementation Reference Name"),
 				new GQIStringColumn("ID"),
 				new GQIStringColumn("Implementation Reference Link"),
+				new GQIBooleanColumn("Implementation Reference Has Value"),
+				new GQIBooleanColumn("Implementation Reference Name Has Value"),
+				new GQIBooleanColumn("Implementation Reference Link Has Value"),
 			};
 		}
 
@@ -146,6 +149,9 @@ namespace Get_ServiceItemsMultipleSections_1
 					new GQICell { Value = implementationRef.Item1 },
 					new GQICell { Value = item.SectionID.Id.ToString() },
 					new GQICell { Value = implementationRef.Item2 },
+					new GQICell { Value = !String.IsNullOrEmpty(item.ImplementationReference) },
+					new GQICell { Value = !String.IsNullOrEmpty(implementationRef.Item1) },
+					new GQICell { Value = !String.IsNullOrEmpty(implementationRef.Item2) },
 				});
 		}
 

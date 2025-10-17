@@ -85,10 +85,6 @@
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.Icon), comparer, (string)value);
 				case "ServiceExposers.ServiceSpecifcation":
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceSpecifcation), comparer, (Guid)value);
-				case "ServiceExposers.ServiceProperties":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceProperties), comparer, (Guid)value);
-				case "ServiceExposers.ServiceConfiguration":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfiguration), comparer, (Guid)value);
 				case "ServiceExposers.RelatedOrganization":
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.RelatedOrganization), comparer, (Guid)value);
 				case "ServiceExposers.ServiceCategory":
@@ -105,8 +101,6 @@
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemType), comparer, (int)value);
 				case "ServiceItemsSection.DefinitionReference":
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.DefinitionReference), comparer, (string)value);
-				case "ServiceItemsSection.ServiceItemConfiguration":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemConfiguration), comparer, (Guid)value);
 				case "ServiceItemsSection.ServiceItemScript":
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemScript), comparer, (string)value);
 				case "ServiceItemsSection.ImplementationReference":
@@ -121,6 +115,12 @@
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.ParentServiceItemInterfaceID), comparer, (string)value);
 				case "ServiceItemRelationshipSection.ChildServiceItemInterfaceID":
 					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.ChildServiceItemInterfaceID), comparer, (string)value);
+
+				/*SERVICE CONFIGURATION VALUE*/
+				case nameof(ServiceSpecificationExposers) + "." + nameof(ServiceSpecificationExposers.Guid):
+					return FilterElementFactory.Create(DomInstanceExposers.Id, comparer, (Guid)value);
+				case nameof(ServiceSpecificationExposers) + "." + nameof(ServiceSpecificationExposers.Name):
+					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceSpecificationInfo.SpecificationName), comparer, (string)value);
 
 				/*SERVICE CONFIGURATION VALUE*/
 				case nameof(ServiceConfigurationValueExposers) + "." + nameof(ServiceConfigurationValueExposers.Guid):

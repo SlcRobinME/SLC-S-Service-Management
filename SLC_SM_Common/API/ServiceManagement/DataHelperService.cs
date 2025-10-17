@@ -8,8 +8,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 	using DomHelpers.SlcServicemanagement;
 
 	using Library;
-
-	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -40,17 +38,10 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			instance.ServiceInfo.ServiceStartTime = item.StartTime;
 			instance.ServiceInfo.ServiceEndTime = item.EndTime;
 			instance.ServiceInfo.GenerateMonitoringService = item.GenerateMonitoringService;
-			instance.ServiceInfo.ServiceProperties = item.Properties?.ID;
 			instance.ServiceInfo.ServiceCategory = item.Category?.ID;
 			instance.ServiceInfo.ServiceSpecifcation = item.ServiceSpecificationId;
 			instance.ServiceInfo.Icon = item.Icon;
 			instance.ServiceInfo.RelatedOrganization = item.OrganizationId;
-
-			if (item.Properties != null)
-			{
-				var dataHelperProperties = new DataHelperServicePropertyValues(_connection);
-				dataHelperProperties.CreateOrUpdate(item.Properties);
-			}
 
 			if (item.Category != null)
 			{
@@ -141,11 +132,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 		{
 			bool b = true;
 
-			if (item.Properties != null)
-			{
-				b &= TryDelete(item.Properties.ID);
-			}
-
 			if (item.Configurations != null)
 			{
 				foreach (var config in item.Configurations)
@@ -230,7 +216,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 		private static Models.Service FromInstance(
 			ServicesInstance domInstance,
 			List<Models.ServiceCategory> serviceCategories,
-			List<Models.ServicePropertyValues> serviceProperties,
 			List<Models.ServiceConfigurationValue> serviceConfigurations)
 		{
 			return new Models.Service
@@ -246,7 +231,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				Category = serviceCategories.Find(c => c.ID == domInstance.ServiceInfo.ServiceCategory),
 				ServiceSpecificationId = domInstance.ServiceInfo.ServiceSpecifcation,
 				OrganizationId = domInstance.ServiceInfo.RelatedOrganization,
-				Properties = serviceProperties.Find(p => p.ID == domInstance.ServiceInfo.ServiceProperties) ?? new Models.ServicePropertyValues { Values = new List<Models.ServicePropertyValue>() },
 				Configurations = serviceConfigurations.Where(p => domInstance.ServiceInfo.ServiceConfigurationParameters.Contains(p.ID)).ToList(),
 				ServiceItems = domInstance.ServiceItemses.Select(
 						s => new Models.ServiceItem
@@ -281,15 +265,13 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				return new List<Models.Service>();
 			}
 
-			var dataHelperServicePropertyValues = new DataHelperServicePropertyValues(_connection);
-			var serviceProperties = dataHelperServicePropertyValues.Read();
 			var dataHelperServiceConfigurations = new DataHelperServiceConfigurationValue(_connection);
 			var serviceConfigurations = dataHelperServiceConfigurations.Read();
 			var dataHelperServiceCategory = new DataHelperServiceCategory(_connection);
 			var serviceCategories = dataHelperServiceCategory.Read();
 
 			return instances.Select(
-					x => FromInstance(x, serviceCategories, serviceProperties, serviceConfigurations))
+					x => FromInstance(x, serviceCategories, serviceConfigurations))
 				.ToList();
 		}
 	}

@@ -78,12 +78,6 @@
 					{
 						config.ConfigurationParameter.ID = Guid.NewGuid(); // Duplicate
 					}
-
-					if (view.Specification.Selected.Properties != null)
-					{
-						instanceToReturn.ServiceOrderItem.Properties = view.Specification.Selected.Properties;
-						instanceToReturn.ServiceOrderItem.Properties.ID = Guid.NewGuid(); // Duplicate
-					}
 				}
 
 				return instanceToReturn;

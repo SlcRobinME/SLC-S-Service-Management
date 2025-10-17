@@ -37,14 +37,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 
 			instance.ServiceOrderItemServiceInfo.ServiceSpecification = item.SpecificationId;
 			instance.ServiceOrderItemServiceInfo.ServiceCategory = item.ServiceCategoryId;
-			instance.ServiceOrderItemServiceInfo.Properties = item.Properties?.ID;
 			instance.ServiceOrderItemServiceInfo.Service = item.ServiceId;
-
-			if (item.Properties != null)
-			{
-				var dataHelperProperties = new DataHelperServicePropertyValues(_connection);
-				dataHelperProperties.CreateOrUpdate(item.Properties);
-			}
 
 			var dataHelperConfigurations = new DataHelperServiceOrderItemConfigurationValue(_connection);
 			instance.ServiceOrderItemServiceInfo.ServiceOrderItemConfigurations.Clear();
@@ -63,7 +56,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				.Select(x => new ServiceOrderItemsInstance(x))
 				.ToList();
 
-			var helperPropertyValues = new DataHelperServicePropertyValues(_connection).Read();
 			var helperConfigurations = new DataHelperServiceOrderItemConfigurationValue(_connection).Read();
 			return instances.Select(
 					x => new Models.ServiceOrderItem
@@ -77,7 +69,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 						IndefiniteRuntime = x.ServiceOrderItemInfo.ServiceIndefiniteRuntime,
 						SpecificationId = x.ServiceOrderItemServiceInfo.ServiceSpecification,
 						ServiceCategoryId = x.ServiceOrderItemServiceInfo.ServiceCategory,
-						Properties = helperPropertyValues.Find(p => p.ID == x.ServiceOrderItemServiceInfo.Properties),
 						Configurations = helperConfigurations.Where(c => x.ServiceOrderItemServiceInfo.ServiceOrderItemConfigurations.Contains(c.ID)).ToList(),
 						ServiceId = x.ServiceOrderItemServiceInfo.Service,
 					})
@@ -88,11 +79,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 		public override bool TryDelete(Models.ServiceOrderItem item)
 		{
 			bool ok = true;
-
-			if (item.Properties != null)
-			{
-				ok &= TryDelete(item.Properties.ID);
-			}
 
 			foreach (var serviceOrderItemConfigurationValue in item.Configurations)
 			{

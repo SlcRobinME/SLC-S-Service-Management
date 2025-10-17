@@ -146,8 +146,6 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			//instance.Icon = serviceSpecificationInstance.Icon;
 			instance.Description = serviceSpecificationInstance.Description;
-			instance.Properties = serviceSpecificationInstance.Properties ?? new Models.ServicePropertyValues();
-			instance.Properties.ID = Guid.NewGuid();
 
 			if (serviceSpecificationInstance.Configurations != null)
 			{
@@ -286,7 +284,6 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				EndTime = serviceOrder.EndTime,
 				Icon = String.Empty,
 				ServiceSpecificationId = serviceOrder.SpecificationId,
-				Properties = serviceOrder.Properties,
 				Category = repo.ServiceCategories.Read().Find(x => x.ID == serviceOrder.ServiceCategoryId),
 				ServiceItems = new List<Models.ServiceItem>(),
 				ServiceItemsRelationships = new List<Models.ServiceItemRelationShip>(),

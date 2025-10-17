@@ -3,12 +3,11 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcServicemanagement;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.SDM;
 
 	/// <inheritdoc />
 	public class DataHelperServiceSpecification : DataHelper<Models.ServiceSpecification>
@@ -25,13 +24,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			instance.ServiceSpecificationInfo.SpecificationName = item.Name;
 			instance.ServiceSpecificationInfo.Description = item.Description;
 			instance.ServiceSpecificationInfo.Icon = item.Icon;
-			instance.ServiceSpecificationInfo.ServiceProperties = item.Properties?.ID;
-
-			if (item.Properties != null)
-			{
-				var dataHelperProperties = new DataHelperServicePropertyValues(_connection);
-				dataHelperProperties.CreateOrUpdate(item.Properties);
-			}
 
 			if (item.ServiceItemsRelationships != null)
 			{
@@ -91,12 +83,47 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 		/// <inheritdoc />
 		public override List<Models.ServiceSpecification> Read()
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new ServiceSpecificationsInstance(x))
-				.ToList();
+			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id));
+			return Read(instances);
+		}
 
-			var dataHelperServicePropertyValues = new DataHelperServicePropertyValues(_connection);
-			var serviceProperties = dataHelperServicePropertyValues.Read();
+		/// <inheritdoc />
+		public List<Models.ServiceSpecification> Read(FilterElement<Models.ServiceSpecification> filter)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			var domFilter = FilterTranslator.TranslateFullFilter(filter);
+			return Read(_domHelper.DomInstances.Read(domFilter));
+		}
+
+		/// <inheritdoc />
+		public override bool TryDelete(Models.ServiceSpecification item)
+		{
+			bool b = true;
+
+			if (item.Configurations != null)
+			{
+				var helperConfigs = new DataHelperServiceSpecificationConfigurationValue(_connection);
+				foreach (var config in item.Configurations)
+				{
+					b &= helperConfigs.TryDelete(config.ID);
+				}
+			}
+
+			return b && TryDelete(item.ID);
+		}
+
+		private List<Models.ServiceSpecification> Read(List<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new ServiceSpecificationsInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.ServiceSpecification>();
+			}
+
 			var dataHelperServiceConfigurations = new DataHelperServiceSpecificationConfigurationValue(_connection);
 			var serviceConfigurations = dataHelperServiceConfigurations.Read();
 
@@ -107,8 +134,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 						Name = x.ServiceSpecificationInfo.SpecificationName,
 						Description = x.ServiceSpecificationInfo.Description,
 						Icon = x.ServiceSpecificationInfo.Icon,
-						Properties = serviceProperties.Find(p => p.ID == x.ServiceSpecificationInfo.ServiceProperties)
-						             ?? new Models.ServicePropertyValues { Values = new List<Models.ServicePropertyValue>() },
 						Configurations = serviceConfigurations.Where(p => x.ServiceSpecificationInfo.ServiceSpecificationConfigurationParameters.Contains(p.ID)).ToList(),
 						ServiceItems = x.ServiceItemses.Select(
 								s => new Models.ServiceItem
@@ -134,28 +159,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 							.ToList(),
 					})
 				.ToList();
-		}
-
-		/// <inheritdoc />
-		public override bool TryDelete(Models.ServiceSpecification item)
-		{
-			bool b = true;
-
-			if (item.Properties != null)
-			{
-				b &= new DataHelperServicePropertyValues(_connection).TryDelete(item.Properties);
-			}
-
-			if (item.Configurations != null)
-			{
-				var helperConfigs = new DataHelperServiceSpecificationConfigurationValue(_connection);
-				foreach (var config in item.Configurations)
-				{
-					b &= helperConfigs.TryDelete(config.ID);
-				}
-			}
-
-			return b && TryDelete(item.ID);
 		}
 	}
 }

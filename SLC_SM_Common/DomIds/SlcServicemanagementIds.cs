@@ -204,8 +204,6 @@ namespace DomHelpers.SlcServicemanagement
                 public static FieldDescriptorID SpecificationName { get; } = new FieldDescriptorID(new Guid("08908eda-eb78-4d7f-a462-71769da596a3"));
                 public static FieldDescriptorID Icon { get; } = new FieldDescriptorID(new Guid("7a60d6b5-c37f-4250-810f-b62a501892b9"));
                 public static FieldDescriptorID Description { get; } = new FieldDescriptorID(new Guid("ee3f4719-8930-476a-b91a-ef98476fb170"));
-                public static FieldDescriptorID ServiceProperties { get; } = new FieldDescriptorID(new Guid("2690b1d8-602e-4f6d-8bad-1e197ee8535a"));
-                public static FieldDescriptorID ServiceConfiguration { get; } = new FieldDescriptorID(new Guid("82c72b36-640b-414d-b4da-9c3fd5fe54fb"));
                 public static FieldDescriptorID ServiceSpecificationConfigurationParameters { get; } = new FieldDescriptorID(new Guid("62f7f7af-8452-46da-9f3d-4efd0f5d8b9a"));
             }
 
@@ -227,8 +225,6 @@ namespace DomHelpers.SlcServicemanagement
                 public static FieldDescriptorID ServiceEndTime { get; } = new FieldDescriptorID(new Guid("a1f0a928-fe05-4f47-bbde-e3f88d5ffb6b"));
                 public static FieldDescriptorID Icon { get; } = new FieldDescriptorID(new Guid("bbb840cf-045f-4581-9103-c0ed696e4f08"));
                 public static FieldDescriptorID ServiceSpecifcation { get; } = new FieldDescriptorID(new Guid("20003807-2368-456f-b1ad-c8eb2e5c98e9"));
-                public static FieldDescriptorID ServiceProperties { get; } = new FieldDescriptorID(new Guid("48751f65-2740-4965-b178-acede95cb3e6"));
-                public static FieldDescriptorID ServiceConfiguration { get; } = new FieldDescriptorID(new Guid("040d827c-c713-461f-9f05-aeb3ef15f7de"));
                 public static FieldDescriptorID RelatedOrganization { get; } = new FieldDescriptorID(new Guid("d0f0ea83-ce6f-4c5d-be6a-f30387a4a703"));
                 public static FieldDescriptorID ServiceCategory { get; } = new FieldDescriptorID(new Guid("1aba841d-3c8e-411d-9821-a9209c02e4c8"));
                 public static FieldDescriptorID ServiceConfigurationParameters { get; } = new FieldDescriptorID(new Guid("226d2c8b-544b-4ee2-aec6-093dc3c0e8fa"));
@@ -299,8 +295,6 @@ namespace DomHelpers.SlcServicemanagement
                 public static FieldDescriptorID ServiceCategory { get; } = new FieldDescriptorID(new Guid("50d5611c-e27b-45a3-8767-d3140b101382"));
                 public static FieldDescriptorID ServiceSpecification { get; } = new FieldDescriptorID(new Guid("951f4359-97bf-4d90-b4ca-7fb3eab51aa1"));
                 public static FieldDescriptorID Service { get; } = new FieldDescriptorID(new Guid("cd7a33ff-d5f2-40de-910d-616a6e9b3ce2"));
-                public static FieldDescriptorID Properties { get; } = new FieldDescriptorID(new Guid("a0b3c4f9-f9bc-41ca-a480-fe4878de45b6"));
-                public static FieldDescriptorID Configuration { get; } = new FieldDescriptorID(new Guid("d8b3971c-6331-4aac-a556-9ff378d19070"));
                 public static FieldDescriptorID ServiceOrderItemConfigurations { get; } = new FieldDescriptorID(new Guid("d97aa318-daf2-4085-ac3f-991e53e2952d"));
             }
 
@@ -312,7 +306,6 @@ namespace DomHelpers.SlcServicemanagement
                 public static FieldDescriptorID ServiceItemID { get; } = new FieldDescriptorID(new Guid("01c36e03-5baf-44f9-8bbb-f1e7383cc148"));
                 public static FieldDescriptorID ServiceItemType { get; } = new FieldDescriptorID(new Guid("8b3e1590-2eeb-4c2c-b249-dd61023a1b06"));
                 public static FieldDescriptorID DefinitionReference { get; } = new FieldDescriptorID(new Guid("30c7c421-7c97-4723-91e1-046ba1792ec8"));
-                public static FieldDescriptorID ServiceItemConfiguration { get; } = new FieldDescriptorID(new Guid("9a3144ee-794d-4ea9-8888-c06d9b4789ed"));
                 public static FieldDescriptorID ServiceItemScript { get; } = new FieldDescriptorID(new Guid("bfc7a72c-5e0d-4ffe-9c96-27f5e749d3fa"));
                 public static FieldDescriptorID ImplementationReference { get; } = new FieldDescriptorID(new Guid("8cedc78a-a23f-46c4-92a3-30393704f340"));
                 public static FieldDescriptorID Icon { get; } = new FieldDescriptorID(new Guid("9b0fdbce-8ecc-4480-afc0-42010e8e7a69"));
@@ -3917,76 +3910,6 @@ namespace DomHelpers.SlcServicemanagement
         }
 
         /// <summary>
-        /// Gets or sets the ServiceProperties field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-        /// </list>
-        /// </remarks>
-        public Guid? ServiceProperties
-        {
-            get
-            {
-                var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceSpecificationInfo.ServiceProperties);
-                if (wrapper != null)
-                {
-                    return (Guid? )wrapper.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcServicemanagementIds.Sections.ServiceSpecificationInfo.ServiceProperties);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcServicemanagementIds.Sections.ServiceSpecificationInfo.ServiceProperties, (Guid)value);
-                }
-            }
-        }
-
-        [Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
-        /// <summary>
-        /// Gets the ServiceConfiguration field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// </remarks>
-        public Guid? ServiceConfiguration
-        {
-            get
-            {
-                var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceSpecificationInfo.ServiceConfiguration);
-                if (wrapper != null)
-                {
-                    return (Guid? )wrapper.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the ServiceSpecificationConfigurationParameters field of the DOM Instance.
         /// </summary>
         /// <remarks>
@@ -4440,76 +4363,6 @@ namespace DomHelpers.SlcServicemanagement
                 else
                 {
                     section.AddOrUpdateValue(SlcServicemanagementIds.Sections.ServiceInfo.ServiceSpecifcation, (Guid)value);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the ServiceProperties field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-        /// </list>
-        /// </remarks>
-        public Guid? ServiceProperties
-        {
-            get
-            {
-                var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceInfo.ServiceProperties);
-                if (wrapper != null)
-                {
-                    return (Guid? )wrapper.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcServicemanagementIds.Sections.ServiceInfo.ServiceProperties);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcServicemanagementIds.Sections.ServiceInfo.ServiceProperties, (Guid)value);
-                }
-            }
-        }
-
-        [Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
-        /// <summary>
-        /// Gets the ServiceConfiguration field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// </remarks>
-        public Guid? ServiceConfiguration
-        {
-            get
-            {
-                var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfiguration);
-                if (wrapper != null)
-                {
-                    return (Guid? )wrapper.Value;
-                }
-                else
-                {
-                    return null;
                 }
             }
         }
@@ -6000,76 +5853,6 @@ namespace DomHelpers.SlcServicemanagement
         }
 
         /// <summary>
-        /// Gets or sets the Properties field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// When setting the value:
-        /// <list type="bullet">
-        /// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
-        /// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
-        /// </list>
-        /// </remarks>
-        public Guid? Properties
-        {
-            get
-            {
-                var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceOrderItemServiceInfo.Properties);
-                if (wrapper != null)
-                {
-                    return (Guid? )wrapper.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    section.RemoveFieldValueById(SlcServicemanagementIds.Sections.ServiceOrderItemServiceInfo.Properties);
-                }
-                else
-                {
-                    section.AddOrUpdateValue(SlcServicemanagementIds.Sections.ServiceOrderItemServiceInfo.Properties, (Guid)value);
-                }
-            }
-        }
-
-        [Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
-        /// <summary>
-        /// Gets the Configuration field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// </remarks>
-        public Guid? Configuration
-        {
-            get
-            {
-                var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceOrderItemServiceInfo.Configuration);
-                if (wrapper != null)
-                {
-                    return (Guid? )wrapper.Value;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the ServiceOrderItemConfigurations field of the DOM Instance.
         /// </summary>
         /// <remarks>
@@ -6306,33 +6089,6 @@ namespace DomHelpers.SlcServicemanagement
                 else
                 {
                     section.AddOrUpdateValue(SlcServicemanagementIds.Sections.ServiceItems.DefinitionReference, (String)value);
-                }
-            }
-        }
-
-        [Obsolete("The FieldDescriptor, this property represents, is marked as SoftDeleted, in the SectionDefinition.")]
-        /// <summary>
-        /// Gets the ServiceItemConfiguration field of the DOM Instance.
-        /// </summary>
-        /// <remarks>
-        /// When retrieving the value:
-        /// <list type="bullet">
-        /// <item>If the field has been set, it will return the value.</item>
-        /// <item>If the field is not set it will return <see langword="null"/>.</item>
-        /// </list>
-        /// </remarks>
-        public Guid? ServiceItemConfiguration
-        {
-            get
-            {
-                var wrapper = section.GetValue<Guid>(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemConfiguration);
-                if (wrapper != null)
-                {
-                    return (Guid? )wrapper.Value;
-                }
-                else
-                {
-                    return null;
                 }
             }
         }

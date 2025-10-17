@@ -16,8 +16,6 @@ namespace Library
 		{
 			ServiceCategories = new DataHelperServiceCategory(connection);
 			ServiceSpecifications = new DataHelperServiceSpecification(connection);
-			ServiceProperties = new DataHelperServiceProperties(connection);
-			ServicePropertyValues = new DataHelperServicePropertyValues(connection);
 			ServiceOrders = new DataHelperServiceOrder(connection);
 			ServiceOrderItems = new DataHelperServiceOrderItem(connection);
 			Services = new DataHelperService(connection);
@@ -40,16 +38,6 @@ namespace Library
 		///     Gets the data helper for service specifications.
 		/// </summary>
 		public DataHelperServiceSpecification ServiceSpecifications { get; }
-
-		/// <summary>
-		///     Gets the data helper for service properties.
-		/// </summary>
-		public DataHelperServiceProperties ServiceProperties { get; }
-
-		/// <summary>
-		///     Gets the data helper for service property values.
-		/// </summary>
-		public DataHelperServicePropertyValues ServicePropertyValues { get; }
 
 		/// <summary>
 		///     Gets the data helper for services.

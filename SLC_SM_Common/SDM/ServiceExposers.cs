@@ -12,6 +12,16 @@ namespace DomHelpers.SlcServicemanagement
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using static Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
+
+	/// <summary>
+	/// Exposer-metods for the <see cref="Models.ServiceSpecification"/> instances.
+	/// </summary>
+	public static class ServiceSpecificationExposers
+	{
+		public static readonly Exposer<Models.ServiceSpecification, Guid> Guid = new Exposer<Models.ServiceSpecification, Guid>((obj) => obj.ID, String.Join(".", nameof(ServiceSpecificationExposers), nameof(Guid)));
+		public static readonly Exposer<Models.ServiceSpecification, string> Name = new Exposer<Models.ServiceSpecification, string>((obj) => obj.Name, String.Join(".", nameof(ServiceSpecificationExposers), nameof(Name)));
+	}
 
 	/// <summary>
 	/// Exposer-metods for the <see cref="Models.ServiceConfigurationValue"/> instances.
