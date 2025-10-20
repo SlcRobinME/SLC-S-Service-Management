@@ -3,12 +3,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcServicemanagement;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	/// <inheritdoc />
 	public class DataHelperServiceCategory : DataHelper<Models.ServiceCategory>
@@ -30,11 +27,19 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 		}
 
 		/// <inheritdoc />
-		public override List<Models.ServiceCategory> Read()
+		public override bool TryDelete(Models.ServiceCategory item)
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new ServiceCategoryInstance(x))
-				.ToList();
+			return TryDelete(item.ID);
+		}
+
+		/// <inheritdoc />
+		protected override List<Models.ServiceCategory> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new ServiceCategoryInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.ServiceCategory>();
+			}
 
 			return instances.Select(
 					x => new Models.ServiceCategory
@@ -45,12 +50,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 						Icon = x.ServiceCategoryInfo.Icon,
 					})
 				.ToList();
-		}
-
-		/// <inheritdoc />
-		public override bool TryDelete(Models.ServiceCategory item)
-		{
-			return TryDelete(item.ID);
 		}
 	}
 }

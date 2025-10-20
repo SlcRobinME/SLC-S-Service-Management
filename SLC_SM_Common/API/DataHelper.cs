@@ -3,12 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using Newtonsoft.Json;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.SDM;
 
 	/// <summary>
 	///     Provides helper methods for reading, creating, updating, and deleting DOM instances of type
@@ -17,9 +16,9 @@
 	/// <typeparam name="T">The type of the DOM instance.</typeparam>
 	public abstract class DataHelper<T> where T : class
 	{
-		internal readonly IConnection _connection;
-		internal readonly DomDefinitionId _defId;
-		internal readonly DomHelper _domHelper;
+		protected readonly IConnection _connection;
+		protected readonly DomDefinitionId _defId;
+		protected readonly DomHelper _domHelper;
 
 		/// <summary>
 		///     Initializes a new instance of the <see cref="DataHelper{T}" /> class.
@@ -44,7 +43,27 @@
 		///     Reads all DOM instances of type <typeparamref name="T" />.
 		/// </summary>
 		/// <returns>A list of DOM instances of type <typeparamref name="T" />.</returns>
-		public abstract List<T> Read();
+		public virtual List<T> Read()
+		{
+			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id));
+			return Read(instances);
+		}
+
+		/// <summary>
+		///     Reads all DOM instances of type <typeparamref name="T" /> for the given filter <see cref="FilterElement{T}" />.
+		/// </summary>
+		/// <param name="filter">Filter to limit the items returned.</param>
+		/// <returns>A list of DOM instances of type <typeparamref name="T" />.</returns>
+		public virtual List<T> Read(FilterElement<T> filter)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			var domFilter = FilterTranslator.TranslateFullFilter(filter);
+			return Read(_domHelper.DomInstances.Read(domFilter));
+		}
 
 		/// <summary>
 		///     Attempts to delete the specified DOM instance of type <typeparamref name="T" />.
@@ -74,5 +93,7 @@
 		{
 			return _domHelper.DomInstances.TryDelete(new DomInstance { ID = new DomInstanceId(id) });
 		}
+
+		protected abstract List<T> Read(IEnumerable<DomInstance> domInstances);
 	}
 }

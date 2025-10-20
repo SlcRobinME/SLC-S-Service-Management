@@ -114,7 +114,7 @@ namespace SLCSMDemo
 		////	string categoryType = "Channel";
 		////	string categoryName = "ARD";
 
-		////	var dataHelpers = new DataHelpersServiceManagement(Engine.SLNetRaw);
+		////	var dataHelpers = new DataHelpersServiceManagement(engine.GetUserConnection());
 
 		////	var categoryToMatch = dataHelpers.ServiceCategories.Read().Find(x => x.Type == categoryType && x.Name == categoryName)
 		////	                      ?? throw new InvalidOperationException($"No Category found matching '{categoryType}-{categoryName}'");
@@ -129,7 +129,7 @@ namespace SLCSMDemo
 			//string configurationParameterLabel = "Service Type";
 			string configurationParameterValue = "Channel";
 
-			var dataHelpersSrvMgmt = new DataHelpersServiceManagement(Engine.SLNetRaw);
+			var dataHelpersSrvMgmt = new DataHelpersServiceManagement(engine.GetUserConnection());
 			var services = dataHelpersSrvMgmt.Services.GetServicesByCharacteristic(configurationParameter, null, configurationParameterValue);
 
 			engine.GenerateInformation($"Service(s) found:\r\n{String.Join(Environment.NewLine, services.Select(s => $"{s.Name} ({s.ID})"))}");

@@ -80,7 +80,7 @@ namespace SLCSMDSGetServicesByCharacteristic
 
 			_connection = gqiDms.GetConnection();
 			_dms = _connection.GetDms();
-			_agent = _dms.GetAgents().SingleOrDefault();
+			_agent = _dms.GetAgents().FirstOrDefault();
 			if (_agent == null)
 			{
 				throw new InvalidOperationException("This operation is supported only on single agent dataminer systems");

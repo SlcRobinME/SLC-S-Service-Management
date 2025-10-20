@@ -17,13 +17,15 @@
 	public class ServicePresenter
 	{
 		private readonly List<string> getServiceLabels;
+		private readonly IEngine _engine;
 		private readonly DataHelpersServiceManagement repo;
 		private readonly ServiceView view;
 		private Models.Service instanceToReturn;
 		private bool isEdit = false;
 
-		public ServicePresenter(DataHelpersServiceManagement repo, ServiceView view, List<string> getServiceLabels)
+		public ServicePresenter(IEngine engine, DataHelpersServiceManagement repo, ServiceView view, List<string> getServiceLabels)
 		{
+			_engine = engine;
 			this.repo = repo;
 			this.view = view;
 			this.getServiceLabels = getServiceLabels;
@@ -60,7 +62,7 @@
 				instanceToReturn.Category = view.ServiceCategory.Selected;
 				instanceToReturn.ServiceSpecificationId = view.Specs.Selected?.ID;
 				instanceToReturn.OrganizationId = view.Organizations.Selected?.ID;
-				instanceToReturn.Icon = view.ServiceCategory?.Selected?.Icon ?? string.Empty;
+				instanceToReturn.Icon = view.ServiceCategory?.Selected?.Icon ?? String.Empty;
 
 				return instanceToReturn;
 			}
@@ -77,7 +79,7 @@
 			specs.Insert(0, new Option<Models.ServiceSpecification>("-None-", null));
 			view.Specs.SetOptions(specs);
 
-			var orgs = new DataHelperOrganization(Engine.SLNetRaw).Read()
+			var orgs = new DataHelperOrganization(_engine.GetUserConnection()).Read()
 				.OrderBy(x => x.Name)
 				.Select(x => new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganization.Models.Organization>(x.Name, x))
 				.ToList();

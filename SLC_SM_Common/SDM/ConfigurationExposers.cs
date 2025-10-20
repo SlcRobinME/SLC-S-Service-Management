@@ -12,6 +12,47 @@ namespace DomHelpers.SlcConfigurations
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
 
 	/// <summary>
+	/// Exposer-methods for the <see cref="Models.ConfigurationUnit"/> instances.
+	/// </summary>
+	public static class ConfigurationUnitExposers
+	{
+		public static readonly Exposer<Models.ConfigurationUnit, Guid> Guid = new Exposer<Models.ConfigurationUnit, Guid>((obj) => obj.ID, String.Join(".", nameof(ConfigurationUnitExposers), nameof(Guid)));
+		public static readonly Exposer<Models.ConfigurationUnit, string> Name = new Exposer<Models.ConfigurationUnit, string>((obj) => obj.Name, String.Join(".", nameof(ConfigurationUnitExposers), nameof(Name)));
+	}
+
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.NumberParameterOptions"/> instances.
+	/// </summary>
+	public static class NumberParameterOptionExposers
+	{
+		public static readonly Exposer<Models.NumberParameterOptions, Guid> Guid = new Exposer<Models.NumberParameterOptions, Guid>((obj) => obj.ID, String.Join(".", nameof(NumberParameterOptionExposers), nameof(Guid)));
+	}
+
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.TextParameterOptions"/> instances.
+	/// </summary>
+	public static class TextParameterOptionExposers
+	{
+		public static readonly Exposer<Models.TextParameterOptions, Guid> Guid = new Exposer<Models.TextParameterOptions, Guid>((obj) => obj.ID, String.Join(".", nameof(TextParameterOptionExposers), nameof(Guid)));
+	}
+
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.DiscreteParameterOptions"/> instances.
+	/// </summary>
+	public static class DiscreteParameterOptionExposers
+	{
+		public static readonly Exposer<Models.DiscreteParameterOptions, Guid> Guid = new Exposer<Models.DiscreteParameterOptions, Guid>((obj) => obj.ID, String.Join(".", nameof(DiscreteParameterOptionExposers), nameof(Guid)));
+	}
+
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.DiscreteValue"/> instances.
+	/// </summary>
+	public static class DiscreteValueExposers
+	{
+		public static readonly Exposer<Models.DiscreteValue, Guid> Guid = new Exposer<Models.DiscreteValue, Guid>((obj) => obj.ID, String.Join(".", nameof(DiscreteValueExposers), nameof(Guid)));
+	}
+
+	/// <summary>
 	/// Exposer-methods for the <see cref="Models.ConfigurationParameterValue"/> instances.
 	/// </summary>
 	public static class ConfigurationParameterExposers

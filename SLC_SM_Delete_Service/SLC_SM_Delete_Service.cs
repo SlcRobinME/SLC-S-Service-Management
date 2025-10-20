@@ -52,7 +52,6 @@ namespace SLC_SM_Delete_Service_1
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
 	using Library;
 	using Newtonsoft.Json;
@@ -62,7 +61,9 @@ namespace SLC_SM_Delete_Service_1
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
+	using SLC_SM_Common.Extensions;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
@@ -75,9 +76,16 @@ namespace SLC_SM_Delete_Service_1
 		///     The script entry point.
 		/// </summary>
 		/// <param name="engine">Link with SLAutomation process.</param>
-		/// // engine.ShowUI();
 		public void Run(IEngine engine)
 		{
+			/*
+			* Note:
+			* Do not remove the commented methods below!
+			* The lines are needed to execute an interactive automation script from the non-interactive automation script or from Visio!
+			*
+			* engine.ShowUI();
+			*/
+
 			try
 			{
 				_engine = engine;
@@ -102,22 +110,13 @@ namespace SLC_SM_Delete_Service_1
 			}
 			catch (Exception e)
 			{
-				engine.ExitFail(e.Message);
+				engine.ShowErrorDialog(e);
 			}
 		}
 
 		private void RunSafe()
 		{
-			string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
-			_engine.GenerateInformation(domIdRaw);
-			List<Guid> domIdList = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw);
-			if (domIdList.Count() == 0)
-			{
-				return;
-				//throw new InvalidOperationException("No DOM ID provided as input to the script");
-			}
-
-			var serviceManagementHelper = new DataHelpersServiceManagement(Engine.SLNetRaw);
+			var domIdList = _engine.ReadScriptParamsFromApp<Guid>("DOM ID");
 
 			// confirmation if the user wants to delete the services
 			if (!_engine.ShowConfirmDialog($"Are you sure to you want to delete the selected {domIdList.Count} service(s) from the Inventory?"))
@@ -125,39 +124,25 @@ namespace SLC_SM_Delete_Service_1
 				return;
 			}
 
+			var serviceManagementHelper = new DataHelpersServiceManagement(_engine.GetUserConnection());
 			var dms = _engine.GetDms();
-			foreach (var domId in domIdList)
-			{
-				var service = serviceManagementHelper.Services.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault();
-				if (service != null)
-				{
-					if (service.GenerateMonitoringService == true && FindDmaService(dms, service, out IDmsService dmsService))
-					{
-						dmsService.Delete();
-					}
 
-					_engine.GenerateInformation($"Service that will be removed: {service.ID}/{service.Name}");
-					serviceManagementHelper.Services.TryDelete(service);
-				}
+			FilterElement<Models.Service> filter = new ORFilterElement<Models.Service>();
+			foreach (Guid domId in domIdList)
+			{
+				filter = filter.OR(ServiceExposers.Guid.Equal(domId));
 			}
-		}
 
-		private bool FindDmaService(IDms dms, Models.Service service, out IDmsService dmsService)
-		{
-			dmsService = null;
-			try
+			var services = serviceManagementHelper.Services.Read(filter);
+			foreach (var service in services)
 			{
-				if (dms.ServiceExists(service.Name))
+				if (service.GenerateMonitoringService == true && dms.ServiceExistsSafe(service.Name, out IDmsService dmsService))
 				{
-					dmsService = dms.GetService(service.Name);
-					return true;
+					dmsService.Delete();
 				}
 
-				return false;
-			}
-			catch (Exception)
-			{
-				return false;
+				_engine.GenerateInformation($"Service that will be removed: {service.ID}/{service.Name}");
+				serviceManagementHelper.Services.TryDelete(service);
 			}
 		}
 	}

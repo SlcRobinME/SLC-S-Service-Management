@@ -2,16 +2,18 @@
 {
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 
-	public static class DmaExtensions
+	public static class DmsExtensions
 	{
-		public static bool ServiceExistsSafe(this IDma agent, string serviceName)
+		public static bool ServiceExistsSafe(this IDms dms, string serviceName, out IDmsService service)
 		{
 			try
 			{
-				return agent.ServiceExists(serviceName);
+				service = dms.GetService(serviceName);
+				return true;
 			}
 			catch
 			{
+				service = default;
 				return false;
 			}
 		}

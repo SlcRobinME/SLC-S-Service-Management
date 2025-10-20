@@ -51,6 +51,7 @@ DATE		VERSION		AUTHOR			COMMENTS
 
 namespace SLCSMDSTopologySelectedItems
 {
+	using System;
 	using System.Linq;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 
@@ -97,7 +98,7 @@ namespace SLCSMDSTopologySelectedItems
 				&& (_connectionIds == null || !_connectionIds.Any()))
 			{
 				type = "None";
-				ids = string.Empty;
+				ids = String.Empty;
 			}
 			else if (_nodeIds != null && _nodeIds.Any())
 			{

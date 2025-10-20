@@ -7,7 +7,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
 
 	/// <inheritdoc />
 	public class DataHelperServiceSpecification : DataHelper<Models.ServiceSpecification>
@@ -81,25 +80,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 		}
 
 		/// <inheritdoc />
-		public override List<Models.ServiceSpecification> Read()
-		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id));
-			return Read(instances);
-		}
-
-		/// <inheritdoc />
-		public List<Models.ServiceSpecification> Read(FilterElement<Models.ServiceSpecification> filter)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
-
-			var domFilter = FilterTranslator.TranslateFullFilter(filter);
-			return Read(_domHelper.DomInstances.Read(domFilter));
-		}
-
-		/// <inheritdoc />
 		public override bool TryDelete(Models.ServiceSpecification item)
 		{
 			bool b = true;
@@ -116,7 +96,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			return b && TryDelete(item.ID);
 		}
 
-		private List<Models.ServiceSpecification> Read(List<DomInstance> domInstances)
+		protected override List<Models.ServiceSpecification> Read(IEnumerable<DomInstance> domInstances)
 		{
 			var instances = domInstances.Select(x => new ServiceSpecificationsInstance(x)).ToList();
 			if (instances.Count < 1)
@@ -124,8 +104,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				return new List<Models.ServiceSpecification>();
 			}
 
-			var dataHelperServiceConfigurations = new DataHelperServiceSpecificationConfigurationValue(_connection);
-			var serviceConfigurations = dataHelperServiceConfigurations.Read();
+			var serviceConfigurations = GetRequiredServiceSpecificationConfigurationValues(instances);
 
 			return instances.Select(
 					x => new Models.ServiceSpecification
@@ -159,6 +138,18 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 							.ToList(),
 					})
 				.ToList();
+		}
+
+		private List<Models.ServiceSpecificationConfigurationValue> GetRequiredServiceSpecificationConfigurationValues(List<ServiceSpecificationsInstance> instances)
+		{
+			FilterElement<Models.ServiceSpecificationConfigurationValue> filter = new ORFilterElement<Models.ServiceSpecificationConfigurationValue>();
+			var guids = instances.Where(i => i?.ServiceSpecificationInfo?.ServiceSpecificationConfigurationParameters != null).SelectMany(i => i.ServiceSpecificationInfo.ServiceSpecificationConfigurationParameters).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filter = filter.OR(ServiceSpecificationConfigurationValueExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperServiceSpecificationConfigurationValue(_connection).Read(filter) : new List<Models.ServiceSpecificationConfigurationValue>();
 		}
 	}
 }

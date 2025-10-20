@@ -142,14 +142,14 @@ namespace SLCSMDSGetWorkflows
 			return properties
 				.FirstOrDefault(p =>
 					p.DataMinerID == liteElementInfoEvent.DataMinerID &&
-					p.ElementID == liteElementInfoEvent.ElementID)?.Value ?? string.Empty;
+					p.ElementID == liteElementInfoEvent.ElementID)?.Value ?? String.Empty;
 		}
 
 		private string FetchWorkflowCategory(WorkflowsInstance workflow, IEnumerable<PropertyValuesInstance> propertyValues)
 		{
 			return propertyValues
 				.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())?
-				.PropertyValues.FirstOrDefault(v => v.PropertyName == "Category")?.Value ?? string.Empty;
+				.PropertyValues.FirstOrDefault(v => v.PropertyName == "Category")?.Value ?? String.Empty;
 		}
 
 		private GQIRow BuildRow(WorkflowsInstance workflow, string category)

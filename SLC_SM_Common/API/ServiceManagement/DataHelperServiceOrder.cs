@@ -3,9 +3,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcServicemanagement;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -69,14 +67,34 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 		}
 
 		/// <inheritdoc />
-		public override List<Models.ServiceOrder> Read()
+		public override bool TryDelete(Models.ServiceOrder item)
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new ServiceOrdersInstance(x))
-				.ToList();
+			bool ok = true;
 
-			var dataHelperServiceOrderItem = new DataHelperServiceOrderItem(_connection);
-			var serviceOrderItems = dataHelperServiceOrderItem.Read();
+			var helper = new DataHelperServiceOrderItem(_connection);
+			if (item.OrderItems != null)
+			{
+				foreach (var orderItem in item.OrderItems)
+				{
+					if (orderItem.ServiceOrderItem != null)
+					{
+						ok &= helper.TryDelete(orderItem.ServiceOrderItem);
+					}
+				}
+			}
+
+			return TryDelete(item.ID);
+		}
+
+		protected override List<Models.ServiceOrder> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new ServiceOrdersInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.ServiceOrder>();
+			}
+
+			var serviceOrderItems = GetRequiredServiceOrderItems(instances);
 
 			return instances.Select(
 					x =>
@@ -108,24 +126,16 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				.ToList();
 		}
 
-		/// <inheritdoc />
-		public override bool TryDelete(Models.ServiceOrder item)
+		private List<Models.ServiceOrderItem> GetRequiredServiceOrderItems(List<ServiceOrdersInstance> instances)
 		{
-			bool ok = true;
-
-			var helper = new DataHelperServiceOrderItem(_connection);
-			if (item.OrderItems != null)
+			FilterElement<Models.ServiceOrderItem> filter = new ORFilterElement<Models.ServiceOrderItem>();
+			var guids = instances.Where(i => i?.ServiceOrderItemses != null).SelectMany(i => i.ServiceOrderItemses).Where(i => i.ServiceOrderItem != null).Select(i => i.ServiceOrderItem.Value).Distinct().ToList();
+			foreach (Guid guid in guids)
 			{
-				foreach (var orderItem in item.OrderItems)
-				{
-					if (orderItem.ServiceOrderItem != null)
-					{
-						ok &= helper.TryDelete(orderItem.ServiceOrderItem);
-					}
-				}
+				filter = filter.OR(ServiceOrderItemExposers.Guid.Equal(guid));
 			}
 
-			return TryDelete(item.ID);
+			return guids.Count > 0 ? new DataHelperServiceOrderItem(_connection).Read(filter) : new List<Models.ServiceOrderItem>();
 		}
 	}
 }

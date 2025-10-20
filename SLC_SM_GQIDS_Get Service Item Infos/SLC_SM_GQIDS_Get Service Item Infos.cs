@@ -5,6 +5,7 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 	using DomHelpers.SlcServicemanagement;
 	using Library;
 	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 
@@ -25,13 +26,17 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 		{
 			return new GQIColumn[]
 			{
+				new GQIStringColumn("ID"),
 				new GQIStringColumn("Name"),
 				new GQIStringColumn("Description"),
+				new GQIStringColumn("Icon"),
+				new GQIBooleanColumn("Monitored"),
 				new GQIStringColumn("Specification"),
 				new GQIStringColumn("Organization"),
 				new GQIStringColumn("Category"),
 				new GQIDateTimeColumn("Start Time"),
 				new GQIDateTimeColumn("End Time"),
+				new GQIIntColumn("Alarm Level"),
 			};
 		}
 
@@ -94,18 +99,32 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 				org = new DataHelpersPeopleAndOrganizations(dms.GetConnection()).Organizations.Read().Find(x => x.ID == service.OrganizationId.Value)?.Name ?? String.Empty;
 			}
 
+			string alarmLevel = String.Empty;
+			if (service.GenerateMonitoringService.GetValueOrDefault())
+			{
+				var liteServiceInfoEvent = dms.SendMessage(new GetLiteServiceInfo { NameFilter = service.Name }) as LiteServiceInfoEvent;
+				if (liteServiceInfoEvent != null)
+				{
+					alarmLevel = (dms.SendMessage(new GetServiceStateMessage { DataMinerID = liteServiceInfoEvent.DataMinerID, ServiceID = liteServiceInfoEvent.ID }) as ServiceStateEventMessage)?.Level.ToString() ?? String.Empty;
+				}
+			}
+
 			return new GQIRow[]
 			{
 				new GQIRow(
 					new[]
 					{
+						new GQICell { Value = service.ID.ToString() },
 						new GQICell { Value = service.Name },
-						new GQICell { Value = service.Description },
+						new GQICell { Value = service.Description ?? String.Empty },
+						new GQICell { Value = service.Icon ?? String.Empty },
+						new GQICell { Value = service.GenerateMonitoringService.GetValueOrDefault() },
 						new GQICell { Value = spec },
 						new GQICell { Value = org },
 						new GQICell { Value = service.Category?.Name ?? String.Empty },
 						new GQICell { Value = service.StartTime },
 						new GQICell { Value = service.EndTime },
+						new GQICell { Value = alarmLevel },
 					}),
 			};
 		}

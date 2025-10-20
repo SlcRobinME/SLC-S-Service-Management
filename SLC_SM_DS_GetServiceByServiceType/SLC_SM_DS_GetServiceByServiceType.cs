@@ -88,7 +88,7 @@ namespace SLCSMDSGetServiceByServiceType
 			var gqiDms = args.DMS;
 			_connection = gqiDms.GetConnection();
 			_dms = _connection.GetDms();
-			_agent = _dms.GetAgents().SingleOrDefault();
+			_agent = _dms.GetAgents().FirstOrDefault();
 			if (_agent == null)
 			{
 				throw new InvalidOperationException("This operation is supported only on single agent dataminer systems");
@@ -211,12 +211,12 @@ namespace SLCSMDSGetServiceByServiceType
 				new GQICell { Value = service.Service.ServiceInfo.Icon },
 				new GQICell { Value = service.Service.Status.ToString() },
 				new GQICell { Value = (int) TryGetAlarmLevel(service) },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Service Type", out var type) ? type : string.Empty },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Reception Type", out var receptionType) ? receptionType : string.Empty },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Channel ID", out var channelId) ? channelId : string.Empty },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Video Format", out var videoFormat) ? videoFormat : string.Empty },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Distribution Type", out var distType) ? distType : string.Empty },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Region", out var region) ? region : string.Empty },
+				new GQICell { Value = service.ParameterValues.TryGetValue("Service Type", out var type) ? type : String.Empty },
+				new GQICell { Value = service.ParameterValues.TryGetValue("Reception Type", out var receptionType) ? receptionType : String.Empty },
+				new GQICell { Value = service.ParameterValues.TryGetValue("Channel ID", out var channelId) ? channelId : String.Empty },
+				new GQICell { Value = service.ParameterValues.TryGetValue("Video Format", out var videoFormat) ? videoFormat : String.Empty },
+				new GQICell { Value = service.ParameterValues.TryGetValue("Distribution Type", out var distType) ? distType : String.Empty },
+				new GQICell { Value = service.ParameterValues.TryGetValue("Region", out var region) ? region : String.Empty },
 			});
 		}
 

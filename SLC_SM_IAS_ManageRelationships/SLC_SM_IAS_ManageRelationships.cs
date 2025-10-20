@@ -53,6 +53,7 @@ namespace SLCSMIASManageRelationships
 {
 	using System;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 	using SLC_SM_IAS_ManageRelationships.Controller;
 
 	/// <summary>
@@ -94,11 +95,7 @@ namespace SLCSMIASManageRelationships
 			}
 			catch (Exception e)
 			{
-				var popup = engine.PrepareSubScript("SLC_SM_IAS_PopupMessage");
-				popup.SelectScriptParam("Title", "Attention!");
-				popup.SelectScriptParam("Message", e.Message);
-				popup.SelectScriptParam("ButtonLabel", "Ok");
-				popup.StartScript();
+				engine.ShowPopupDialog("Attention!", e.Message, "OK");
 			}
 		}
 

@@ -66,6 +66,7 @@ namespace SLCSMCreateJobForServiceItem
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Relationships;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Workflows;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using OutputData = Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler.OutputData;
@@ -118,8 +119,7 @@ namespace SLCSMCreateJobForServiceItem
 
 		private void RunSafe(IEngine engine)
 		{
-			string domIdRaw = engine.GetScriptParam("DOM ID").Value;
-			Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
+			Guid domId = engine.ReadScriptParamFromApp<Guid>("DOM ID");
 			if (domId == Guid.Empty)
 			{
 				throw new InvalidOperationException("No DOM ID provided as input to the script");
@@ -130,7 +130,7 @@ namespace SLCSMCreateJobForServiceItem
 			var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
 							  ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
 
-			string label = engine.GetScriptParam("Service Item Label").Value.Trim('"', '[', ']');
+			string label = engine.ReadScriptParamFromApp("Service Item Label");
 
 			var instance = ServiceInstancesExtentions.GetTypedInstance(domInstance);
 			ServiceItemsSection serviceItemsSection = instance.GetServiceItems().SingleOrDefault(s => s.Label == label);

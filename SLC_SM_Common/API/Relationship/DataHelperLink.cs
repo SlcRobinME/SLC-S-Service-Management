@@ -3,12 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcRelationships;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	public class DataHelperLink : DataHelper<Models.Link>
 	{
@@ -30,18 +27,12 @@
 			return CreateOrUpdateInstance(instance);
 		}
 
-		public override List<Models.Link> Read()
-		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id));
-			return Read(instances);
-		}
-
 		public override bool TryDelete(Models.Link item)
 		{
 			return TryDelete(item.ID);
 		}
 
-		private List<Models.Link> Read(List<DomInstance> domInstances)
+		protected override List<Models.Link> Read(IEnumerable<DomInstance> domInstances)
 		{
 			var instances = domInstances.Select(x => new LinksInstance(x)).ToList();
 			if (instances.Count < 1)

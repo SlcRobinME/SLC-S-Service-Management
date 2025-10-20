@@ -54,12 +54,14 @@ namespace SLC_SM_IAS_Service_Spec_Configuration
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using DomHelpers.SlcServicemanagement;
 	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
-	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Service_Spec_Configuration.Presenters;
 	using SLC_SM_IAS_Service_Spec_Configuration.Views;
 
@@ -117,19 +119,14 @@ namespace SLC_SM_IAS_Service_Spec_Configuration
 		private void RunSafe()
 		{
 			// Input
-			string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
-			Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
-			if (domId == Guid.Empty)
-			{
-				throw new InvalidOperationException("No DOM ID provided as input to the script");
-			}
+			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
 
-			var instance = new DataHelperServiceSpecification(Engine.SLNetRaw).Read().Find(x => x.ID == domId)
+			var specification = new DataHelperServiceSpecification(_engine.GetUserConnection()).Read(ServiceSpecificationExposers.Guid.Equal(domId)).FirstOrDefault()
 				?? throw new InvalidOperationException($"Instance with ID '{domId}' does not exist");
 
 			// Model-View-Presenter
 			var view = new ServiceConfigurationView(_engine);
-			var presenter = new ServiceConfigurationPresenter(_engine, _controller, view, instance);
+			var presenter = new ServiceConfigurationPresenter(_engine, _controller, view, specification);
 
 			presenter.LoadFromModel();
 

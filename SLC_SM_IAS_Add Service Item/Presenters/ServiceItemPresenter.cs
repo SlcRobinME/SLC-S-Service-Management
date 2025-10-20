@@ -269,7 +269,7 @@
 			{
 				if (specifications.Count < 1)
 				{
-					specifications.AddRange(new DataHelperServiceSpecification(Engine.SLNetRaw).Read());
+					specifications.AddRange(new DataHelperServiceSpecification(engine.GetUserConnection()).Read());
 				}
 
 				List<string> specOptions = specifications.Select(x => x.Name).OrderBy(x => x).ToList();

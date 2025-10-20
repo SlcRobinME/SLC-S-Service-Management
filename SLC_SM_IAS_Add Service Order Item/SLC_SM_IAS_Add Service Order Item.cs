@@ -58,6 +58,7 @@ namespace SLC_SM_IAS_Add_Service_Order_Item_1
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Add_Service_Order_Item_1.Presenters;
@@ -149,24 +150,19 @@ namespace SLC_SM_IAS_Add_Service_Order_Item_1
 
 		private void RunSafe()
 		{
-			string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
-			Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
-			if (domId == Guid.Empty)
-			{
-				throw new InvalidOperationException("No DOM ID provided as input to the script");
-			}
+			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
 
-			string actionRaw = _engine.GetScriptParam("Action").Value.Trim('"', '[', ']');
+			string actionRaw = _engine.ReadScriptParamFromApp("Action");
 			if (!Enum.TryParse(actionRaw, true, out Action action))
 			{
 				throw new InvalidOperationException("No Action provided as input to the script");
 			}
 
-			var repo = new DataHelpersServiceManagement(Engine.SLNetRaw);
+			var repo = new DataHelpersServiceManagement(_engine.GetUserConnection());
 			var order = repo.ServiceOrders.Read().Find(x => x.ID == domId)
 				?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system.");
 
-			Guid.TryParse(_engine.GetScriptParam("Service Order Item ID").Value.Trim('"', '[', ']'), out Guid orderItemid);
+			Guid.TryParse(_engine.ReadScriptParamFromApp("Service Order Item ID"), out Guid orderItemid);
 
 			var orderItem = order.OrderItems.FirstOrDefault(x => x.ServiceOrderItem?.ID == orderItemid);
 

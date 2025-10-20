@@ -15,7 +15,7 @@
 		<Exe id="2" type="csharp">
 			<Value><![CDATA[[Project:SLC_SM_GQIDS_Get Service Items]]]></Value>
 			<Param type="preCompile">true</Param>
-			<Param type="libraryName">GetServiceItemsMultipleSections</Param>
+			<Param type="libraryName">GetServiceItems</Param>
 			<Message />
 		</Exe>
 	</Script>

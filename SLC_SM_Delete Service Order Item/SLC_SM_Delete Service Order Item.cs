@@ -55,11 +55,14 @@ namespace SLC_SM_Delete_Service_Order_Item_1
 {
 	using System;
 	using System.Linq;
-
+	using DomHelpers.SlcServicemanagement;
 	using Library;
 
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
@@ -74,6 +77,14 @@ namespace SLC_SM_Delete_Service_Order_Item_1
 		/// <param name="engine">Link with SLAutomation process.</param>
 		public void Run(IEngine engine)
 		{
+			/*
+			* Note:
+			* Do not remove the commented methods below!
+			* The lines are needed to execute an interactive automation script from the non-interactive automation script or from Visio!
+			*
+			* engine.ShowUI();
+			*/
+
 			try
 			{
 				_engine = engine;
@@ -98,7 +109,7 @@ namespace SLC_SM_Delete_Service_Order_Item_1
 			}
 			catch (Exception e)
 			{
-				engine.ExitFail(e.Message);
+				engine.ShowErrorDialog(e);
 			}
 		}
 
@@ -110,7 +121,10 @@ namespace SLC_SM_Delete_Service_Order_Item_1
 				throw new InvalidOperationException($"No Service order item exists with ID '{serviceOrderItemId}' to remove");
 			}
 
-			repo.ServiceOrderItems.TryDelete(itemToRemove.ServiceOrderItem);
+			if (!repo.ServiceOrderItems.TryDelete(itemToRemove.ServiceOrderItem))
+			{
+				throw new InvalidOperationException("Failed to remove the Service Order item");
+			}
 
 			domInstance.OrderItems.Remove(itemToRemove);
 			repo.ServiceOrders.CreateOrUpdate(domInstance);
@@ -118,18 +132,22 @@ namespace SLC_SM_Delete_Service_Order_Item_1
 
 		private void RunSafe()
 		{
-			if (!Guid.TryParse(_engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']'), out Guid domId))
+			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
+
+			Guid serviceOrderItemId = _engine.ReadScriptParamFromApp<Guid>("Service Order Item ID");
+
+			// confirmation if the user wants to delete the services
+			if (!_engine.ShowConfirmDialog($"Are you sure to you want to delete the selected service order item(s)?"))
 			{
-				throw new InvalidOperationException("No DOM ID provided as input to the script");
+				return;
 			}
 
-			if (!Guid.TryParse(_engine.GetScriptParam("Service Order Item ID").Value.Trim('"', '[', ']'), out Guid serviceOrderItemId))
+			var repo = new DataHelpersServiceManagement(_engine.GetUserConnection());
+			var orderItemInstance = repo.ServiceOrders.Read(ServiceOrderExposers.Guid.Equal(domId)).FirstOrDefault();
+			if (orderItemInstance == null)
 			{
-				throw new InvalidOperationException("No Service Order Item ID provided as input to the script");
+				return;
 			}
-
-			var repo = new DataHelpersServiceManagement(Engine.SLNetRaw);
-			var orderItemInstance = repo.ServiceOrders.Read().Find(x => x.ID == domId);
 
 			DeleteServiceItemFromInstance(repo, orderItemInstance, serviceOrderItemId);
 		}

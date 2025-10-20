@@ -58,8 +58,8 @@
 
 		public void LoadFromModel()
 		{
-			repoService = new DataHelpersServiceManagement(Engine.SLNetRaw);
-			repoConfig = new DataHelpersConfigurations(Engine.SLNetRaw);
+			repoService = new DataHelpersServiceManagement(engine.GetUserConnection());
+			repoConfig = new DataHelpersConfigurations(engine.GetUserConnection());
 
 			var configParams = repoConfig.ConfigurationParameters.Read();
 

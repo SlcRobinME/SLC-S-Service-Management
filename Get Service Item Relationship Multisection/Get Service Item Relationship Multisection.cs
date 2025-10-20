@@ -157,7 +157,7 @@ namespace GetServiceItemRelationshipMultisection
 		private string GetReferencedObjectName(string serviceItemId)
 		{
 			return _serviceInstance.GetServiceItems()
-			.FirstOrDefault(i => i.ServiceItemID.ToString() == serviceItemId)?.DefinitionReference ?? string.Empty;
+			.FirstOrDefault(i => i.ServiceItemID.ToString() == serviceItemId)?.DefinitionReference ?? String.Empty;
 		}
 
 		private GQIRow BuildRow(ServiceItemRelationshipSection r)
@@ -204,7 +204,7 @@ namespace GetServiceItemRelationshipMultisection
 				.FirstOrDefault(w => w.Name == workflowName)?.Nodeses
 				.FirstOrDefault(n => n.NodeID == interfaceId);
 
-			return node?.NodeAlias ?? string.Empty;
+			return node?.NodeAlias ?? String.Empty;
 		}
 
 		private GQIPage EmptyPage()

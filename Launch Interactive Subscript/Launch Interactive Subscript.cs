@@ -62,6 +62,7 @@ namespace Launch_Interactive_Subscript_1
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
@@ -84,16 +85,13 @@ namespace Launch_Interactive_Subscript_1
 
 			try
 			{
-				if (!Guid.TryParse(engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']'), out Guid domId))
-				{
-					return;
-				}
+				Guid domId = engine.ReadScriptParamFromApp<Guid>("DOM ID");
 
 				var srvHelper = new DataHelpersServiceManagement(engine.GetUserConnection());
 				Models.Service service = srvHelper.Services.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault()
 										 ?? throw new InvalidOperationException($"No Service exists on the system with ID '{domId}'");
 
-				string itemLabel = engine.GetScriptParam("Item Label").Value.Trim('"', '[', ']');
+				string itemLabel = engine.ReadScriptParamFromApp("Item Label");
 				var serviceItem = service.ServiceItems.Find(s => s.Label == itemLabel);
 				if (serviceItem == null)
 				{

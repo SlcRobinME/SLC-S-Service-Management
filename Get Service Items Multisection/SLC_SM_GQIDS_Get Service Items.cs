@@ -2,7 +2,6 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 {
 	// Used to process the Service Items
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
@@ -15,12 +14,11 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 	using SLDataGateway.API.Querying;
 
 	// Required to mark the interface as a GQI data source
-	[GQIMetaData(Name = "Get_ServiceItems")]
+	[GQIMetaData(Name = "Get_ServiceItemsMultipleSections")]
 	public class EventManagerGetMultipleSections : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = true };
-		private DomHelper _domHelper;
 		private GQIDMS dms;
 
 		// variable where input argument will be stored
@@ -43,11 +41,14 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 				new GQIStringColumn("Service Item Script"),
 				new GQIStringColumn("Implementation Reference"),
 				new GQIStringColumn("Implementation Reference Name"),
-				new GQIStringColumn("ID"),
 				new GQIStringColumn("Implementation Reference Link"),
 				new GQIBooleanColumn("Implementation Reference Has Value"),
 				new GQIBooleanColumn("Implementation Reference Name Has Value"),
 				new GQIBooleanColumn("Implementation Reference Link Has Value"),
+				new GQIStringColumn("Implementation State"),
+				new GQIStringColumn("Implementation Reference Custom Link"),
+				new GQIBooleanColumn("Implementation Reference Custom Link Has Value"),
+				new GQIStringColumn("Monitoring Service State"),
 			};
 		}
 
@@ -82,8 +83,85 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
 			dms = args.DMS;
-
 			return default;
+		}
+
+		private GQIRow BuildRow(Models.ServiceItem item)
+		{
+			var implementationRef = GetImplementationRefName(item.ImplementationReference, item.DefinitionReference);
+			return new GQIRow(
+				Guid.NewGuid().ToString(),
+				new[]
+				{
+					new GQICell { Value = item.Label },
+					new GQICell { Value = (int)item.ID },
+					new GQICell { Value = SlcServicemanagementIds.Enums.Serviceitemtypes.ToValue(item.Type) },
+					new GQICell { Value = item.DefinitionReference ?? String.Empty },
+					new GQICell { Value = item.Script ?? String.Empty },
+					new GQICell { Value = item.ImplementationReference ?? String.Empty },
+					new GQICell { Value = implementationRef.Name },
+					new GQICell { Value = implementationRef.ServiceId },
+					new GQICell { Value = !String.IsNullOrEmpty(item.ImplementationReference) },
+					new GQICell { Value = !String.IsNullOrEmpty(implementationRef.Name) },
+					new GQICell { Value = !String.IsNullOrEmpty(implementationRef.ServiceId) },
+					new GQICell { Value = implementationRef.State },
+					new GQICell { Value = implementationRef.CustomLink },
+					new GQICell { Value = !String.IsNullOrEmpty(implementationRef.CustomLink) },
+					new GQICell { Value = implementationRef.MonServiceState },
+				});
+		}
+
+		private ImplementationItemInfo GetImplementationRefName(string referenceId, string definitionReference)
+		{
+			if (String.IsNullOrEmpty(referenceId) || !Guid.TryParse(referenceId, out Guid id))
+			{
+				return new ImplementationItemInfo();
+			}
+
+			var inst = new DomHelper(dms.SendMessages, SlcWorkflowIds.ModuleId).DomInstances.Read(DomInstanceExposers.Id.Equal(id)).FirstOrDefault();
+			if (inst != null)
+			{
+				var jobInst = new JobsInstance(inst);
+				return new ImplementationItemInfo
+				{
+					Name = inst.Name,
+					State = jobInst.Status.ToString(),
+				};
+			}
+
+			var serv = new DataHelperService(dms.GetConnection()).Read(ServiceExposers.Guid.Equal(id)).FirstOrDefault();
+			if (serv != null)
+			{
+				return new ImplementationItemInfo
+				{
+					Name = serv.Name,
+				};
+			}
+
+			var request = new ManagerStoreStartPagingRequest<ReservationInstance>(ReservationInstanceExposers.ID.Equal(id).ToQuery(), 10);
+			var reservation = ((ManagerStorePagingResponse<ReservationInstance>)dms.SendMessage(request))?.Objects?.FirstOrDefault() as ServiceReservationInstance;
+			if (reservation != null)
+			{
+				string customReference = null;
+				if (!String.IsNullOrEmpty(definitionReference))
+				{
+					var liteElementInfoEvent = dms.SendMessage(new GetElementByNameMessage(definitionReference)) as ElementInfoEventMessage;
+					customReference = liteElementInfoEvent?.GetPropertyValue("App Link");
+				}
+
+				var serviceInfoEventMessage = dms.SendMessage(new GetServiceStateMessage { DataMinerID = reservation.ServiceID.DataMinerID, ServiceID = reservation.ServiceID.SID }) as ServiceStateEventMessage;
+
+				return new ImplementationItemInfo
+				{
+					Name = reservation.Name,
+					ServiceId = reservation.ServiceID.ToString(),
+					State = reservation.Status.ToString(),
+					CustomLink = customReference ?? String.Empty,
+					MonServiceState = serviceInfoEventMessage?.Level.ToString() ?? String.Empty,
+				};
+			}
+
+			return new ImplementationItemInfo();
 		}
 
 		private GQIRow[] GetMultiSection()
@@ -95,94 +173,32 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 				return Array.Empty<GQIRow>();
 			}
 
-			// will initiate DomHelper
-			LoadApplicationHandlersAndHelpers();
-
-			var domIntanceId = new DomInstanceId(instanceDomId);
-
-			// create filter to filter event instances with specific dom event ids
-			var filter = DomInstanceExposers.Id.Equal(domIntanceId);
-
-			var domInstance = _domHelper.DomInstances.Read(filter).FirstOrDefault();
-			if (domInstance == null)
+			var service = new DataHelperService(dms.GetConnection()).Read(ServiceExposers.Guid.Equal(instanceDomId)).FirstOrDefault();
+			if (service != null)
 			{
-				return Array.Empty<GQIRow>();
+				return service.ServiceItems.Select(BuildRow).ToArray();
 			}
 
-			// Service item list to fill with either service or service specification's service items
-			IList<ServiceItemsSection> serviceItems = new List<ServiceItemsSection>();
-
-			if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.Services.Id)
+			var spec = new DataHelperServiceSpecification(dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(instanceDomId)).FirstOrDefault();
+			if (spec != null)
 			{
-				var instance = new ServicesInstance(domInstance);
-				serviceItems = instance.ServiceItemses;
-			}
-			else if (domInstance.DomDefinitionId.Id == SlcServicemanagementIds.Definitions.ServiceSpecifications.Id)
-			{
-				var instance = new ServiceSpecificationsInstance(domInstance);
-				serviceItems = instance.ServiceItemses;
-			}
-			else
-			{
-				// For future use
+				return spec.ServiceItems.Select(BuildRow).ToArray();
 			}
 
-			// GenerateInformationEvent("test");
-			return serviceItems
-				.Where(x => !String.IsNullOrEmpty(x.Label))
-				.Select(BuildRow)
-				.ToArray();
+			return Array.Empty<GQIRow>();
 		}
+	}
 
-		private GQIRow BuildRow(ServiceItemsSection item)
-		{
-			var implementationRef = GetImplementationRefName(item.ImplementationReference);
-			return new GQIRow(
-				new[]
-				{
-					new GQICell { Value = item.Label },
-					new GQICell { Value = (int)(item.ServiceItemID ?? 0) },
-					new GQICell { Value = item.ServiceItemType.HasValue ? SlcServicemanagementIds.Enums.Serviceitemtypes.ToValue(item.ServiceItemType.Value) : String.Empty },
-					new GQICell { Value = item.DefinitionReference ?? String.Empty },
-					new GQICell { Value = item.ServiceItemScript ?? String.Empty },
-					new GQICell { Value = item.ImplementationReference ?? String.Empty },
-					new GQICell { Value = implementationRef.Item1 },
-					new GQICell { Value = item.SectionID.Id.ToString() },
-					new GQICell { Value = implementationRef.Item2 },
-					new GQICell { Value = !String.IsNullOrEmpty(item.ImplementationReference) },
-					new GQICell { Value = !String.IsNullOrEmpty(implementationRef.Item1) },
-					new GQICell { Value = !String.IsNullOrEmpty(implementationRef.Item2) },
-				});
-		}
+	internal sealed class ImplementationItemInfo
+	{
+		public string Name { get; set; } = String.Empty;
 
-		private (string, string) GetImplementationRefName(string reference)
-		{
-			if (String.IsNullOrEmpty(reference) || !Guid.TryParse(reference, out Guid id))
-			{
-				return (String.Empty, String.Empty);
-			}
+		public string ServiceId { get; set; } = String.Empty;
 
-			var inst = new DomHelper(dms.SendMessages, SlcWorkflowIds.ModuleId).DomInstances.Read(DomInstanceExposers.Id.Equal(id)).FirstOrDefault();
-			if (inst != null)
-			{
-				return (inst.Name, String.Empty);
-			}
+		public string State { get; set; } = String.Empty;
 
-			var serv = new DataHelperService(dms.GetConnection()).Read(ServiceExposers.Guid.Equal(id)).FirstOrDefault();
-			if (serv != null)
-			{
-				return (serv.Name, String.Empty);
-			}
+		public string CustomLink { get; set; } = String.Empty;
 
-			var request = new ManagerStoreStartPagingRequest<ReservationInstance>(ReservationInstanceExposers.ID.Equal(id).ToQuery(), 1000);
-			var reservation = ((ManagerStorePagingResponse<ReservationInstance>)dms.SendMessage(request))?.Objects?.FirstOrDefault() as ServiceReservationInstance;
-
-			return (reservation?.Name ?? String.Empty, reservation?.ServiceID?.ToString() ?? String.Empty);
-		}
-
-		private void LoadApplicationHandlersAndHelpers()
-		{
-			_domHelper = new DomHelper(dms.SendMessages, SlcServicemanagementIds.ModuleId);
-		}
+		public string MonServiceState { get; set; } = String.Empty;
 	}
 }

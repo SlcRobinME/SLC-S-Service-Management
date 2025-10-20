@@ -56,6 +56,7 @@ namespace SLC_SM_IAS_Add_Service_Order_1
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Add_Service_Order_1.Presenters;
@@ -124,15 +125,15 @@ namespace SLC_SM_IAS_Add_Service_Order_1
 
 		private void RunSafe()
 		{
-			Guid.TryParse(_engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']'), out Guid domId);
+			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
 
-			string actionRaw = _engine.GetScriptParam("Action").Value.Trim('"', '[', ']');
+			string actionRaw = _engine.ReadScriptParamFromApp("Action");
 			if (!Enum.TryParse(actionRaw, true, out Action action))
 			{
 				throw new InvalidOperationException("No Action provided as input to the script");
 			}
 
-			var dataHelperOrders = new DataHelperServiceOrder(Engine.SLNetRaw);
+			var dataHelperOrders = new DataHelperServiceOrder(_engine.GetUserConnection());
 			List<Models.ServiceOrder> serviceOrders = dataHelperOrders.Read();
 
 			var usedOrderItemLabels = serviceOrders.Select(o => o.Name).ToList();

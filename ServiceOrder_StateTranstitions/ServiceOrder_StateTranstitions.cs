@@ -1,53 +1,3 @@
-/*
-****************************************************************************
-*  Copyright (c) 2025,  Skyline Communications NV  All Rights Reserved.    *
-****************************************************************************
-
-By using this script, you expressly agree with the usage terms and
-conditions set out below.
-This script and all related materials are protected by copyrights and
-other intellectual property rights that exclusively belong
-to Skyline Communications.
-
-A user license granted for this script is strictly for personal use only.
-This script may not be used in any way by anyone without the prior
-written consent of Skyline Communications. Any sublicensing of this
-script is forbidden.
-
-Any modifications to this script by the user are only allowed for
-personal use and within the intended purpose of the script,
-and will remain the sole responsibility of the user.
-Skyline Communications will not be responsible for any damages or
-malfunctions whatsoever of the script resulting from a modification
-or adaptation by the user.
-
-The content of this script is confidential information.
-The user hereby agrees to keep this confidential information strictly
-secret and confidential and not to disclose or reveal it, in whole
-or in part, directly or indirectly to any person, entity, organization
-or administration without the prior written consent of
-Skyline Communications.
-
-Any inquiries can be addressed to:
-
-    Skyline Communications NV
-    Ambachtenstraat 33
-    B-8870 Izegem
-    Belgium
-    Tel.    : +32 51 31 35 69
-    Fax.    : +32 51 31 01 29
-    E-mail    : info@skyline.be
-    Web        : www.skyline.be
-    Contact    : Ben Vandenberghe
-
-****************************************************************************
-Revision History:
-
-DATE        VERSION        AUTHOR            COMMENTS
-
-dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
-****************************************************************************
-*/
 namespace ServiceOrder_StateTranstitions_1
 {
 	using System;
@@ -55,6 +5,7 @@ namespace ServiceOrder_StateTranstitions_1
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel.Actions;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	public class Script
 	{
@@ -65,8 +16,8 @@ namespace ServiceOrder_StateTranstitions_1
 			// engine.ShowUI();
 
 			var instanceId = context.ContextId as DomInstanceId;
-			var previousState = engine.GetScriptParam("PreviousState")?.Value;
-			var nextState = engine.GetScriptParam("NextState")?.Value;
+			var previousState = engine.ReadScriptParamFromApp("PreviousState");
+			var nextState = engine.ReadScriptParamFromApp("NextState");
 
 			////engine.GenerateInformation($"EventStateTransition: Input parameters instaceId: {instanceId.ToString()}, PreviousState: {previousState}, NextState: {nextState}");
 
@@ -74,12 +25,6 @@ namespace ServiceOrder_StateTranstitions_1
 
 			////engine.GenerateInformation(previousState);
 			////engine.GenerateInformation(nextState);
-
-			if (!ValidateArguments(instanceId, previousState, nextState))
-			{
-				////engine.GenerateInformation($"{nextState} and {previousState}");
-				engine.ExitFail("Input is not valid");
-			}
 
 			var domHelper = new DomHelper(engine.SendSLNetMessages, instanceId.ModuleId);
 
@@ -287,26 +232,6 @@ namespace ServiceOrder_StateTranstitions_1
 			// DO NOT REMOVE
 			// engine.ShowUI();
 			engine.ExitFail("This script should be executed using the 'OnDomAction' entry point");
-		}
-
-		private static bool ValidateArguments(DomInstanceId domInstanceId, string scriptParamValue, string scriptParamValue2)
-		{
-			if (domInstanceId == null)
-			{
-				return false;
-			}
-
-			if (String.IsNullOrEmpty(scriptParamValue))
-			{
-				return false;
-			}
-
-			if (String.IsNullOrEmpty(scriptParamValue2))
-			{
-				return false;
-			}
-
-			return true;
 		}
 	}
 }

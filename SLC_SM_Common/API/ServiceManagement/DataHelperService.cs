@@ -3,15 +3,13 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcConfigurations;
 	using DomHelpers.SlcServicemanagement;
-
 	using Library;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
 
 	/// <inheritdoc />
 	public class DataHelperService : DataHelper<Models.Service>
@@ -108,60 +106,22 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			return CreateOrUpdateInstance(instance);
 		}
 
-		/// <inheritdoc />
-		public override List<Models.Service> Read()
-		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id));
-			return Read(instances);
-		}
-
-		/// <inheritdoc />
-		public List<Models.Service> Read(FilterElement<Models.Service> filter)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
-
-			var domFilter = FilterTranslator.TranslateFullFilter(filter);
-			return Read(_domHelper.DomInstances.Read(domFilter));
-		}
-
-		/// <inheritdoc />
-		public override bool TryDelete(Models.Service item)
-		{
-			bool b = true;
-
-			if (item.Configurations != null)
-			{
-				foreach (var config in item.Configurations)
-				{
-					b &= TryDelete(config.ID);
-				}
-			}
-
-			return b && TryDelete(item.ID);
-		}
-
-		public string UniqueServiceId()
-		{
-			return UniqueServiceId(Read());
-		}
-
-		public string UniqueServiceId(List<Models.Service> services)
-		{
-			var serviceIds = services.Where(x => x?.ServiceID != null).Select(x => Int32.TryParse(x.ServiceID.Split('-').Last(), out int res) ? res : 0).ToArray();
-			int max = serviceIds.Length > 0 ? serviceIds.Max() : 0;
-			return $"SERVICE-{max + 1:00000}";
-		}
-
 		/// <summary>
-		/// Retrieve a list of services filtered by a configuration parameter (characteristic).
+		///     Retrieve a list of services filtered by a configuration parameter (characteristic).
 		/// </summary>
-		/// <param name="parameterName">Name of the characteristic <see cref="Configurations.Models.ConfigurationParameter"/> (optional).</param>
-		/// <param name="configurationParameterLabel">Label of the <see cref="Configurations.Models.ConfigurationParameterValue"/> (optional).</param>
-		/// <param name="configurationParameterValue">Value of the <see cref="Configurations.Models.ConfigurationParameterValue"/> (optional).</param>
-		/// <returns><see cref="List{T}"/> of filtered services.</returns>
+		/// <param name="parameterName">
+		///     Name of the characteristic <see cref="Configurations.Models.ConfigurationParameter" />
+		///     (optional).
+		/// </param>
+		/// <param name="configurationParameterLabel">
+		///     Label of the <see cref="Configurations.Models.ConfigurationParameterValue" />
+		///     (optional).
+		/// </param>
+		/// <param name="configurationParameterValue">
+		///     Value of the <see cref="Configurations.Models.ConfigurationParameterValue" />
+		///     (optional).
+		/// </param>
+		/// <returns><see cref="List{T}" /> of filtered services.</returns>
 		public List<Models.Service> GetServicesByCharacteristic(string parameterName = null, string configurationParameterLabel = null, string configurationParameterValue = null)
 		{
 			// Filter Configuration Parameter Value
@@ -169,7 +129,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 
 			if (parameterName != null)
 			{
-				var configurationParameter = new Configurations.DataHelperConfigurationParameter(_connection).Read(ConfigurationParameterExposers.Name.Equal(parameterName)).FirstOrDefault();
+				var configurationParameter = new DataHelperConfigurationParameter(_connection).Read(ConfigurationParameterExposers.Name.Equal(parameterName)).FirstOrDefault();
 				if (configurationParameter != null)
 				{
 					cpvFilter = cpvFilter.AND(ConfigurationParameterValueExposers.ConfigurationParameterID.Equal(configurationParameter.ID));
@@ -211,6 +171,48 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			}
 
 			return Read(servFilter);
+		}
+
+		/// <inheritdoc />
+		public override bool TryDelete(Models.Service item)
+		{
+			bool b = true;
+
+			if (item.Configurations != null)
+			{
+				foreach (var config in item.Configurations)
+				{
+					b &= TryDelete(config.ID);
+				}
+			}
+
+			return b && TryDelete(item.ID);
+		}
+
+		public string UniqueServiceId()
+		{
+			return UniqueServiceId(Read());
+		}
+
+		public string UniqueServiceId(List<Models.Service> services)
+		{
+			var serviceIds = services.Where(x => x?.ServiceID != null).Select(x => Int32.TryParse(x.ServiceID.Split('-').Last(), out int res) ? res : 0).ToArray();
+			int max = serviceIds.Length > 0 ? serviceIds.Max() : 0;
+			return $"SERVICE-{max + 1:00000}";
+		}
+
+		protected override List<Models.Service> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new ServicesInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.Service>();
+			}
+
+			var serviceConfigurations = GetRequiredServiceConfigurationValues(instances);
+			var serviceCategories = GetRequiredCategories(instances);
+
+			return instances.Select(x => FromInstance(x, serviceCategories, serviceConfigurations)).ToList();
 		}
 
 		private static Models.Service FromInstance(
@@ -257,22 +259,28 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			};
 		}
 
-		private List<Models.Service> Read(List<DomInstance> domInstances)
+		private List<Models.ServiceCategory> GetRequiredCategories(List<ServicesInstance> instances)
 		{
-			var instances = domInstances.Select(x => new ServicesInstance(x)).ToList();
-			if (instances.Count < 1)
+			FilterElement<Models.ServiceCategory> filter = new ORFilterElement<Models.ServiceCategory>();
+			var guids = instances.Where(i => i?.ServiceInfo?.ServiceCategory != null).Select(i => i.ServiceInfo.ServiceCategory.Value).Distinct().ToList();
+			foreach (Guid guid in guids)
 			{
-				return new List<Models.Service>();
+				filter = filter.OR(ServiceCategroyExposers.Guid.Equal(guid));
 			}
 
-			var dataHelperServiceConfigurations = new DataHelperServiceConfigurationValue(_connection);
-			var serviceConfigurations = dataHelperServiceConfigurations.Read();
-			var dataHelperServiceCategory = new DataHelperServiceCategory(_connection);
-			var serviceCategories = dataHelperServiceCategory.Read();
+			return guids.Count > 0 ? new DataHelperServiceCategory(_connection).Read(filter) : new List<Models.ServiceCategory>();
+		}
 
-			return instances.Select(
-					x => FromInstance(x, serviceCategories, serviceConfigurations))
-				.ToList();
+		private List<Models.ServiceConfigurationValue> GetRequiredServiceConfigurationValues(List<ServicesInstance> instances)
+		{
+			FilterElement<Models.ServiceConfigurationValue> filter = new ORFilterElement<Models.ServiceConfigurationValue>();
+			var guids = instances.Where(i => i?.ServiceInfo?.ServiceConfigurationParameters != null).SelectMany(i => i.ServiceInfo.ServiceConfigurationParameters).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filter = filter.OR(ServiceConfigurationValueExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperServiceConfigurationValue(_connection).Read(filter) : new List<Models.ServiceConfigurationValue>();
 		}
 	}
 }

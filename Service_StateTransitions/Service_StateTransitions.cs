@@ -1,12 +1,10 @@
 namespace ServiceStateTransitions
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.Text;
 	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
@@ -53,9 +51,9 @@ namespace ServiceStateTransitions
 		private void RunSafe(IEngine engine)
 		{
 			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-			var serviceReference = engine.GetScriptParam("ServiceReference").Value.Trim('[', ']').Trim('"', '"');
-			var previousState = engine.GetScriptParam("PreviousState").Value.Trim('[', ']').Trim('"', '"').ToLower();
-			var nextState = engine.GetScriptParam("NextState").Value.Trim('[', ']').Trim('"', '"').ToLower();
+			var serviceReference = engine.ReadScriptParamFromApp<Guid>("ServiceReference");
+			var previousState = engine.ReadScriptParamFromApp("PreviousState").ToLower();
+			var nextState = engine.ReadScriptParamFromApp("NextState").ToLower();
 
 			string transitionId = String.Empty;
 
@@ -87,7 +85,7 @@ namespace ServiceStateTransitions
 
 			engine.GenerateInformation($"Service Order Status Transition starting: previousState: {previousState}, nextState: {nextState}");
 
-			domHelper.DomInstances.DoStatusTransition(new DomInstanceId(Guid.Parse(serviceReference)), transitionId);
+			domHelper.DomInstances.DoStatusTransition(new DomInstanceId(serviceReference), transitionId);
 		}
 
 		private static string GetTransitionIdTerminated(string previousState, string nextState)

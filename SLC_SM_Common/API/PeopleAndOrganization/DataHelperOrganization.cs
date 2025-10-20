@@ -3,12 +3,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganizati
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcPeople_Organizations;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	/// <inheritdoc />
 	public class DataHelperOrganization : DataHelper<Models.Organization>
@@ -29,11 +26,19 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganizati
 		}
 
 		/// <inheritdoc />
-		public override List<Models.Organization> Read()
+		public override bool TryDelete(Models.Organization item)
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new OrganizationsInstance(x))
-				.ToList();
+			return TryDelete(item.ID);
+		}
+
+		/// <inheritdoc />
+		protected override List<Models.Organization> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new OrganizationsInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.Organization>();
+			}
 
 			return instances.Select(
 					x => new Models.Organization
@@ -43,12 +48,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganizati
 						CategoryId = x.OrganizationInformation.Category,
 					})
 				.ToList();
-		}
-
-		/// <inheritdoc />
-		public override bool TryDelete(Models.Organization item)
-		{
-			return TryDelete(item.ID);
 		}
 	}
 }

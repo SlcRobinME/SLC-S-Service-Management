@@ -3,12 +3,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcConfigurations;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	/// <inheritdoc />
 	public class DataHelperConfigurationUnit : DataHelper<Models.ConfigurationUnit>
@@ -28,11 +25,19 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 		}
 
 		/// <inheritdoc />
-		public override List<Models.ConfigurationUnit> Read()
+		public override bool TryDelete(Models.ConfigurationUnit item)
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new ConfigurationUnitInstance(x))
-				.ToList();
+			return TryDelete(item.ID);
+		}
+
+		/// <inheritdoc />
+		protected override List<Models.ConfigurationUnit> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new ConfigurationUnitInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.ConfigurationUnit>();
+			}
 
 			return instances.Select(
 					x => new Models.ConfigurationUnit
@@ -41,12 +46,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 						Name = x.ConfigurationUnitInfo.UnitName,
 					})
 				.ToList();
-		}
-
-		/// <inheritdoc />
-		public override bool TryDelete(Models.ConfigurationUnit item)
-		{
-			return TryDelete(item.ID);
 		}
 	}
 }

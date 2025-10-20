@@ -24,12 +24,54 @@ namespace DomHelpers.SlcServicemanagement
 	}
 
 	/// <summary>
+	/// Exposer-metods for the <see cref="Models.ServiceSpecificationConfigurationValue"/> instances.
+	/// </summary>
+	public static class ServiceSpecificationConfigurationValueExposers
+	{
+		public static readonly Exposer<Models.ServiceSpecificationConfigurationValue, Guid> Guid = new Exposer<Models.ServiceSpecificationConfigurationValue, Guid>((obj) => obj.ID, String.Join(".", nameof(ServiceSpecificationConfigurationValueExposers), nameof(Guid)));
+	}
+
+	/// <summary>
+	/// Exposer-metods for the <see cref="Models.ServiceOrder"/> instances.
+	/// </summary>
+	public static class ServiceOrderExposers
+	{
+		public static readonly Exposer<Models.ServiceOrder, Guid> Guid = new Exposer<Models.ServiceOrder, Guid>((obj) => obj.ID, String.Join(".", nameof(ServiceOrderExposers), nameof(Guid)));
+		public static readonly Exposer<Models.ServiceOrder, string> Name = new Exposer<Models.ServiceOrder, string>((obj) => obj.Name, String.Join(".", nameof(ServiceOrderExposers), nameof(Name)));
+	}
+
+	/// <summary>
+	/// Exposer-metods for the <see cref="Models.ServiceOrderItem"/> instances.
+	/// </summary>
+	public static class ServiceOrderItemExposers
+	{
+		public static readonly Exposer<Models.ServiceOrderItem, Guid> Guid = new Exposer<Models.ServiceOrderItem, Guid>((obj) => obj.ID, String.Join(".", nameof(ServiceOrderItemExposers), nameof(Guid)));
+		public static readonly Exposer<Models.ServiceOrderItem, string> Name = new Exposer<Models.ServiceOrderItem, string>((obj) => obj.Name, String.Join(".", nameof(ServiceOrderItemExposers), nameof(Name)));
+	}
+
+	/// <summary>
 	/// Exposer-metods for the <see cref="Models.ServiceConfigurationValue"/> instances.
 	/// </summary>
 	public static class ServiceConfigurationValueExposers
 	{
 		public static readonly Exposer<Models.ServiceConfigurationValue, Guid> Guid = new Exposer<Models.ServiceConfigurationValue, Guid>((obj) => obj.ID, String.Join(".", nameof(ServiceConfigurationValueExposers), nameof(Guid)));
 		public static readonly Exposer<Models.ServiceConfigurationValue, Guid> ConfigurationParameterID = new Exposer<Models.ServiceConfigurationValue, Guid>((obj) => obj.ConfigurationParameter?.ID ?? System.Guid.Empty, String.Join(".", nameof(ServiceConfigurationValueExposers), nameof(ConfigurationParameterID)));
+	}
+
+	/// <summary>
+	/// Exposer-metods for the <see cref="Models.ServiceOrderItemConfigurationValue"/> instances.
+	/// </summary>
+	public static class ServiceOrderItemConfigurationValueExposers
+	{
+		public static readonly Exposer<Models.ServiceOrderItemConfigurationValue, Guid> Guid = new Exposer<Models.ServiceOrderItemConfigurationValue, Guid>((obj) => obj.ID, String.Join(".", nameof(ServiceOrderItemConfigurationValueExposers), nameof(Guid)));
+	}
+
+	/// <summary>
+	/// Exposer-metods for the <see cref="Models.ServiceCategory"/> instances.
+	/// </summary>
+	public static class ServiceCategroyExposers
+	{
+		public static readonly Exposer<Models.ServiceCategory, Guid> Guid = new Exposer<Models.ServiceCategory, Guid>((obj) => obj.ID, String.Join(".", nameof(ServiceCategroyExposers), nameof(Guid)));
 	}
 
 	/// <summary>

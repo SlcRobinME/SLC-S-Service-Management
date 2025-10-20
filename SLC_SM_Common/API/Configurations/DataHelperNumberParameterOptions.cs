@@ -3,9 +3,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcConfigurations;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -69,14 +67,20 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 		}
 
 		/// <inheritdoc />
-		public override List<Models.NumberParameterOptions> Read()
+		public override bool TryDelete(Models.NumberParameterOptions item)
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new NumberParameterOptionsInstance(x))
-				.ToList();
+			return TryDelete(item.ID);
+		}
 
-			var dataHelperUnits = new DataHelperConfigurationUnit(_connection);
-			var units = dataHelperUnits.Read();
+		protected override List<Models.NumberParameterOptions> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new NumberParameterOptionsInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.NumberParameterOptions>();
+			}
+
+			List<Models.ConfigurationUnit> units = GetRequiredUnits(instances);
 
 			return instances.Select(
 					x => new Models.NumberParameterOptions
@@ -93,10 +97,16 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 				.ToList();
 		}
 
-		/// <inheritdoc />
-		public override bool TryDelete(Models.NumberParameterOptions item)
+		private List<Models.ConfigurationUnit> GetRequiredUnits(List<NumberParameterOptionsInstance> instances)
 		{
-			return TryDelete(item.ID);
+			FilterElement<Models.ConfigurationUnit> filter = new ORFilterElement<Models.ConfigurationUnit>();
+			var guids = instances.Where(i => i?.NumberParameterOptions?.Units != null).SelectMany(i => i.NumberParameterOptions?.Units).Distinct().ToList();
+			foreach (var guid in guids)
+			{
+				filter = filter.OR(ConfigurationUnitExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperConfigurationUnit(_connection).Read(filter) : new List<Models.ConfigurationUnit>();
 		}
 	}
 }

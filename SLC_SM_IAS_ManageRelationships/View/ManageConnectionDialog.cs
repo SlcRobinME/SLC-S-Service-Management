@@ -1,5 +1,6 @@
 ﻿namespace SLC_SM_IAS_ManageRelationships.View
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using DomHelpers.SlcWorkflow;
@@ -154,7 +155,7 @@
 			var sourceInterface = row.SourceInterface.NodeID;
 			var selectedDestination = row.DestinationInterfaces.Selected;
 
-			_context.Pair.AddLink(sourceInterface, selectedDestination?.NodeID ?? string.Empty);
+			_context.Pair.AddLink(sourceInterface, selectedDestination?.NodeID ?? String.Empty);
 		}
 
 		private class DialogRow

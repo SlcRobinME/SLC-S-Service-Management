@@ -7,6 +7,7 @@
 	using System.Threading.Tasks;
 	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	internal class ScriptData
 	{
@@ -33,23 +34,15 @@
 
 		private void LoadParameters()
 		{
-			var paramType = _engine.GetScriptParam("Type")?.Value;
+			var paramType = _engine.ReadScriptParamFromApp("Type");
 			if (!Enum.TryParse(paramType, out ObjectType type))
 			{
 				throw new InvalidOperationException($"Invalid object type: {paramType}");
 			}
 
-			var domIdRaw = _engine.GetScriptParam("DomId")?.Value;
-			DomId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw ?? "[]").FirstOrDefault();
-			if (DomId == Guid.Empty)
-			{
-				throw new InvalidOperationException("No valid DOM ID provided as input to the script");
-			}
-
 			Type = type;
-
-			var nameRaw = _engine.GetScriptParam("Path")?.Value;
-			Name = JsonConvert.DeserializeObject<List<string>>(nameRaw ?? "[]").FirstOrDefault();
+			DomId = _engine.ReadScriptParamFromApp<Guid>("DomId");
+			Name = _engine.ReadScriptParamFromApp("Path");
 		}
 	}
 }
