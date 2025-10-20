@@ -150,6 +150,7 @@
 			var lblLabel = new Label("Label");
 			var lblParameter = new Label("Parameter");
 			var lblLink = new Label("Link");
+			var lblNa = new Label("N/A");
 			var lblValue = new Label("Value");
 			var lblUnit = new Label("Unit");
 			var lblStart = new Label("Start");
@@ -165,8 +166,9 @@
 			view.AddWidget(lblLabel, row, 0);
 			view.AddWidget(lblParameter, row, 1);
 			view.AddWidget(lblLink, row, 2);
-			view.AddWidget(lblValue, row, 3);
-			view.AddWidget(lblUnit, row, 4);
+			view.AddWidget(lblNa, row, 3);
+			view.AddWidget(lblValue, row, 4);
+			view.AddWidget(lblUnit, row, 5);
 
 			view.Details.AddWidget(lblStart, 0, 0);
 			view.Details.AddWidget(lblEnd, 0, 1);
@@ -201,8 +203,8 @@
 				BuildUIRow(configuration, ++row, ++sectionRow);
 			}
 
-			view.AddSection(view.Details, originalSectionRow, 5);
-			view.AddSection(view.LifeCycleDetails, originalSectionRow, 10);
+			view.AddSection(view.Details, originalSectionRow, 6);
+			view.AddSection(view.LifeCycleDetails, originalSectionRow, 11);
 			view.Details.IsVisible = showDetails;
 			view.LifeCycleDetails.IsVisible = showLifeCycleDetails;
 
@@ -238,6 +240,7 @@
 			};
 			var isFixed = new CheckBox { IsChecked = record.ConfigurationParamValue.ValueFixed };
 			var link = new CheckBox { IsChecked = record.ConfigurationParamValue.LinkedConfigurationReference != null };
+			var na = new CheckBox { IsChecked = false };
 			var unit = new DropDown<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>(new[] { new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>("-", null) }) { IsEnabled = false, MaxWidth = 80 };
 			var start = new Numeric { IsEnabled = false, MaxWidth = 100 };
 			var end = new Numeric { IsEnabled = false, MaxWidth = 100 };
@@ -329,7 +332,19 @@
 							};
 							unit.Changed += (sender, args) => record.ConfigurationParamValue.NumberOptions.DefaultUnit = args.Selected;
 							value.Changed += (sender, args) => { record.ConfigurationParamValue.DoubleValue = args.Value; };
-							view.AddWidget(value, row, 3);
+							view.AddWidget(value, row, 4);
+
+							bool hasValue = record.ConfigurationParamValue.DoubleValue.HasValue || record.ConfigurationParamValue.NumberOptions.DefaultValue.HasValue;
+							na.IsChecked = !hasValue;
+							value.IsEnabled = hasValue;
+							na.Changed += (sender, args) =>
+							{
+								value.IsEnabled = !args.IsChecked;
+								if (!args.IsChecked)
+								{
+									record.ConfigurationParamValue.DoubleValue = null;
+								}
+							};
 						}
 
 						break;
@@ -368,7 +383,19 @@
 								};
 								controller.ShowDialog(optionsView);
 							};
-							view.AddWidget(value, row, 3);
+							view.AddWidget(value, row, 4);
+
+							bool hasValue = discretes.Count > 0;
+							na.IsChecked = !hasValue;
+							value.IsEnabled = hasValue;
+							na.Changed += (sender, args) =>
+							{
+								value.IsEnabled = !args.IsChecked;
+								if (!args.IsChecked)
+								{
+									record.ConfigurationParamValue.StringValue = null;
+								}
+							};
 						}
 
 						break;
@@ -393,7 +420,19 @@
 								value.ValidationText = record.ConfigurationParamValue.TextOptions?.UserMessage;
 								record.ConfigurationParamValue.StringValue = args.Value;
 							};
-							view.AddWidget(value, row, 3);
+							view.AddWidget(value, row, 4);
+
+							bool hasValue = !String.IsNullOrEmpty(record.ConfigurationParamValue.StringValue) || !String.IsNullOrEmpty(record.ConfigurationParamValue.TextOptions?.Default);
+							na.IsChecked = !hasValue;
+							value.IsEnabled = hasValue;
+							na.Changed += (sender, args) =>
+							{
+								value.IsEnabled = !args.IsChecked;
+								if (!args.IsChecked)
+								{
+									record.ConfigurationParamValue.StringValue = null;
+								}
+							};
 						}
 
 						break;
@@ -404,7 +443,8 @@
 			view.AddWidget(label, row, 0);
 			view.AddWidget(parameter, row, 1);
 			view.AddWidget(link, row, 2);
-			view.AddWidget(unit, row, 4);
+			view.AddWidget(na, row, 3);
+			view.AddWidget(unit, row, 5);
 
 			view.Details.AddWidget(start, sectionRow, 0);
 			view.Details.AddWidget(end, sectionRow, 1);
@@ -416,7 +456,7 @@
 			view.LifeCycleDetails.AddWidget(mandatoryAtOrder, sectionRow, 2);
 			view.LifeCycleDetails.AddWidget(mandatoryAtService, sectionRow, 3);
 
-			view.AddWidget(delete, row, 14);
+			view.AddWidget(delete, row, 15);
 		}
 
 		private List<Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>> GetUnits(Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.NumberParameterOptions numberValueOptions, Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter parameter)
