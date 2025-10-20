@@ -10,6 +10,7 @@
 	using Library;
 
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Helper;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
@@ -351,10 +352,11 @@
 
 					case SlcConfigurationsIds.Enums.Type.Discrete:
 						{
-							var discretes = record.ConfigurationParamValue.DiscreteOptions.DiscreteValues
+							var allDiscretes = record.ConfigurationParam.DiscreteOptions.DiscreteValues
 								.Select(x => new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.DiscreteValue>(x.Value, x))
 								.OrderBy(x => x.DisplayValue)
 								.ToList();
+							var discretes = allDiscretes.Where(d => record.ConfigurationParamValue.DiscreteOptions.DiscreteValues.Any(r => d.Value.Equals(r))).ToList();
 
 							var value = new DropDown<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.DiscreteValue>(discretes);
 							if (record.ConfigurationParamValue.StringValue != null
@@ -373,14 +375,23 @@
 							values.Pressed += (sender, args) =>
 							{
 								var optionsView = new DiscreteValuesView(engine);
-								optionsView.Options.SetOptions(discretes);
-								optionsView.Options.CheckAll();
+								optionsView.Options.SetOptions(allDiscretes);
+								foreach (var option in optionsView.Options.Values.ToList())
+								{
+									if (value.Options.Any(o => o.Value.Equals(option)))
+									{
+										optionsView.Options.Check(option); // check only the available items.
+									}
+								}
+
 								optionsView.BtnApply.Pressed += (o, eventArgs) =>
 								{
 									value.SetOptions(optionsView.Options.CheckedOptions);
 									record.ConfigurationParamValue.StringValue = value.Selected?.Value;
+									record.ConfigurationParamValue.DiscreteOptions.DiscreteValues = optionsView.Options.Checked.ToList();
 									controller.ShowDialog(view);
 								};
+								optionsView.BtnCancel.Pressed += (o, eventArgs) => controller.ShowDialog(view);
 								controller.ShowDialog(optionsView);
 							};
 							view.AddWidget(value, row, 4);
@@ -449,7 +460,7 @@
 			view.Details.AddWidget(start, sectionRow, 0);
 			view.Details.AddWidget(end, sectionRow, 1);
 			view.Details.AddWidget(step, sectionRow, 2);
-			view.Details.AddWidget(decimals, sectionRow,3);
+			view.Details.AddWidget(decimals, sectionRow, 3);
 			view.Details.AddWidget(values, sectionRow, 4);
 			view.LifeCycleDetails.AddWidget(isFixed, sectionRow, 0);
 			view.LifeCycleDetails.AddWidget(exposeAtOrder, sectionRow, 1);

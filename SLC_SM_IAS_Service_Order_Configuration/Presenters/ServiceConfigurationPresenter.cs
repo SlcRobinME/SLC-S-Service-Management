@@ -322,10 +322,11 @@
 
 					case SlcConfigurationsIds.Enums.Type.Discrete:
 						{
-							var discretes = record.ConfigurationParamValue.DiscreteOptions.DiscreteValues
+							var allDiscretes = record.ConfigurationParam.DiscreteOptions.DiscreteValues
 								.Select(x => new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.DiscreteValue>(x.Value, x))
 								.OrderBy(x => x.DisplayValue)
 								.ToList();
+							var discretes = allDiscretes.Where(d => record.ConfigurationParamValue.DiscreteOptions.DiscreteValues.Any(r => d.Value.Equals(r))).ToList();
 
 							var value = new DropDown<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.DiscreteValue>(discretes) { IsEnabled = !isFixed.IsChecked };
 							if (record.ConfigurationParamValue.StringValue != null
@@ -344,14 +345,23 @@
 							values.Pressed += (sender, args) =>
 							{
 								var optionsView = new DiscreteValuesView(engine);
-								optionsView.Options.SetOptions(discretes);
-								optionsView.Options.CheckAll();
+								optionsView.Options.SetOptions(allDiscretes);
+								foreach (var option in optionsView.Options.Values.ToList())
+								{
+									if (value.Options.Any(o => o.Value.Equals(option)))
+									{
+										optionsView.Options.Check(option); // check only the available items.
+									}
+								}
+
 								optionsView.BtnApply.Pressed += (o, eventArgs) =>
 								{
 									value.SetOptions(optionsView.Options.CheckedOptions);
 									record.ConfigurationParamValue.StringValue = value.Selected?.Value;
+									record.ConfigurationParamValue.DiscreteOptions.DiscreteValues = optionsView.Options.Checked.ToList();
 									controller.ShowDialog(view);
 								};
+								optionsView.BtnCancel.Pressed += (o, eventArgs) => controller.ShowDialog(view);
 								controller.ShowDialog(optionsView);
 							};
 							view.AddWidget(value, row, 3);

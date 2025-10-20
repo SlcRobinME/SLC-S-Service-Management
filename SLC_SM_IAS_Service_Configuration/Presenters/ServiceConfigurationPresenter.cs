@@ -3,18 +3,12 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Runtime.CompilerServices;
 	using System.Text.RegularExpressions;
-
 	using DomHelpers.SlcConfigurations;
-
 	using Library;
-
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
-
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using SLC_SM_IAS_Service_Configuration.Views;
 
 	public class ServiceConfigurationPresenter
@@ -323,26 +317,12 @@
 								value.Selected = value.Options.First(x => x.DisplayValue == record.ConfigurationParamValue.StringValue).Value;
 							}
 
-							values.IsEnabled = true;
 							if (record.ConfigurationParamValue.StringValue == null)
 							{
 								record.ConfigurationParamValue.StringValue = value.Selected?.Value;
 							}
 
 							value.Changed += (sender, args) => { record.ConfigurationParamValue.StringValue = args.SelectedOption.DisplayValue; };
-							values.Pressed += (sender, args) =>
-							{
-								var optionsView = new DiscreteValuesView(engine);
-								optionsView.Options.SetOptions(discretes);
-								optionsView.Options.CheckAll();
-								optionsView.BtnApply.Pressed += (o, eventArgs) =>
-								{
-									value.SetOptions(optionsView.Options.CheckedOptions);
-									record.ConfigurationParamValue.StringValue = value.Selected?.Value;
-									controller.ShowDialog(view);
-								};
-								controller.ShowDialog(optionsView);
-							};
 							view.AddWidget(value, row, 3);
 						}
 
