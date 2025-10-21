@@ -50,6 +50,7 @@
 				/*SERVICE ORDER*/
 				[ServiceOrderExposers.Guid.fieldName] = HandleGuid,
 				[ServiceOrderExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceOrderInfo.Name), comparer, (string)value),
+				[ServiceOrderExposers.ExternalId.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceOrderInfo.ExternalID), comparer, (string)value),
 
 				/*SERVICE ORDER ITEM*/
 				[ServiceOrderItemExposers.Guid.fieldName] = HandleGuid,

@@ -38,6 +38,7 @@ namespace DomHelpers.SlcServicemanagement
 	{
 		public static readonly Exposer<Models.ServiceOrder, Guid> Guid = new Exposer<Models.ServiceOrder, Guid>((obj) => obj.ID, String.Join(".", nameof(ServiceOrderExposers), nameof(Guid)));
 		public static readonly Exposer<Models.ServiceOrder, string> Name = new Exposer<Models.ServiceOrder, string>((obj) => obj.Name, String.Join(".", nameof(ServiceOrderExposers), nameof(Name)));
+		public static readonly Exposer<Models.ServiceOrder, string> ExternalId = new Exposer<Models.ServiceOrder, string>((obj) => obj.ExternalID, String.Join(".", nameof(ServiceOrderExposers), nameof(ExternalId)));
 	}
 
 	/// <summary>
