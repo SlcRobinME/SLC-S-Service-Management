@@ -60,6 +60,7 @@ namespace SLCSMDemo
 	using Library;
 
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
@@ -107,7 +108,27 @@ namespace SLCSMDemo
 			//FilterServiceOnCategory(engine);
 
 			FilterServiceOnCharacteristic(engine);
+			//RemoveSpecProperties(engine);
 		}
+
+		////private void RemoveSpecProperties(IEngine engine)
+		////{
+		////	var helper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
+		////	var inst = helper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcServicemanagementIds.Definitions.Services.Id));
+
+		////	foreach (var i in inst)
+		////	{
+		////		var ss = new ServicesInstance(i);
+		////		if (ss.ServiceInfo.ServiceProperties == null && ss.ServiceInfo.ServiceConfiguration == null)
+		////		{
+		////			continue;
+		////		}
+
+		////		ss.ServiceInfo.ServiceProperties = null;
+		////		ss.ServiceInfo.ServiceConfiguration = null;
+		////		ss.Save(helper);
+		////	}
+		////}
 
 		////private static void FilterServiceOnCategory(IEngine engine)
 		////{
