@@ -49,6 +49,7 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 				new GQIStringColumn("Implementation Reference Custom Link"),
 				new GQIBooleanColumn("Implementation Reference Custom Link Has Value"),
 				new GQIStringColumn("Monitoring Service State"),
+				new GQIStringColumn("Monitoring Service DMA ID/SID"),
 			};
 		}
 
@@ -108,6 +109,7 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 					new GQICell { Value = implementationRef.CustomLink },
 					new GQICell { Value = !String.IsNullOrEmpty(implementationRef.CustomLink) },
 					new GQICell { Value = implementationRef.MonServiceState },
+					new GQICell { Value = implementationRef.MonServiceDmaIdSid },
 				});
 		}
 
@@ -158,6 +160,7 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 					State = reservation.Status.ToString(),
 					CustomLink = customReference ?? String.Empty,
 					MonServiceState = serviceInfoEventMessage?.Level.ToString() ?? String.Empty,
+					MonServiceDmaIdSid = serviceInfoEventMessage != null ? $"{serviceInfoEventMessage.DataMinerID}/{serviceInfoEventMessage.ServiceID}" : String.Empty,
 				};
 			}
 
@@ -200,5 +203,7 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 		public string CustomLink { get; set; } = String.Empty;
 
 		public string MonServiceState { get; set; } = String.Empty;
+
+		public string MonServiceDmaIdSid { get; set; } = String.Empty;
 	}
 }

@@ -122,8 +122,8 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 						new GQICell { Value = spec },
 						new GQICell { Value = org },
 						new GQICell { Value = service.Category?.Name ?? String.Empty },
-						new GQICell { Value = service.StartTime },
-						new GQICell { Value = service.EndTime },
+						new GQICell { Value = service.StartTime?.ToUniversalTime() },
+						new GQICell { Value = service.EndTime?.ToUniversalTime() },
 						new GQICell { Value = alarmLevel },
 					}),
 			};

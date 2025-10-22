@@ -114,18 +114,17 @@ namespace SLCSMDemo
 		////private void RemoveSpecProperties(IEngine engine)
 		////{
 		////	var helper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-		////	var inst = helper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcServicemanagementIds.Definitions.Services.Id));
+		////	var inst = helper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcServicemanagementIds.Definitions.ServiceSpecifications.Id));
 
 		////	foreach (var i in inst)
 		////	{
-		////		var ss = new ServicesInstance(i);
-		////		if (ss.ServiceInfo.ServiceProperties == null && ss.ServiceInfo.ServiceConfiguration == null)
+		////		var ss = new ServiceSpecificationsInstance(i);
+		////		if (ss.ServiceSpecificationInfo.ServiceProperties == null)
 		////		{
 		////			continue;
 		////		}
 
-		////		ss.ServiceInfo.ServiceProperties = null;
-		////		ss.ServiceInfo.ServiceConfiguration = null;
+		////		ss.ServiceSpecificationInfo.ServiceProperties = null;
 		////		ss.Save(helper);
 		////	}
 		////}

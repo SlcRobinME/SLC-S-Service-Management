@@ -51,10 +51,8 @@ DATE        VERSION        AUTHOR            COMMENTS
 namespace SLC_SM_Delete_Service_1
 {
 	using System;
-	using System.Collections.Generic;
 	using DomHelpers.SlcServicemanagement;
 	using Library;
-	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
