@@ -70,7 +70,7 @@ namespace SLCSMCOGetWorkflowIcon
 		private readonly GQIStringColumn _iconColumn = new GQIStringColumn("Icon");
 
 		private readonly GQIStringArgument _argWorkflowIdColumnName = new GQIStringArgument("Workflow ID Column Name") { IsRequired = true };
-		private string _workflowIdColumnName = string.Empty;
+		private string _workflowIdColumnName = String.Empty;
 
 		private GQIDMS _dms;
 		private DomHelper _propertiesDomHelper;
@@ -99,7 +99,7 @@ namespace SLCSMCOGetWorkflowIcon
 
 			var icon = workflow != null
 				? FetchWorkflowCategory(new WorkflowsInstance(workflow))
-				: string.Empty;
+				: String.Empty;
 
 			row.SetValue(_iconColumn, icon);
 		}
@@ -127,7 +127,7 @@ namespace SLCSMCOGetWorkflowIcon
 		{
 			return _propertyValues
 				.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())?
-				.PropertyValues.FirstOrDefault(v => v.PropertyName == "Icon")?.Value ?? string.Empty;
+				.PropertyValues.FirstOrDefault(v => v.PropertyName == "Icon")?.Value ?? String.Empty;
 		}
 	}
 }

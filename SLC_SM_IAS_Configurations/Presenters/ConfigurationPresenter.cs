@@ -48,7 +48,7 @@
 
 		public void LoadFromModel()
 		{
-			repoConfig = new DataHelpersConfigurations(Engine.SLNetRaw);
+			repoConfig = new DataHelpersConfigurations(engine.GetUserConnection());
 			cachedUnits = repoConfig.ConfigurationUnits.Read().Select(x => new Option<Models.ConfigurationUnit>(x.Name, x)).OrderBy(x => x.DisplayValue).ToList();
 			cachedUnits.Insert(0, new Option<Models.ConfigurationUnit>("-", null));
 

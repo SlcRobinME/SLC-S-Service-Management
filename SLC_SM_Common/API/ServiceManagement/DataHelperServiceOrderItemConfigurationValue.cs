@@ -3,9 +3,8 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
+	using DomHelpers.SlcConfigurations;
 	using DomHelpers.SlcServicemanagement;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -37,14 +36,22 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 		}
 
 		/// <inheritdoc />
-		public override List<Models.ServiceOrderItemConfigurationValue> Read()
+		public override bool TryDelete(Models.ServiceOrderItemConfigurationValue item)
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new ServiceOrderItemConfigurationValueInstance(x))
-				.ToList();
+			bool ok = TryDelete(item.ConfigurationParameter.ID);
+			return ok && TryDelete(item.ID);
+		}
 
-			var dataHelperConfigurationParameters = new DataHelperConfigurationParameterValue(_connection);
-			var configurationParameters = dataHelperConfigurationParameters.Read();
+		/// <inheritdoc />
+		protected override List<Models.ServiceOrderItemConfigurationValue> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new ServiceOrderItemConfigurationValueInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.ServiceOrderItemConfigurationValue>();
+			}
+
+			var configurationParameters = GetRequiredConfigurationParameterValues(instances);
 
 			return instances.Select(
 					x => new Models.ServiceOrderItemConfigurationValue
@@ -56,11 +63,16 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				.ToList();
 		}
 
-		/// <inheritdoc />
-		public override bool TryDelete(Models.ServiceOrderItemConfigurationValue item)
+		private List<Configurations.Models.ConfigurationParameterValue> GetRequiredConfigurationParameterValues(List<ServiceOrderItemConfigurationValueInstance> instances)
 		{
-			bool ok = TryDelete(item.ConfigurationParameter.ID);
-			return ok && TryDelete(item.ID);
+			FilterElement<Configurations.Models.ConfigurationParameterValue> filter = new ORFilterElement<Configurations.Models.ConfigurationParameterValue>();
+			var guids = instances.Where(i => i?.ServiceOrderItemConfigurationValue?.ConfigurationParameterValue != null).Select(i => i.ServiceOrderItemConfigurationValue.ConfigurationParameterValue.Value).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filter = filter.OR(ConfigurationParameterValueExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperConfigurationParameterValue(_connection).Read(filter) : new List<Configurations.Models.ConfigurationParameterValue>();
 		}
 	}
 }

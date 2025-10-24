@@ -3,12 +3,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcConfigurations;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	/// <inheritdoc />
 	public class DataHelperTextParameterOptions : DataHelper<Models.TextParameterOptions>
@@ -30,11 +27,19 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 		}
 
 		/// <inheritdoc />
-		public override List<Models.TextParameterOptions> Read()
+		public override bool TryDelete(Models.TextParameterOptions item)
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new TextParameterOptionsInstance(x))
-				.ToList();
+			return TryDelete(item.ID);
+		}
+
+		/// <inheritdoc />
+		protected override List<Models.TextParameterOptions> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new TextParameterOptionsInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.TextParameterOptions>();
+			}
 
 			return instances.Select(
 					x => new Models.TextParameterOptions
@@ -45,12 +50,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 						UserMessage = x.TextParameterOptions.UserMessage,
 					})
 				.ToList();
-		}
-
-		/// <inheritdoc />
-		public override bool TryDelete(Models.TextParameterOptions item)
-		{
-			return TryDelete(item.ID);
 		}
 	}
 }

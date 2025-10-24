@@ -1,12 +1,10 @@
 namespace SLCSMButtonStateTransitions
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.Text;
 	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
@@ -53,9 +51,9 @@ namespace SLCSMButtonStateTransitions
 		private void RunSafe(IEngine engine)
 		{
 			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-			var serviceOrderReference = engine.GetScriptParam("ServiceOrderReference").Value.Trim('[', ']').Trim('"', '"');
-			var previousState = engine.GetScriptParam("PreviousState").Value.Trim('[', ']').Trim('"', '"').ToLower();
-			var nextState = engine.GetScriptParam("NextState").Value.Trim('[', ']').Trim('"', '"').ToLower();
+			var serviceOrderReference = engine.ReadScriptParamFromApp<Guid>("ServiceOrderReference");
+			var previousState = engine.ReadScriptParamFromApp("PreviousState").ToLower();
+			var nextState = engine.ReadScriptParamFromApp("NextState").ToLower();
 
 			string transitionId = String.Empty;
 
@@ -96,7 +94,7 @@ namespace SLCSMButtonStateTransitions
 
 			engine.GenerateInformation($"Service Order Status Transition starting: previousState: {previousState}, nextState: {nextState}");
 
-			domHelper.DomInstances.DoStatusTransition(new DomInstanceId(Guid.Parse(serviceOrderReference)), transitionId);
+			domHelper.DomInstances.DoStatusTransition(new DomInstanceId(serviceOrderReference), transitionId);
 		}
 
 		private static string GetTransitionIdPendingCancel(string nextState, string previousState)

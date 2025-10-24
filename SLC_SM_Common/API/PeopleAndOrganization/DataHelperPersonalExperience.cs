@@ -3,12 +3,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganizati
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcPeople_Organizations;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	/// <inheritdoc />
 	public class DataHelperPersonalExperience : DataHelper<Models.ExperienceLevel>
@@ -28,11 +25,19 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganizati
 		}
 
 		/// <inheritdoc />
-		public override List<Models.ExperienceLevel> Read()
+		public override bool TryDelete(Models.ExperienceLevel item)
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new ExperienceInstance(x))
-				.ToList();
+			return TryDelete(item.ID);
+		}
+
+		/// <inheritdoc />
+		protected override List<Models.ExperienceLevel> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new ExperienceInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.ExperienceLevel>();
+			}
 
 			return instances.Select(
 					x => new Models.ExperienceLevel
@@ -41,12 +46,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganizati
 						Value = x.ExperienceInformation.Experience,
 					})
 				.ToList();
-		}
-
-		/// <inheritdoc />
-		public override bool TryDelete(Models.ExperienceLevel item)
-		{
-			return TryDelete(item.ID);
 		}
 	}
 }

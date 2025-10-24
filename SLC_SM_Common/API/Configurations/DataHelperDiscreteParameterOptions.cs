@@ -3,9 +3,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcConfigurations;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -64,14 +62,21 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 		}
 
 		/// <inheritdoc />
-		public override List<Models.DiscreteParameterOptions> Read()
+		public override bool TryDelete(Models.DiscreteParameterOptions item)
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new DiscreteParameterOptionsInstance(x))
-				.ToList();
+			return TryDelete(item.ID);
+		}
 
-			var dataHelperDiscreteValues = new DataHelperDiscreteValues(_connection);
-			var discretes = dataHelperDiscreteValues.Read();
+		/// <inheritdoc />
+		protected override List<Models.DiscreteParameterOptions> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new DiscreteParameterOptionsInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.DiscreteParameterOptions>();
+			}
+
+			List<Models.DiscreteValue> discretes = GetRequiredDiscreteValues(instances);
 
 			return instances.Select(
 					x => new Models.DiscreteParameterOptions
@@ -83,10 +88,16 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 				.ToList();
 		}
 
-		/// <inheritdoc />
-		public override bool TryDelete(Models.DiscreteParameterOptions item)
+		private List<Models.DiscreteValue> GetRequiredDiscreteValues(List<DiscreteParameterOptionsInstance> instances)
 		{
-			return TryDelete(item.ID);
+			FilterElement<Models.DiscreteValue> filter = new ORFilterElement<Models.DiscreteValue>();
+			List<Guid> guids = instances.Where(i => i?.DiscreteParameterOptions?.DiscreteValues != null).SelectMany(i => i.DiscreteParameterOptions.DiscreteValues).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filter = filter.OR(DiscreteValueExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperDiscreteValues(_connection).Read(filter) : new List<Models.DiscreteValue>();
 		}
 	}
 }

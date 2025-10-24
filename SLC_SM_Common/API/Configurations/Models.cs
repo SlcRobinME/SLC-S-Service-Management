@@ -83,11 +83,26 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 			public DiscreteValue Default { get; set; }
 		}
 
-		public class DiscreteValue
+		public class DiscreteValue : IEquatable<DiscreteValue>
 		{
 			public Guid ID { get; set; }
 
 			public string Value { get; set; }
+
+			public bool Equals(DiscreteValue other)
+			{
+				if (ReferenceEquals(null, other))
+				{
+					return false;
+				}
+
+				if (ReferenceEquals(this, other))
+				{
+					return true;
+				}
+
+				return ID.Equals(other.ID);
+			}
 		}
 
 		public class TextParameterOptions

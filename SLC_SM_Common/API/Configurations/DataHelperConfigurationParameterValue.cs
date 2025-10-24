@@ -5,11 +5,9 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 	using System.Linq;
 
 	using DomHelpers.SlcConfigurations;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
 
 	/// <inheritdoc />
 	public class DataHelperConfigurationParameterValue : DataHelper<Models.ConfigurationParameterValue>
@@ -76,25 +74,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 		}
 
 		/// <inheritdoc />
-		public override List<Models.ConfigurationParameterValue> Read()
-		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id));
-			return Read(instances);
-		}
-
-		/// <inheritdoc />
-		public List<Models.ConfigurationParameterValue> Read(FilterElement<Models.ConfigurationParameterValue> filter)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
-
-			var domFilter = FilterTranslator.TranslateFullFilter(filter);
-			return Read(_domHelper.DomInstances.Read(domFilter));
-		}
-
-		/// <inheritdoc />
 		public override bool TryDelete(Models.ConfigurationParameterValue item)
 		{
 			bool b = true;
@@ -116,7 +95,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 			return b && TryDelete(item.ID);
 		}
 
-		private List<Models.ConfigurationParameterValue> Read(List<DomInstance> domInstances)
+		protected override List<Models.ConfigurationParameterValue> Read(IEnumerable<DomInstance> domInstances)
 		{
 			var instances = domInstances.Select(x => new ConfigurationParameterValueInstance(x)).ToList();
 			if (instances.Count < 1)
@@ -124,21 +103,21 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 				return new List<Models.ConfigurationParameterValue>();
 			}
 
-			var numberOptions = new DataHelperNumberParameterOptions(_connection).Read();
-			var discreteOptions = new DataHelperDiscreteParameterOptions(_connection).Read();
-			var textOptions = new DataHelperTextParameterOptions(_connection).Read();
-			var configurationParameters = new DataHelperConfigurationParameter(_connection).Read();
+			List<Models.ConfigurationParameter> configurationParameters = GetRequiredConfigurationParameters(instances);
+			List<Models.NumberParameterOptions> numberOptions = GetRequiredNumberOptions(instances);
+			List<Models.DiscreteParameterOptions> discreteOptions = GetRequiredDiscreteOptions(instances);
+			List<Models.TextParameterOptions> textOptions = GetRequiredTextOptions(instances);
 
 			return instances.Select(
 					x =>
 					{
-						var configParameter = configurationParameters.First(p => p.ID == x.ConfigurationParameterValue.ConfigurationParameterReference);
+						var configParameter = configurationParameters.FirstOrDefault(p => p.ID == x.ConfigurationParameterValue.ConfigurationParameterReference);
 						Models.NumberParameterOptions numberOption;
 						if (x.ConfigurationParameterValue.NumberValueOptions != null)
 						{
 							numberOption = numberOptions.Find(o => o.ID == x.ConfigurationParameterValue.NumberValueOptions);
 						}
-						else if (configParameter.NumberOptions != null)
+						else if (configParameter?.NumberOptions != null)
 						{
 							// Create duplicate of the pre-configured Configuration Parameter option
 							numberOption = configParameter.NumberOptions;
@@ -157,7 +136,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 						{
 							discreteOption = discreteOptions.Find(o => o.ID == x.ConfigurationParameterValue.DiscreteValueOptions);
 						}
-						else if (configParameter.DiscreteOptions != null)
+						else if (configParameter?.DiscreteOptions != null)
 						{
 							// Create duplicate of the pre-configured Configuration Parameter option
 							discreteOption = configParameter.DiscreteOptions;
@@ -176,7 +155,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 						{
 							textOption = textOptions.Find(o => o.ID == x.ConfigurationParameterValue.TextValueOptions);
 						}
-						else if (configParameter.TextOptions != null)
+						else if (configParameter?.TextOptions != null)
 						{
 							// Create duplicate of the pre-configured Configuration Parameter option
 							textOption = configParameter.TextOptions;
@@ -194,8 +173,8 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 						{
 							ID = x.ID.Id,
 							Label = x.ConfigurationParameterValue.Label,
-							ConfigurationParameterId = x.ConfigurationParameterValue.ConfigurationParameterReference.Value,
-							Type = x.ConfigurationParameterValue.Type ?? configParameter.Type,
+							ConfigurationParameterId = x.ConfigurationParameterValue.ConfigurationParameterReference ?? Guid.Empty,
+							Type = x.ConfigurationParameterValue.Type ?? configParameter?.Type ?? SlcConfigurationsIds.Enums.Type.Text,
 							StringValue = x.ConfigurationParameterValue.StringValue,
 							DoubleValue = x.ConfigurationParameterValue.DoubleValue,
 							NumberOptions = numberOption,
@@ -206,6 +185,54 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 						};
 					})
 				.ToList();
+		}
+
+		private List<Models.ConfigurationParameter> GetRequiredConfigurationParameters(List<ConfigurationParameterValueInstance> instances)
+		{
+			FilterElement<Models.ConfigurationParameter> filterConfigurationParameter = new ORFilterElement<Models.ConfigurationParameter>();
+			var guids = instances.Where(i => i?.ConfigurationParameterValue.ConfigurationParameterReference != null).Select(i => i.ConfigurationParameterValue.ConfigurationParameterReference.Value).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filterConfigurationParameter = filterConfigurationParameter.OR(ConfigurationParameterExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperConfigurationParameter(_connection).Read(filterConfigurationParameter) : new List<Models.ConfigurationParameter>();
+		}
+
+		private List<Models.DiscreteParameterOptions> GetRequiredDiscreteOptions(List<ConfigurationParameterValueInstance> instances)
+		{
+			FilterElement<Models.DiscreteParameterOptions> filter = new ORFilterElement<Models.DiscreteParameterOptions>();
+			var guids = instances.Where(i => i?.ConfigurationParameterValue?.DiscreteValueOptions != null).Select(i => i.ConfigurationParameterValue.DiscreteValueOptions.Value).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filter = filter.OR(DiscreteParameterOptionExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperDiscreteParameterOptions(_connection).Read(filter) : new List<Models.DiscreteParameterOptions>();
+		}
+
+		private List<Models.NumberParameterOptions> GetRequiredNumberOptions(List<ConfigurationParameterValueInstance> instances)
+		{
+			FilterElement<Models.NumberParameterOptions> filter = new ORFilterElement<Models.NumberParameterOptions>();
+			var guids = instances.Where(i => i?.ConfigurationParameterValue?.NumberValueOptions != null).Select(i => i.ConfigurationParameterValue.NumberValueOptions.Value).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filter = filter.OR(NumberParameterOptionExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperNumberParameterOptions(_connection).Read(filter) : new List<Models.NumberParameterOptions>();
+		}
+
+		private List<Models.TextParameterOptions> GetRequiredTextOptions(List<ConfigurationParameterValueInstance> instances)
+		{
+			FilterElement<Models.TextParameterOptions> filter = new ORFilterElement<Models.TextParameterOptions>();
+			var guids = instances.Where(i => i?.ConfigurationParameterValue?.TextValueOptions != null).Select(i => i.ConfigurationParameterValue.TextValueOptions.Value).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filter = filter.OR(TextParameterOptionExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperTextParameterOptions(_connection).Read(filter) : new List<Models.TextParameterOptions>();
 		}
 	}
 }

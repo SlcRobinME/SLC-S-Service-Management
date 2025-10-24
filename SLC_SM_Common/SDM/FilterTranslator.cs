@@ -1,6 +1,7 @@
 ﻿namespace Skyline.DataMiner.SDM
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 
 	using DomHelpers.SlcConfigurations;
@@ -9,9 +10,91 @@
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Comparer = Skyline.DataMiner.Net.Messages.SLDataGateway.Comparer;
 
 	public static class FilterTranslator
 	{
+		private static readonly Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>> Handlers = new Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>>
+			{
+				/*SERVICE*/
+				[ServiceExposers.Guid.fieldName] = HandleGuid,
+				[ServiceExposers.ServiceName.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceName), comparer, (string)value),
+				[ServiceExposers.Description.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.Description), comparer, (string)value),
+				[ServiceExposers.ServiceStartTime.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceStartTime), comparer, (DateTime)value),
+				[ServiceExposers.ServiceEndTime.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceEndTime), comparer, (DateTime)value),
+				[ServiceExposers.Icon.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.Icon), comparer, (string)value),
+				[ServiceExposers.ServiceSpecifcation.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceSpecifcation), comparer, (Guid)value),
+				[ServiceExposers.RelatedOrganization.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.RelatedOrganization), comparer, (Guid)value),
+				[ServiceExposers.ServiceCategory.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceCategory), comparer, (value as Models.ServiceCategory)?.ID ?? Guid.Empty),
+				[ServiceExposers.ServiceConfigurationParameters.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfigurationParameters), comparer, (value as Models.ServiceConfigurationValue)?.ID ?? Guid.Empty),
+				[ServiceExposers.ServiceID.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceID), comparer, (string)value),
+				[ServiceExposers.ServiceItemsSection.Label.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.Label), comparer, (string)value),
+				[ServiceExposers.ServiceItemsSection.ServiceItemID.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemID), comparer, (long)value),
+				[ServiceExposers.ServiceItemsSection.ServiceItemType.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemType), comparer, (int)value),
+				[ServiceExposers.ServiceItemsSection.DefinitionReference.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.DefinitionReference), comparer, (string)value),
+				[ServiceExposers.ServiceItemsSection.ServiceItemScript.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemScript), comparer, (string)value),
+				[ServiceExposers.ServiceItemsSection.ImplementationReference.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ImplementationReference), comparer, (string)value),
+				[ServiceExposers.ServiceItemRelationshipsSection.Type.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.Type), comparer, (string)value),
+				[ServiceExposers.ServiceItemRelationshipsSection.ParentServiceItem.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.ParentServiceItem), comparer, (string)value),
+				[ServiceExposers.ServiceItemRelationshipsSection.ChildServiceItem.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.ChildServiceItem), comparer, (string)value),
+				[ServiceExposers.ServiceItemRelationshipsSection.ParentServiceItemInterfaceID.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.ParentServiceItemInterfaceID), comparer, (string)value),
+				[ServiceExposers.ServiceItemRelationshipsSection.ChildServiceItemInterfaceID.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.ChildServiceItemInterfaceID), comparer, (string)value),
+
+				/*SERVICE SPECIFICATION*/
+				[ServiceSpecificationExposers.Guid.fieldName] = HandleGuid,
+				[ServiceSpecificationExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceSpecificationInfo.SpecificationName), comparer, (string)value),
+
+				/*SERVICE SPECIFICATION CONFIGURATION VALUE*/
+				[ServiceSpecificationConfigurationValueExposers.Guid.fieldName] = HandleGuid,
+
+				/*SERVICE ORDER*/
+				[ServiceOrderExposers.Guid.fieldName] = HandleGuid,
+				[ServiceOrderExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceOrderInfo.Name), comparer, (string)value),
+				[ServiceOrderExposers.ExternalId.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceOrderInfo.ExternalID), comparer, (string)value),
+
+				/*SERVICE ORDER ITEM*/
+				[ServiceOrderItemExposers.Guid.fieldName] = HandleGuid,
+				[ServiceOrderItemExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceOrderItemInfo.Name), comparer, (string)value),
+
+				/*SERVICE ORDER ITEM*/
+				[ServiceOrderItemConfigurationValueExposers.Guid.fieldName] = HandleGuid,
+
+				/*SERVICE CATEGORY*/
+				[ServiceCategroyExposers.Guid.fieldName] = HandleGuid,
+
+				/*SERVICE CONFIGURATION VALUE*/
+				[ServiceConfigurationValueExposers.Guid.fieldName] = HandleGuid,
+				[ServiceConfigurationValueExposers.ConfigurationParameterID.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceConfigurationValue.ConfigurationParameterValue), comparer, (Guid)value),
+
+				/*CONFIGURATION PARAM*/
+				[ConfigurationParameterExposers.Guid.fieldName] = HandleGuid,
+				[ConfigurationParameterExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.ParameterName), comparer, (string)value),
+
+				/*CONFIGURATION VALUE*/
+				[ConfigurationParameterValueExposers.Guid.fieldName] = HandleGuid,
+				[ConfigurationParameterValueExposers.Label.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Label), comparer, (string)value),
+				[ConfigurationParameterValueExposers.StringValue.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterValue.StringValue), comparer, (string)value),
+				[ConfigurationParameterValueExposers.DoubleValue.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterValue.DoubleValue), comparer, (double?)value),
+				[ConfigurationParameterValueExposers.Type.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Type), comparer, (SlcConfigurationsIds.Enums.Type)value),
+				[ConfigurationParameterValueExposers.ConfigurationParameterID.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterValue.ConfigurationParameterReference), comparer, (Guid)value),
+
+				/*CONFIGURATION PARAM*/
+				[ConfigurationUnitExposers.Guid.fieldName] = HandleGuid,
+				[ConfigurationUnitExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationUnitInfo.UnitName), comparer, (string)value),
+
+				/*CONFIGURATION NUMBER OPTIONS*/
+				[NumberParameterOptionExposers.Guid.fieldName] = HandleGuid,
+
+				/*CONFIGURATION TEXT OPTIONS*/
+				[TextParameterOptionExposers.Guid.fieldName] = HandleGuid,
+
+				/*CONFIGURATION DSICRETE OPTIONS*/
+				[DiscreteParameterOptionExposers.Guid.fieldName] = HandleGuid,
+
+				/*CONFIGURATION DSICRETE VALUE OPTIONS*/
+				[DiscreteValueExposers.Guid.fieldName] = HandleGuid,
+			};
+
 		public static FilterElement<DomInstance> TranslateFullFilter<T>(FilterElement<T> filter) where T : class
 		{
 			if (filter is null)
@@ -68,88 +151,17 @@
 
 		private static FilterElement<DomInstance> CreateFilter(string fieldName, Comparer comparer, object value)
 		{
-			switch (fieldName)
+			if (!Handlers.ContainsKey(fieldName))
 			{
-				/*SERVICE*/
-				case "ServiceExposers.Guid":
-					return FilterElementFactory.Create(DomInstanceExposers.Id, comparer, (Guid)value);
-				case "ServiceExposers.ServiceName":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceName), comparer, (string)value);
-				case "ServiceExposers.Description":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.Description), comparer, (string)value);
-				case "ServiceExposers.ServiceStartTime":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceStartTime), comparer, (DateTime)value);
-				case "ServiceExposers.ServiceEndTime":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceEndTime), comparer, (DateTime)value);
-				case "ServiceExposers.Icon":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.Icon), comparer, (string)value);
-				case "ServiceExposers.ServiceSpecifcation":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceSpecifcation), comparer, (Guid)value);
-				case "ServiceExposers.ServiceProperties":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceProperties), comparer, (Guid)value);
-				case "ServiceExposers.ServiceConfiguration":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfiguration), comparer, (Guid)value);
-				case "ServiceExposers.RelatedOrganization":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.RelatedOrganization), comparer, (Guid)value);
-				case "ServiceExposers.ServiceCategory":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceCategory), comparer, (value as Models.ServiceCategory)?.ID ?? Guid.Empty);
-				case "ServiceExposers.ServiceConfigurationParameters":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfigurationParameters), comparer, (value as Models.ServiceConfigurationValue)?.ID ?? Guid.Empty);
-				case "ServiceExposers.ServiceID":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceID), comparer, (string)value);
-				case "ServiceItemsSection.Label":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.Label), comparer, (string)value);
-				case "ServiceItemsSection.ServiceItemID":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemID), comparer, (long)value);
-				case "ServiceItemsSection.ServiceItemType":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemType), comparer, (int)value);
-				case "ServiceItemsSection.DefinitionReference":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.DefinitionReference), comparer, (string)value);
-				case "ServiceItemsSection.ServiceItemConfiguration":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemConfiguration), comparer, (Guid)value);
-				case "ServiceItemsSection.ServiceItemScript":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemScript), comparer, (string)value);
-				case "ServiceItemsSection.ImplementationReference":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ImplementationReference), comparer, (string)value);
-				case "ServiceItemRelationshipSection.Type":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.Type), comparer, (string)value);
-				case "ServiceItemRelationshipSection.ParentServiceItem":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.ParentServiceItem), comparer, (string)value);
-				case "ServiceItemRelationshipSection.ChildServiceItem":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.ChildServiceItem), comparer, (string)value);
-				case "ServiceItemRelationshipSection.ParentServiceItemInterfaceID":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.ParentServiceItemInterfaceID), comparer, (string)value);
-				case "ServiceItemRelationshipSection.ChildServiceItemInterfaceID":
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItemRelationship.ChildServiceItemInterfaceID), comparer, (string)value);
-
-				/*SERVICE CONFIGURATION VALUE*/
-				case nameof(ServiceConfigurationValueExposers) + "." + nameof(ServiceConfigurationValueExposers.Guid):
-					return FilterElementFactory.Create(DomInstanceExposers.Id, comparer, (Guid)value);
-				case nameof(ServiceConfigurationValueExposers) + "." + nameof(ServiceConfigurationValueExposers.ConfigurationParameterID):
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceConfigurationValue.ConfigurationParameterValue), comparer, (Guid)value);
-
-				/*CONFIGURATION PARAM*/
-				case nameof(ConfigurationParameterExposers) + "." + nameof(ConfigurationParameterExposers.Guid):
-					return FilterElementFactory.Create(DomInstanceExposers.Id, comparer, (Guid)value);
-				case nameof(ConfigurationParameterExposers) + "." + nameof(ConfigurationParameterExposers.Name):
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterInfo.ParameterName), comparer, (string)value);
-
-				/*CONFIGURATION VALUE*/
-				case nameof(ConfigurationParameterValueExposers) + "." + nameof(ConfigurationParameterValueExposers.Guid):
-					return FilterElementFactory.Create(DomInstanceExposers.Id, comparer, (Guid)value);
-				case nameof(ConfigurationParameterValueExposers) + "." + nameof(ConfigurationParameterValueExposers.Label):
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Label), comparer, (string)value);
-				case nameof(ConfigurationParameterValueExposers) + "." + nameof(ConfigurationParameterValueExposers.StringValue):
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterValue.StringValue), comparer, (string)value);
-				case nameof(ConfigurationParameterValueExposers) + "." + nameof(ConfigurationParameterValueExposers.DoubleValue):
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterValue.DoubleValue), comparer, (double?)value);
-				case nameof(ConfigurationParameterValueExposers) + "." + nameof(ConfigurationParameterValueExposers.Type):
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterValue.Type), comparer, (SlcConfigurationsIds.Enums.Type)value);
-				case nameof(ConfigurationParameterValueExposers) + "." + nameof(ConfigurationParameterValueExposers.ConfigurationParameterID):
-					return FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcConfigurationsIds.Sections.ConfigurationParameterValue.ConfigurationParameterReference), comparer, (Guid)value);
-				default:
-					throw new NotSupportedException(fieldName);
+				throw new NotSupportedException(fieldName);
 			}
+
+			return Handlers[fieldName].Invoke(comparer, value);
+		}
+
+		private static FilterElement<DomInstance> HandleGuid(Comparer comparer, object value)
+		{
+			return FilterElementFactory.Create(DomInstanceExposers.Id, comparer, (Guid)value);
 		}
 	}
 }

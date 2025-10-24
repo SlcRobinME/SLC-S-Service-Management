@@ -1,12 +1,10 @@
 namespace ServiceOrderItemStateTranstitions
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
 	using DomHelpers.SlcServicemanagement;
-	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
@@ -15,12 +13,9 @@ namespace ServiceOrderItemStateTranstitions
 	{
 		public void OnButtonActionMethod(IEngine engine)
 		{
-			var domInstanceIdInput = engine.GetScriptParam("Id")?.Value;
-			string domInstanceId = JsonConvert.DeserializeObject<List<string>>(domInstanceIdInput).FirstOrDefault();
-			var previousStateInput = engine.GetScriptParam("PreviousState")?.Value;
-			string previousState = JsonConvert.DeserializeObject<List<string>>(previousStateInput).FirstOrDefault();
-			var nextStateInput = engine.GetScriptParam("NextState")?.Value;
-			string nextState = JsonConvert.DeserializeObject<List<string>>(nextStateInput).FirstOrDefault();
+			string domInstanceId = engine.ReadScriptParamFromApp("Id");
+			string previousState = engine.ReadScriptParamFromApp("PreviousState");
+			string nextState = engine.ReadScriptParamFromApp("NextState");
 
 			////engine.GenerateInformation($"EventStateTransition: Input parameters instaceId: {instanceId.ToString()}, PreviousState: {previousState}, NextState: {nextState}");
 
@@ -28,12 +23,6 @@ namespace ServiceOrderItemStateTranstitions
 
 			////engine.GenerateInformation(previousState);
 			////engine.GenerateInformation(nextState);
-
-			if (!ValidateArguments(domInstanceId, previousState, nextState))
-			{
-				////engine.GenerateInformation($"{nextState} and {previousState}");
-				engine.ExitFail("Input is not valid");
-			}
 
 			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
 
@@ -240,26 +229,6 @@ namespace ServiceOrderItemStateTranstitions
 		public void Run(Engine engine)
 		{
 			OnButtonActionMethod(engine);
-		}
-
-		private static bool ValidateArguments(string domInstanceIdGuid, string scriptParamValue, string scriptParamValue2)
-		{
-			if (!Guid.TryParse(domInstanceIdGuid, out var _))
-			{
-				return false;
-			}
-
-			if (String.IsNullOrEmpty(scriptParamValue))
-			{
-				return false;
-			}
-
-			if (String.IsNullOrEmpty(scriptParamValue2))
-			{
-				return false;
-			}
-
-			return true;
 		}
 	}
 }

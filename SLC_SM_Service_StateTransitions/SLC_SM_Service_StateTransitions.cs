@@ -5,6 +5,7 @@ namespace SLCSMServiceStateTransitions
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel.Actions;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
@@ -18,8 +19,8 @@ namespace SLCSMServiceStateTransitions
 			// engine.ShowUI();
 
 			var instanceId = context.ContextId as DomInstanceId;
-			var previousState = engine.GetScriptParam("PreviousState")?.Value;
-			var nextState = engine.GetScriptParam("NextState")?.Value;
+			var previousState = engine.ReadScriptParamFromApp("PreviousState");
+			var nextState = engine.ReadScriptParamFromApp("NextState");
 
 			////engine.GenerateInformation($"EventStateTransition: Input parameters instaceId: {instanceId.ToString()}, PreviousState: {previousState}, NextState: {nextState}");
 
@@ -27,12 +28,6 @@ namespace SLCSMServiceStateTransitions
 
 			////engine.GenerateInformation(previousState);
 			////engine.GenerateInformation(nextState);
-
-			if (!ValidateArguments(instanceId, previousState, nextState))
-			{
-				////engine.GenerateInformation($"{nextState} and {previousState}");
-				engine.ExitFail("Input is not valid");
-			}
 
 			var domHelper = new DomHelper(engine.SendSLNetMessages, instanceId.ModuleId);
 
@@ -125,26 +120,6 @@ namespace SLCSMServiceStateTransitions
 			// DO NOT REMOVE
 			// engine.ShowUI();
 			engine.ExitFail("This script should be executed using the 'OnDomAction' entry point");
-		}
-
-		private static bool ValidateArguments(DomInstanceId domInstanceId, string scriptParamValue, string scriptParamValue2)
-		{
-			if (domInstanceId == null)
-			{
-				return false;
-			}
-
-			if (String.IsNullOrEmpty(scriptParamValue))
-			{
-				return false;
-			}
-
-			if (String.IsNullOrEmpty(scriptParamValue2))
-			{
-				return false;
-			}
-
-			return true;
 		}
 	}
 }

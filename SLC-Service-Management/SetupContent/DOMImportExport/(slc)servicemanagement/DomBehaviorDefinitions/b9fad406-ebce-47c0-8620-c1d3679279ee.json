@@ -273,24 +273,6 @@
         {
           "ClientReadOnly": false,
           "FieldDescriptorId": {
-            "Id": "48751f65-2740-4965-b178-acede95cb3e6"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "040d827c-c713-461f-9f05-aeb3ef15f7de"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
             "Id": "d0f0ea83-ce6f-4c5d-be6a-f30387a4a703"
           },
           "ReadOnly": false,
@@ -377,15 +359,6 @@
           "ClientReadOnly": false,
           "FieldDescriptorId": {
             "Id": "30c7c421-7c97-4723-91e1-046ba1792ec8"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "9a3144ee-794d-4ea9-8888-c06d9b4789ed"
           },
           "ReadOnly": false,
           "RequiredForStatus": false,
@@ -488,24 +461,6 @@
         {
           "ClientReadOnly": false,
           "FieldDescriptorId": {
-            "Id": "48751f65-2740-4965-b178-acede95cb3e6"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "040d827c-c713-461f-9f05-aeb3ef15f7de"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
             "Id": "d0f0ea83-ce6f-4c5d-be6a-f30387a4a703"
           },
           "ReadOnly": false,
@@ -592,15 +547,6 @@
           "ClientReadOnly": false,
           "FieldDescriptorId": {
             "Id": "30c7c421-7c97-4723-91e1-046ba1792ec8"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "9a3144ee-794d-4ea9-8888-c06d9b4789ed"
           },
           "ReadOnly": false,
           "RequiredForStatus": false,
@@ -703,24 +649,6 @@
         {
           "ClientReadOnly": false,
           "FieldDescriptorId": {
-            "Id": "48751f65-2740-4965-b178-acede95cb3e6"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "040d827c-c713-461f-9f05-aeb3ef15f7de"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
             "Id": "d0f0ea83-ce6f-4c5d-be6a-f30387a4a703"
           },
           "ReadOnly": false,
@@ -807,15 +735,6 @@
           "ClientReadOnly": false,
           "FieldDescriptorId": {
             "Id": "30c7c421-7c97-4723-91e1-046ba1792ec8"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "9a3144ee-794d-4ea9-8888-c06d9b4789ed"
           },
           "ReadOnly": false,
           "RequiredForStatus": false,
@@ -918,24 +837,6 @@
         {
           "ClientReadOnly": false,
           "FieldDescriptorId": {
-            "Id": "48751f65-2740-4965-b178-acede95cb3e6"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "040d827c-c713-461f-9f05-aeb3ef15f7de"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
             "Id": "d0f0ea83-ce6f-4c5d-be6a-f30387a4a703"
           },
           "ReadOnly": false,
@@ -1022,15 +923,6 @@
           "ClientReadOnly": false,
           "FieldDescriptorId": {
             "Id": "30c7c421-7c97-4723-91e1-046ba1792ec8"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "9a3144ee-794d-4ea9-8888-c06d9b4789ed"
           },
           "ReadOnly": false,
           "RequiredForStatus": false,
@@ -1133,24 +1025,6 @@
         {
           "ClientReadOnly": false,
           "FieldDescriptorId": {
-            "Id": "48751f65-2740-4965-b178-acede95cb3e6"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "040d827c-c713-461f-9f05-aeb3ef15f7de"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
             "Id": "d0f0ea83-ce6f-4c5d-be6a-f30387a4a703"
           },
           "ReadOnly": false,
@@ -1237,15 +1111,6 @@
           "ClientReadOnly": false,
           "FieldDescriptorId": {
             "Id": "30c7c421-7c97-4723-91e1-046ba1792ec8"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "9a3144ee-794d-4ea9-8888-c06d9b4789ed"
           },
           "ReadOnly": false,
           "RequiredForStatus": false,
@@ -1344,24 +1209,6 @@
           "ReadOnly": false,
           "RequiredForStatus": false,
           "Visible": true
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "48751f65-2740-4965-b178-acede95cb3e6"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "040d827c-c713-461f-9f05-aeb3ef15f7de"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
         },
         {
           "ClientReadOnly": false,
@@ -1452,15 +1299,6 @@
           "ClientReadOnly": false,
           "FieldDescriptorId": {
             "Id": "30c7c421-7c97-4723-91e1-046ba1792ec8"
-          },
-          "ReadOnly": false,
-          "RequiredForStatus": false,
-          "Visible": false
-        },
-        {
-          "ClientReadOnly": false,
-          "FieldDescriptorId": {
-            "Id": "9a3144ee-794d-4ea9-8888-c06d9b4789ed"
           },
           "ReadOnly": false,
           "RequiredForStatus": false,

@@ -54,8 +54,8 @@ namespace SLCSMIASManageRelationships
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	public class ScriptData
 	{
@@ -75,29 +75,23 @@ namespace SLCSMIASManageRelationships
 
 		public string Type { get; set; }
 
-		public bool HasDefinitionReference => !string.IsNullOrEmpty(DefinitionReference);
+		public bool HasDefinitionReference => !String.IsNullOrEmpty(DefinitionReference);
 
 		public void Validate()
 		{
-			if (string.IsNullOrEmpty(DefinitionReference) && ServiceIds.Count < 2)
+			if (String.IsNullOrEmpty(DefinitionReference) && ServiceIds.Count < 2)
 				throw new InvalidOperationException("Select a minimum of 2 service items to make a connection");
 		}
 
 		private void LoadScriptParameters()
 		{
-			var domIdRaw = _engine.GetScriptParam("DomId").Value;
-			DomId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
-			if (DomId == Guid.Empty)
-				throw new InvalidOperationException("No DOM ID provided as input to the script");
+			DomId = _engine.ReadScriptParamFromApp<Guid>("DomId");
 
-			var serviceItemIdsRaw = _engine.GetScriptParam("ServiceItemIds").Value;
-			ServiceIds = JsonConvert.DeserializeObject<HashSet<string>>(serviceItemIdsRaw);
+			ServiceIds = _engine.ReadScriptParamsFromApp("ServiceItemIds").ToHashSet();
 
-			var definitionReference = _engine.GetScriptParam("DefinitionReference").Value;
-			DefinitionReference = JsonConvert.DeserializeObject<List<string>>(definitionReference).FirstOrDefault();
+			DefinitionReference = _engine.ReadScriptParamFromApp("DefinitionReference");
 
-			var type = _engine.GetScriptParam("Type").Value;
-			Type = JsonConvert.DeserializeObject<List<string>>(type).FirstOrDefault();
+			Type = _engine.ReadScriptParamFromApp("Type");
 		}
 
 		public override string ToString()

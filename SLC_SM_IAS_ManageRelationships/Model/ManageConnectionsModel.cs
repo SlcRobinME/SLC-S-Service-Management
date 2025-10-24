@@ -110,7 +110,7 @@
 				if (existing != null)
 					relationships.Remove(existing);
 
-				if (!string.IsNullOrEmpty(link.ChildServiceItemInterfaceID))
+				if (!String.IsNullOrEmpty(link.ChildServiceItemInterfaceID))
 					relationships.Add(link);
 			}
 

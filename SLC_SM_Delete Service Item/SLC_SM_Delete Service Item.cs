@@ -63,19 +63,16 @@ namespace SLC_SM_Delete_Service_Item_1
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Scheduling;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
-	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
-	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship.Models;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
 	/// </summary>
 	public class Script
 	{
-		private InteractiveController _controller;
 		private IEngine _engine;
 
 		/// <summary>
@@ -91,10 +88,10 @@ namespace SLC_SM_Delete_Service_Item_1
 			*
 			* engine.ShowUI();
 			*/
+
 			try
 			{
 				_engine = engine;
-				_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
 				RunSafe();
 			}
 			catch (ScriptAbortException)
@@ -120,23 +117,54 @@ namespace SLC_SM_Delete_Service_Item_1
 			}
 		}
 
-		private void DeleteServiceItemFromInstance(DomHelper helper, DomInstance domInstance, string label)
+		private void DeleteServiceItemFromInstance(DataHelperService helper, Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service service, string label)
 		{
-			var instance = ServiceInstancesExtentions.GetTypedInstance(domInstance);
-			var serviceItemToRemove = instance.GetServiceItems().FirstOrDefault(x => x.Label == label);
-			if (serviceItemToRemove != null && !LinkedReferenceStillActive(serviceItemToRemove.ServiceItemType, serviceItemToRemove.ImplementationReference))
+			var serviceItemToRemove = service.ServiceItems.FirstOrDefault(x => x.Label == label);
+			if (serviceItemToRemove == null)
 			{
-				instance.GetServiceItems().Remove(serviceItemToRemove);
-
-				var id = serviceItemToRemove.ServiceItemID?.ToString();
-				var relationships = instance
-					.GetServiceItemRelationships()
-					.Where(r => r.ParentServiceItem == id || r.ChildServiceItem == id);
-
-				relationships.ToList().ForEach(r => instance.GetServiceItemRelationships().Remove(r));
-
-				instance.Save(helper);
+				return;
 			}
+
+			if (LinkedReferenceStillActive(serviceItemToRemove.Type, serviceItemToRemove.ImplementationReference))
+			{
+				return;
+			}
+
+			service.ServiceItems.Remove(serviceItemToRemove);
+
+			var id = serviceItemToRemove.ID.ToString();
+			var relationships = service.ServiceItemsRelationships.Where(r => r.ParentServiceItem == id || r.ChildServiceItem == id).ToList();
+			foreach (var r in relationships)
+			{
+				service.ServiceItemsRelationships.Remove(r);
+			}
+
+			helper.CreateOrUpdate(service);
+		}
+
+		private void DeleteServiceItemFromInstance(DataHelperServiceSpecification helper, Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceSpecification spec, string label)
+		{
+			var serviceItemToRemove = spec.ServiceItems.FirstOrDefault(x => x.Label == label);
+			if (serviceItemToRemove == null)
+			{
+				return;
+			}
+
+			if (LinkedReferenceStillActive(serviceItemToRemove.Type, serviceItemToRemove.ImplementationReference))
+			{
+				return;
+			}
+
+			spec.ServiceItems.Remove(serviceItemToRemove);
+
+			var id = serviceItemToRemove.ID.ToString();
+			var relationships = spec.ServiceItemsRelationships.Where(r => r.ParentServiceItem == id || r.ChildServiceItem == id).ToList();
+			foreach (var r in relationships)
+			{
+				spec.ServiceItemsRelationships.Remove(r);
+			}
+
+			helper.CreateOrUpdate(spec);
 		}
 
 		private bool LinkedBookingStillActive(Guid refId)
@@ -144,15 +172,15 @@ namespace SLC_SM_Delete_Service_Item_1
 			var rm = new ResourceManagerHelper(_engine.SendSLNetSingleResponseMessage);
 			var reservation = rm.GetReservationInstance(refId);
 			if (reservation.StartTimeUTC > DateTime.UtcNow
-			    && (reservation.Status == ReservationStatus.Pending || reservation.Status == ReservationStatus.Confirmed))
+				&& (reservation.Status == ReservationStatus.Pending || reservation.Status == ReservationStatus.Confirmed))
 			{
 				rm.RemoveReservationInstances(reservation);
 				return false;
 			}
 
 			if (reservation.EndTimeUTC < DateTime.UtcNow
-			    || reservation.Status == ReservationStatus.Canceled
-			    || reservation.Status == ReservationStatus.Ended)
+				|| reservation.Status == ReservationStatus.Canceled
+				|| reservation.Status == ReservationStatus.Ended)
 			{
 				return false;
 			}
@@ -201,7 +229,7 @@ namespace SLC_SM_Delete_Service_Item_1
 			throw new InvalidOperationException($"Job '{refId}' still active on the system. Please finish this job first before removing the service item from the inventory.");
 		}
 
-		private bool LinkedReferenceStillActive(SlcServicemanagementIds.Enums.ServiceitemtypesEnum? serviceItemType, string implementationReference)
+		private bool LinkedReferenceStillActive(SlcServicemanagementIds.Enums.ServiceitemtypesEnum serviceItemType, string implementationReference)
 		{
 			if (!Guid.TryParse(implementationReference, out Guid refId))
 			{
@@ -231,14 +259,14 @@ namespace SLC_SM_Delete_Service_Item_1
 
 		private bool LinksStillExist(Guid refId)
 		{
-			var linkHelper = new DataHelperLink(Engine.SLNetRaw);
-			Models.Link link = linkHelper.Read().Find(x => x.ID == refId);
+			var linkHelper = new DataHelperLink(_engine.GetUserConnection());
+			Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship.Models.Link link = linkHelper.Read().Find(x => x.ID == refId);
 			if (link == null)
 			{
 				return false;
 			}
 
-			var dataHelper = new DataHelperService(Engine.SLNetRaw);
+			var dataHelper = new DataHelperService(_engine.GetUserConnection());
 
 			FilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service> filter = new ORFilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service>();
 			if (link.ChildID != null && Guid.TryParse(link.ChildID, out Guid childId))
@@ -262,23 +290,31 @@ namespace SLC_SM_Delete_Service_Item_1
 
 		private void RunSafe()
 		{
-			string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
-			Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
-			if (domId == Guid.Empty)
+			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
+
+			// confirmation if the user wants to delete the services
+			if (!_engine.ShowConfirmDialog($"Are you sure to you want to delete the selected service item(s)?"))
 			{
-				throw new InvalidOperationException("No DOM ID provided as input to the script");
+				return;
 			}
 
-			string serviceItemLabelRaw = _engine.GetScriptParam("Service Item Label").Value;
-			string serviceItemLabel = JsonConvert.DeserializeObject<List<string>>(serviceItemLabelRaw).FirstOrDefault()
-			                          ?? throw new InvalidOperationException("No Service Item Label provided as input to the script");
+			string serviceItemLabel = _engine.ReadScriptParamFromApp("Service Item Label");
 
-			var domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-			var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
-			                  ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
+			var dataHelperService = new DataHelperService(_engine.GetUserConnection());
+			var service = dataHelperService.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault();
+			if (service != null)
+			{
+				DeleteServiceItemFromInstance(dataHelperService, service, serviceItemLabel);
+			}
 
-			DeleteServiceItemFromInstance(domHelper, domInstance, serviceItemLabel);
-			throw new ScriptAbortException("OK");
+			var dataHelperServiceSpecification = new DataHelperServiceSpecification(_engine.GetUserConnection());
+			var spec = dataHelperServiceSpecification.Read(ServiceSpecificationExposers.Guid.Equal(domId)).FirstOrDefault();
+			if (spec != null)
+			{
+				DeleteServiceItemFromInstance(dataHelperServiceSpecification, spec, serviceItemLabel);
+			}
+
+			throw new InvalidOperationException($"No item with ID '{domId}' found on the system!");
 		}
 	}
 }

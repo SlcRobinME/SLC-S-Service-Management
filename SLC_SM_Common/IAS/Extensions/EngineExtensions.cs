@@ -2,6 +2,7 @@
 {
 	using System;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 
 	public static class EngineExtensions
@@ -24,6 +25,28 @@
 			return confirmed;
 		}
 
+		public static bool ShowPopupDialog(this IEngine engine, string title, string message, string buttonText)
+		{
+			return ShowPopupDialog(engine, new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways }, title, message, buttonText);
+		}
+
+		public static bool ShowPopupDialog(this IEngine engine, InteractiveController controller, string title, string message, string buttonText)
+		{
+			var model = new Dialogs.PopupDialog.PopupDialogModel(title, message, buttonText);
+			var view = new Dialogs.PopupDialog.PopupDialogView(engine);
+			var presenter = new Dialogs.PopupDialog.PopupDialogPresenter(view, model);
+
+			var confirmed = false;
+			presenter.Confirm += (sender, arg) => { confirmed = true; };
+
+			presenter.LoadFromModel();
+			presenter.BuildView();
+
+			controller.ShowDialog(view);
+
+			return confirmed;
+		}
+
 		public static void ShowErrorDialog(this IEngine engine, Exception ex)
 		{
 			var model = new ErrorDialogModel("Error", ex.Message, ex.ToString());
@@ -32,7 +55,7 @@
 
 			presenter.LoadFromModel();
 
-			view.Show();
+			new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways }.ShowDialog(view);
 		}
 
 		public static YesNoCancelOption ShowYesNoCancelDialog(this IEngine engine, string message)

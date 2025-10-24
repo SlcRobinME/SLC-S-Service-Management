@@ -1,5 +1,5 @@
-<DMSScript options="272" xmlns="http://www.skyline.be/automation">
-	<Name>SLC_SM_Get Service Properties</Name>
+﻿<DMSScript options="272" xmlns="http://www.skyline.be/automation">
+	<Name>SLC_SM_GQIDS_Get Service Items</Name>
 	<Description />
 	<Type>Automation</Type>
 	<Author>rmeuriss</Author>
@@ -13,9 +13,9 @@
 	</Parameters>
 	<Script>
 		<Exe id="2" type="csharp">
-			<Value><![CDATA[[Project:SLC_SM_Get Service Properties]]]></Value>
+			<Value><![CDATA[[Project:SLC_SM_GQIDS_Get Service Items]]]></Value>
 			<Param type="preCompile">true</Param>
-			<Param type="libraryName">GetServiceProperties</Param>
+			<Param type="libraryName">GetServiceItems</Param>
 			<Message />
 		</Exe>
 	</Script>

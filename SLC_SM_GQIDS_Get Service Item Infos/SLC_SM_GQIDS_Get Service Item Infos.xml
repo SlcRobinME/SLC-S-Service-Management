@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <DMSScript options="272" xmlns="http://www.skyline.be/automation">
-	<Name>SLC_SM_DS_GetServiceDetails</Name>
+	<Name>SLC_SM_GQIDS_Get Service Item Infos</Name>
 	<Description></Description>
 	<Type>Automation</Type>
-	<Author>RCA</Author>
+	<Author>RME</Author>
 	<CheckSets>FALSE</CheckSets>
 	<Folder></Folder>
 
@@ -18,10 +18,10 @@
 
 	<Script>
 		<Exe id="1" type="csharp">
-			<Value><![CDATA[[Project:SLC_SM_DS_GetServiceDetails]]]></Value>
+			<Value><![CDATA[[Project:SLC_SM_GQIDS_Get Service Item Infos]]]></Value>
 			<!--<Param type="debug">true</Param>-->
 			<Param type="preCompile">true</Param>
-			<Param type="libraryName">SLCSMDSGetServiceDetails</Param>
+			<Param type="libraryName">SLCSMGQIDSGetServiceItemInfos</Param>
 			<Message></Message>
 		</Exe>
 	</Script>

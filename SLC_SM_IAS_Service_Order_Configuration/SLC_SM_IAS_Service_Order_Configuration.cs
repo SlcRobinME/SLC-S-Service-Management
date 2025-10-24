@@ -58,6 +58,7 @@ namespace SLC_SM_IAS_Service_Order_Configuration
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Service_Order_Configuration.Presenters;
@@ -117,14 +118,9 @@ namespace SLC_SM_IAS_Service_Order_Configuration
 		private void RunSafe()
 		{
 			// Input
-			string domIdRaw = _engine.GetScriptParam("DOM ID").Value;
-			Guid domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
-			if (domId == Guid.Empty)
-			{
-				throw new InvalidOperationException("No DOM ID provided as input to the script");
-			}
+			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
 
-			var instance = new DataHelperServiceOrderItem(Engine.SLNetRaw).Read().Find(x => x.ID == domId)
+			var instance = new DataHelperServiceOrderItem(_engine.GetUserConnection()).Read().Find(x => x.ID == domId)
 				?? throw new InvalidOperationException($"Instance with ID '{domId}' does not exist");
 
 			// Model-View-Presenter

@@ -124,9 +124,7 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 					},
 					new GQICell
 					{
-						Value = item.ServiceOrderItem.Properties != null
-							? item.ServiceOrderItem.Properties.ID.ToString()
-							: String.Empty,
+						Value = String.Empty, // Property has been removed
 					},
 					new GQICell
 					{

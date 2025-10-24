@@ -3,9 +3,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcServicemanagement;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -25,13 +23,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			instance.ServiceSpecificationInfo.SpecificationName = item.Name;
 			instance.ServiceSpecificationInfo.Description = item.Description;
 			instance.ServiceSpecificationInfo.Icon = item.Icon;
-			instance.ServiceSpecificationInfo.ServiceProperties = item.Properties?.ID;
-
-			if (item.Properties != null)
-			{
-				var dataHelperProperties = new DataHelperServicePropertyValues(_connection);
-				dataHelperProperties.CreateOrUpdate(item.Properties);
-			}
 
 			if (item.ServiceItemsRelationships != null)
 			{
@@ -89,16 +80,31 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 		}
 
 		/// <inheritdoc />
-		public override List<Models.ServiceSpecification> Read()
+		public override bool TryDelete(Models.ServiceSpecification item)
 		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id))
-				.Select(x => new ServiceSpecificationsInstance(x))
-				.ToList();
+			bool b = true;
 
-			var dataHelperServicePropertyValues = new DataHelperServicePropertyValues(_connection);
-			var serviceProperties = dataHelperServicePropertyValues.Read();
-			var dataHelperServiceConfigurations = new DataHelperServiceSpecificationConfigurationValue(_connection);
-			var serviceConfigurations = dataHelperServiceConfigurations.Read();
+			if (item.Configurations != null)
+			{
+				var helperConfigs = new DataHelperServiceSpecificationConfigurationValue(_connection);
+				foreach (var config in item.Configurations)
+				{
+					b &= helperConfigs.TryDelete(config.ID);
+				}
+			}
+
+			return b && TryDelete(item.ID);
+		}
+
+		protected override List<Models.ServiceSpecification> Read(IEnumerable<DomInstance> domInstances)
+		{
+			var instances = domInstances.Select(x => new ServiceSpecificationsInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.ServiceSpecification>();
+			}
+
+			var serviceConfigurations = GetRequiredServiceSpecificationConfigurationValues(instances);
 
 			return instances.Select(
 					x => new Models.ServiceSpecification
@@ -107,8 +113,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 						Name = x.ServiceSpecificationInfo.SpecificationName,
 						Description = x.ServiceSpecificationInfo.Description,
 						Icon = x.ServiceSpecificationInfo.Icon,
-						Properties = serviceProperties.Find(p => p.ID == x.ServiceSpecificationInfo.ServiceProperties)
-						             ?? new Models.ServicePropertyValues { Values = new List<Models.ServicePropertyValue>() },
 						Configurations = serviceConfigurations.Where(p => x.ServiceSpecificationInfo.ServiceSpecificationConfigurationParameters.Contains(p.ID)).ToList(),
 						ServiceItems = x.ServiceItemses.Select(
 								s => new Models.ServiceItem
@@ -136,26 +140,16 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 				.ToList();
 		}
 
-		/// <inheritdoc />
-		public override bool TryDelete(Models.ServiceSpecification item)
+		private List<Models.ServiceSpecificationConfigurationValue> GetRequiredServiceSpecificationConfigurationValues(List<ServiceSpecificationsInstance> instances)
 		{
-			bool b = true;
-
-			if (item.Properties != null)
+			FilterElement<Models.ServiceSpecificationConfigurationValue> filter = new ORFilterElement<Models.ServiceSpecificationConfigurationValue>();
+			var guids = instances.Where(i => i?.ServiceSpecificationInfo?.ServiceSpecificationConfigurationParameters != null).SelectMany(i => i.ServiceSpecificationInfo.ServiceSpecificationConfigurationParameters).Distinct().ToList();
+			foreach (Guid guid in guids)
 			{
-				b &= new DataHelperServicePropertyValues(_connection).TryDelete(item.Properties);
+				filter = filter.OR(ServiceSpecificationConfigurationValueExposers.Guid.Equal(guid));
 			}
 
-			if (item.Configurations != null)
-			{
-				var helperConfigs = new DataHelperServiceSpecificationConfigurationValue(_connection);
-				foreach (var config in item.Configurations)
-				{
-					b &= helperConfigs.TryDelete(config.ID);
-				}
-			}
-
-			return b && TryDelete(item.ID);
+			return guids.Count > 0 ? new DataHelperServiceSpecificationConfigurationValue(_connection).Read(filter) : new List<Models.ServiceSpecificationConfigurationValue>();
 		}
 	}
 }

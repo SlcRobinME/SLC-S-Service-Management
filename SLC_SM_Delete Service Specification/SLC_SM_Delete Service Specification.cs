@@ -54,10 +54,14 @@ dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 namespace SLC_SM_Delete_Service_Specification
 {
 	using System;
-
+	using System.Linq;
+	using DomHelpers.SlcServicemanagement;
 	using Library;
 
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
@@ -72,6 +76,14 @@ namespace SLC_SM_Delete_Service_Specification
 		/// <param name="engine">Link with SLAutomation process.</param>
 		public void Run(IEngine engine)
 		{
+			/*
+			* Note:
+			* Do not remove the commented methods below!
+			* The lines are needed to execute an interactive automation script from the non-interactive automation script or from Visio!
+			*
+			* engine.ShowUI();
+			*/
+
 			try
 			{
 				_engine = engine;
@@ -96,19 +108,26 @@ namespace SLC_SM_Delete_Service_Specification
 			}
 			catch (Exception e)
 			{
-				engine.ExitFail(e.Message);
+				engine.ShowErrorDialog(e);
 			}
 		}
 
 		private void RunSafe()
 		{
-			if (!Guid.TryParse(_engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']'), out Guid domId))
+			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
+
+			// confirmation if the user wants to delete the services
+			if (!_engine.ShowConfirmDialog($"Are you sure to you want to delete the selected service specification(s)?"))
 			{
-				throw new InvalidOperationException("No DOM ID provided as input to the script");
+				return;
 			}
 
-			var repo = new DataHelpersServiceManagement(Engine.SLNetRaw);
-			var orderItemInstance = repo.ServiceSpecifications.Read().Find(x => x.ID == domId);
+			var repo = new DataHelpersServiceManagement(_engine.GetUserConnection());
+			var orderItemInstance = repo.ServiceSpecifications.Read(ServiceSpecificationExposers.Guid.Equal(domId)).FirstOrDefault();
+			if (orderItemInstance == null)
+			{
+				return;
+			}
 
 			repo.ServiceSpecifications.TryDelete(orderItemInstance);
 		}

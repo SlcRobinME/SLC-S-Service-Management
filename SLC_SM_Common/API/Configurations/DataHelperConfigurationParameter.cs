@@ -3,13 +3,10 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcConfigurations;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
 
 	/// <inheritdoc />
 	public class DataHelperConfigurationParameter : DataHelper<Models.ConfigurationParameter>
@@ -48,32 +45,23 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 		}
 
 		/// <inheritdoc />
-		public List<Models.ConfigurationParameter> Read(FilterElement<Models.ConfigurationParameter> filter)
+		public override bool TryDelete(Models.ConfigurationParameter item)
 		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
-
-			var domFilter = FilterTranslator.TranslateFullFilter(filter);
-			return Read(_domHelper.DomInstances.Read(domFilter));
+			return TryDelete(item.ID);
 		}
 
 		/// <inheritdoc />
-		public override List<Models.ConfigurationParameter> Read()
-		{
-			var instances = _domHelper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(_defId.Id));
-			return Read(instances);
-		}
-
-		/// <inheritdoc />
-		private List<Models.ConfigurationParameter> Read(List<DomInstance> domInstances)
+		protected override List<Models.ConfigurationParameter> Read(IEnumerable<DomInstance> domInstances)
 		{
 			var instances = domInstances.Select(x => new ConfigurationParametersInstance(x)).ToList();
+			if (instances.Count < 1)
+			{
+				return new List<Models.ConfigurationParameter>();
+			}
 
-			var numberOptions = new DataHelperNumberParameterOptions(_connection).Read();
-			var discreteOptions = new DataHelperDiscreteParameterOptions(_connection).Read();
-			var textOptions = new DataHelperTextParameterOptions(_connection).Read();
+			List<Models.NumberParameterOptions> numberOptions = GetRequiredNumberOptions(instances);
+			List<Models.DiscreteParameterOptions> discreteOptions = GetRequiredDiscreteOptions(instances);
+			List<Models.TextParameterOptions> textOptions = GetRequiredTextOptions(instances);
 
 			return instances.Select(
 					x => new Models.ConfigurationParameter
@@ -88,10 +76,40 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations
 				.ToList();
 		}
 
-		/// <inheritdoc />
-		public override bool TryDelete(Models.ConfigurationParameter item)
+		private List<Models.DiscreteParameterOptions> GetRequiredDiscreteOptions(List<ConfigurationParametersInstance> instances)
 		{
-			return TryDelete(item.ID);
+			FilterElement<Models.DiscreteParameterOptions> filter = new ORFilterElement<Models.DiscreteParameterOptions>();
+			var guids = instances.Where(i => i?.ConfigurationParameterInfo?.DiscreteOptions != null).Select(i => i.ConfigurationParameterInfo.DiscreteOptions.Value).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filter = filter.OR(DiscreteParameterOptionExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperDiscreteParameterOptions(_connection).Read(filter) : new List<Models.DiscreteParameterOptions>();
+		}
+
+		private List<Models.NumberParameterOptions> GetRequiredNumberOptions(List<ConfigurationParametersInstance> instances)
+		{
+			FilterElement<Models.NumberParameterOptions> filter = new ORFilterElement<Models.NumberParameterOptions>();
+			var guids = instances.Where(i => i?.ConfigurationParameterInfo?.NumberOptions != null).Select(i => i.ConfigurationParameterInfo.NumberOptions.Value).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filter = filter.OR(NumberParameterOptionExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperNumberParameterOptions(_connection).Read(filter) : new List<Models.NumberParameterOptions>();
+		}
+
+		private List<Models.TextParameterOptions> GetRequiredTextOptions(List<ConfigurationParametersInstance> instances)
+		{
+			FilterElement<Models.TextParameterOptions> filter = new ORFilterElement<Models.TextParameterOptions>();
+			var guids = instances.Where(i => i?.ConfigurationParameterInfo?.TextOptions != null).Select(i => i.ConfigurationParameterInfo.TextOptions.Value).Distinct().ToList();
+			foreach (Guid guid in guids)
+			{
+				filter = filter.OR(TextParameterOptionExposers.Guid.Equal(guid));
+			}
+
+			return guids.Count > 0 ? new DataHelperTextParameterOptions(_connection).Read(filter) : new List<Models.TextParameterOptions>();
 		}
 	}
 }

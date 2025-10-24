@@ -3,14 +3,10 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using Library;
-
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
-
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using SLC_SM_IAS_Add_Service_Order_Item_1.Views;
 
 	public class ServiceOrderItemPresenter
@@ -78,12 +74,6 @@
 					{
 						config.ConfigurationParameter.ID = Guid.NewGuid(); // Duplicate
 					}
-
-					if (view.Specification.Selected.Properties != null)
-					{
-						instanceToReturn.ServiceOrderItem.Properties = view.Specification.Selected.Properties;
-						instanceToReturn.ServiceOrderItem.Properties.ID = Guid.NewGuid(); // Duplicate
-					}
 				}
 
 				return instanceToReturn;
@@ -144,7 +134,7 @@
 				view.Category.Selected = serviceCategoryInstance;
 			}
 
-			var serviceInstance = view.Service.Values.First(v => v?.ID == instance.ServiceOrderItem.ServiceId);
+			var serviceInstance = view.Service.Values.FirstOrDefault(v => v?.ID == instance.ServiceOrderItem.ServiceId);
 			if (serviceInstance != null)
 			{
 				view.Service.Selected = serviceInstance;

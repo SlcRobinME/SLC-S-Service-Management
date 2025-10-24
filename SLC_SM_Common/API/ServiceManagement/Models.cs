@@ -6,13 +6,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 
 	using DomHelpers.SlcServicemanagement;
 
-	using Skyline.DataMiner.Net.IManager.Objects;
-	using Skyline.DataMiner.Net.Ticketing;
-
-
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-
 	public static class Models
 	{
 		public class ServiceSpecification
@@ -24,8 +17,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			public string Description { get; set; }
 
 			public string Icon { get; set; }
-
-			public ServicePropertyValues Properties { get; set; }
 
 			public List<ServiceSpecificationConfigurationValue> Configurations { get; set; }
 
@@ -103,34 +94,7 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 
 			public Guid? ServiceId { get; set; }
 
-			public ServicePropertyValues Properties { get; set; }
-
 			public List<ServiceOrderItemConfigurationValue> Configurations { get; set; }
-		}
-
-		public class ServicePropertyValues
-		{
-			public Guid ID { get; set; }
-
-			public List<ServicePropertyValue> Values { get; set; }
-		}
-
-		public class ServicePropertyValue
-		{
-			public string Value { get; set; }
-
-			public Guid ServicePropertyId { get; set; }
-		}
-
-		public class ServiceProperty
-		{
-			public Guid ID { get; set; }
-
-			public string Name { get; set; }
-
-			public SlcServicemanagementIds.Enums.TypeEnum Type { get; set; }
-
-			public List<string> DiscreteValues { get; set; }
 		}
 
 		public class ServiceConfigurationValue
@@ -209,8 +173,6 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement
 			public Guid? OrganizationId { get; set; }
 
 			public Guid? ServiceSpecificationId { get; set; }
-
-			public ServicePropertyValues Properties { get; set; }
 
 			public List<ServiceConfigurationValue> Configurations { get; set; }
 

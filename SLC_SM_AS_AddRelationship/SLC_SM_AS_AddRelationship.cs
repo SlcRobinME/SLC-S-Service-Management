@@ -59,6 +59,7 @@ namespace SLCSMASAddRelationship
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
@@ -195,18 +196,13 @@ namespace SLCSMASAddRelationship
 
 		private void LoadPrameters(IEngine engine)
 		{
-			string domIdRaw = engine.GetScriptParam("DomId").Value;
-			_domId = JsonConvert.DeserializeObject<List<Guid>>(domIdRaw).FirstOrDefault();
-			if (_domId == Guid.Empty)
-			{
-				throw new ArgumentException("No DOM ID provided as Service/Service Specification Id to the script");
-			}
+			_domId = engine.ReadScriptParamFromApp<Guid>("DomId");
 
-			_action = engine.GetScriptParam("Action").Value.Trim('"', '[', ']').ToLower();
-			_sourceId = engine.GetScriptParam("SourceId").Value.Trim('"', '[', ']');
-			_destinationId = engine.GetScriptParam("DestinationId").Value.Trim('"', '[', ']');
-			_sourceInterfaceId = engine.GetScriptParam("SourceInterfaceId").Value.Trim('"', '[', ']');
-			_destinationInterfaceId = engine.GetScriptParam("DestinationInterfaceId").Value.Trim('"', '[', ']');
+			_action = engine.ReadScriptParamFromApp("Action").ToLower();
+			_sourceId = engine.ReadScriptParamFromApp("SourceId");
+			_destinationId = engine.ReadScriptParamFromApp("DestinationId");
+			_sourceInterfaceId = engine.ReadScriptParamFromApp("SourceInterfaceId");
+			_destinationInterfaceId = engine.ReadScriptParamFromApp("DestinationInterfaceId");
 		}
 	}
 }

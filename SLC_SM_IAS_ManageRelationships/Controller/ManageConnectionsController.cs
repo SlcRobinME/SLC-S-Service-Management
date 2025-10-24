@@ -6,6 +6,7 @@
 	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 	using SLC_SM_IAS_ManageRelationships.Model;
 	using SLC_SM_IAS_ManageRelationships.View;
 	using SLCSMIASManageRelationships;
@@ -34,7 +35,7 @@
 			_issueCollector = new IssueCollector();
 		}
 
-		public EventHandler<EventArgs> OnCancel => (sender, args) => _engine.ExitSuccess(string.Empty);
+		public EventHandler<EventArgs> OnCancel => (sender, args) => _engine.ExitSuccess(String.Empty);
 
 		public EventHandler<EventArgs> OnValidate => (sender, args) => Validate_Pressed();
 
@@ -202,16 +203,12 @@
 			if (_issueCollector.HasIssues)
 				ReportIssues();
 
-			_engine.ExitSuccess(string.Empty);
+			_engine.ExitSuccess(String.Empty);
 		}
 
 		private void ReportIssues()
 		{
-			var popup = _engine.PrepareSubScript("SLC_SM_IAS_PopupMessage");
-			popup.SelectScriptParam("Title", "Attention!");
-			popup.SelectScriptParam("Message", _issueCollector.PrintReport());
-			popup.SelectScriptParam("ButtonLabel", "Ok");
-			popup.StartScript();
+			_engine.ShowPopupDialog(_controller, "Attention!", _issueCollector.PrintReport(), "OK");
 		}
 	}
 }

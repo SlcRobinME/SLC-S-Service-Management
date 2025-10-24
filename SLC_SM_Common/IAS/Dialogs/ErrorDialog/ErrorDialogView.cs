@@ -19,7 +19,7 @@
 
 		internal TextBox DetailsBox { get; } = new TextBox { MaxWidth = 800, IsMultiline = true, IsVisible = false, MinHeight = 100, MaxHeight = 250 };
 
-		internal Button DetailsButton { get; } = new Button("+") { Height = ButtonHeight, Width = DetailsButtonWidth };
+		internal Button DetailsButton { get; } = new Button("➕") { Height = ButtonHeight };
 
 		internal Label MessageLabel { get; } = new Label { MinWidth = 400, MaxWidth = 850 };
 
@@ -67,6 +67,8 @@
 			this.view = view ?? throw new ArgumentNullException(nameof(view));
 			this.model = model ?? throw new ArgumentNullException(nameof(model));
 
+			view.Build();
+
 			view.CloseButton.Pressed += OnCloseButtonPressed;
 			view.DetailsButton.Pressed += OnDetailsButtonPressed;
 		}
@@ -77,11 +79,7 @@
 			view.DetailsBox.Text = model.DetailedMessage ?? String.Empty;
 			view.MessageLabel.Text = model.Message ?? String.Empty;
 
-			if (!String.IsNullOrEmpty(model.DetailedMessage))
-			{
-				view.DetailsBox.IsVisible = false;
-				view.DetailsButton.IsVisible = false;
-			}
+			view.DetailsButton.IsVisible = !String.IsNullOrEmpty(model.DetailedMessage);
 		}
 
 		private static void OnCloseButtonPressed(object sender, EventArgs e)
@@ -97,7 +95,7 @@
 
 		private void UpdateDetailsButton()
 		{
-			view.DetailsButton.Text = view.DetailsBox.IsVisible ? "-" : "+";
+			view.DetailsButton.Text = view.DetailsBox.IsVisible ? "➖" : "➕";
 		}
 	}
 }

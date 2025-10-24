@@ -63,6 +63,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_Create_Service_Inventory_Item.Presenters;
@@ -146,8 +147,6 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			//instance.Icon = serviceSpecificationInstance.Icon;
 			instance.Description = serviceSpecificationInstance.Description;
-			instance.Properties = serviceSpecificationInstance.Properties ?? new Models.ServicePropertyValues();
-			instance.Properties.ID = Guid.NewGuid();
 
 			if (serviceSpecificationInstance.Configurations != null)
 			{
@@ -221,7 +220,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 		private void TryCreateDmsService(Models.Service instance)
 		{
 			var dms = _engine.GetDms();
-			var agent = dms.GetAgents().SingleOrDefault();
+			var agent = dms.GetAgents().FirstOrDefault();
 			if (agent == null)
 			{
 				throw new InvalidOperationException($"This operation is valid only on single agent dataminer systems.");
@@ -286,7 +285,6 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				EndTime = serviceOrder.EndTime,
 				Icon = String.Empty,
 				ServiceSpecificationId = serviceOrder.SpecificationId,
-				Properties = serviceOrder.Properties,
 				Category = repo.ServiceCategories.Read().Find(x => x.ID == serviceOrder.ServiceCategoryId),
 				ServiceItems = new List<Models.ServiceItem>(),
 				ServiceItemsRelationships = new List<Models.ServiceItemRelationShip>(),
@@ -357,7 +355,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				}
 			}
 
-			var dataHelperService = new DataHelperService(Engine.SLNetRaw);
+			var dataHelperService = new DataHelperService(_engine.GetUserConnection());
 			Guid newServiceId = dataHelperService.CreateOrUpdate(newService);
 
 			// Provide link on Service Order
@@ -413,20 +411,20 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 		private void RunSafe()
 		{
-			string actionRaw = _engine.GetScriptParam("Action").Value.Trim('"', '[', ']');
+			string actionRaw = _engine.ReadScriptParamFromApp("Action");
 			if (!Enum.TryParse(actionRaw, true, out Action action))
 			{
 				action = Action.AddItem;
 			}
 
-			string domIdRaw = _engine.GetScriptParam("DOM ID").Value.Trim('"', '[', ']');
+			string domIdRaw = _engine.ReadScriptParamFromApp("DOM ID");
 			Guid.TryParse(domIdRaw, out Guid domId);
 
-			var repo = new DataHelpersServiceManagement(Engine.SLNetRaw);
+			var repo = new DataHelpersServiceManagement(_engine.GetUserConnection());
 
 			// Init views
 			var view = new ServiceView(_engine);
-			var presenter = new ServicePresenter(repo, view, repo.Services.Read().Select(x => x.Name).ToList());
+			var presenter = new ServicePresenter(_engine, repo, view, repo.Services.Read().Select(x => x.Name).ToList());
 
 			if (action == Action.AddItem)
 			{

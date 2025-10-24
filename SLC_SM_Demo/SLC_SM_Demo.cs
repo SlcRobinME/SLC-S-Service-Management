@@ -60,6 +60,7 @@ namespace SLCSMDemo
 	using Library;
 
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
 	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
@@ -107,14 +108,33 @@ namespace SLCSMDemo
 			//FilterServiceOnCategory(engine);
 
 			FilterServiceOnCharacteristic(engine);
+			//RemoveSpecProperties(engine);
 		}
+
+		////private void RemoveSpecProperties(IEngine engine)
+		////{
+		////	var helper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
+		////	var inst = helper.DomInstances.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcServicemanagementIds.Definitions.ServiceSpecifications.Id));
+
+		////	foreach (var i in inst)
+		////	{
+		////		var ss = new ServiceSpecificationsInstance(i);
+		////		if (ss.ServiceSpecificationInfo.ServiceProperties == null)
+		////		{
+		////			continue;
+		////		}
+
+		////		ss.ServiceSpecificationInfo.ServiceProperties = null;
+		////		ss.Save(helper);
+		////	}
+		////}
 
 		////private static void FilterServiceOnCategory(IEngine engine)
 		////{
 		////	string categoryType = "Channel";
 		////	string categoryName = "ARD";
 
-		////	var dataHelpers = new DataHelpersServiceManagement(Engine.SLNetRaw);
+		////	var dataHelpers = new DataHelpersServiceManagement(engine.GetUserConnection());
 
 		////	var categoryToMatch = dataHelpers.ServiceCategories.Read().Find(x => x.Type == categoryType && x.Name == categoryName)
 		////	                      ?? throw new InvalidOperationException($"No Category found matching '{categoryType}-{categoryName}'");
@@ -129,7 +149,7 @@ namespace SLCSMDemo
 			//string configurationParameterLabel = "Service Type";
 			string configurationParameterValue = "Channel";
 
-			var dataHelpersSrvMgmt = new DataHelpersServiceManagement(Engine.SLNetRaw);
+			var dataHelpersSrvMgmt = new DataHelpersServiceManagement(engine.GetUserConnection());
 			var services = dataHelpersSrvMgmt.Services.GetServicesByCharacteristic(configurationParameter, null, configurationParameterValue);
 
 			engine.GenerateInformation($"Service(s) found:\r\n{String.Join(Environment.NewLine, services.Select(s => $"{s.Name} ({s.ID})"))}");
