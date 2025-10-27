@@ -51,16 +51,15 @@ dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 namespace SLC_SM_IAS_Add_Service_Order_Item_1
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using Library;
-	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
-	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Add_Service_Order_Item_1.Presenters;
 	using SLC_SM_IAS_Add_Service_Order_Item_1.Views;
 
@@ -159,7 +158,7 @@ namespace SLC_SM_IAS_Add_Service_Order_Item_1
 			}
 
 			var repo = new DataHelpersServiceManagement(_engine.GetUserConnection());
-			var order = repo.ServiceOrders.Read().Find(x => x.ID == domId)
+			var order = repo.ServiceOrders.Read(ServiceOrderExposers.Guid.Equal(domId)).FirstOrDefault()
 				?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system.");
 
 			Guid.TryParse(_engine.ReadScriptParamFromApp("Service Order Item ID"), out Guid orderItemid);

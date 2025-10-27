@@ -53,13 +53,12 @@ namespace SLCSMCOGetWorkflowIcon
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using DomHelpers.SlcConfigurations;
-	using DomHelpers.SlcServicemanagement;
-	using Library;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 
 	/// <summary>
 	///     Represents a data source.

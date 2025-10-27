@@ -2,12 +2,9 @@
 {
 	using System;
 	using System.Linq;
-
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
-
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using SLC_SM_IAS_Configurations.Views;
 
 	public class DiscreteValuesPresenter

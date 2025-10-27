@@ -11,6 +11,7 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.ResourceManager.Objects;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using SLDataGateway.API.Querying;
 
 	// Required to mark the interface as a GQI data source

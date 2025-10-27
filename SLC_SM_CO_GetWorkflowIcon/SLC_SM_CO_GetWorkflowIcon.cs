@@ -49,17 +49,17 @@ DATE		VERSION		AUTHOR			COMMENTS
 ****************************************************************************
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using DomHelpers.SlcProperties;
-using DomHelpers.SlcWorkflow;
-using Skyline.DataMiner.Analytics.GenericInterface;
-using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-using Skyline.DataMiner.Net.Messages.SLDataGateway;
-
 namespace SLCSMCOGetWorkflowIcon
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using DomHelpers.SlcProperties;
+	using DomHelpers.SlcWorkflow;
+	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+
 	/// <summary>
 	/// Represents a data source.
 	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.

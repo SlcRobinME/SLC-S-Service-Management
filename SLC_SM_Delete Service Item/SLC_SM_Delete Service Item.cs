@@ -51,7 +51,6 @@ dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 namespace SLC_SM_Delete_Service_Item_1
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 
 	using DomHelpers.SlcServicemanagement;
@@ -63,6 +62,7 @@ namespace SLC_SM_Delete_Service_Item_1
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Scheduling;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;

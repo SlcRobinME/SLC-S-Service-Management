@@ -11,35 +11,31 @@
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.ResourceManager.Objects;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Workflows;
+	using SLC_SM_IAS_Add_Service_Item.ScriptModels;
 	using SLC_SM_IAS_Add_Service_Item_1.Views;
 
 	public class ServiceItemPresenter
 	{
-		private readonly IServiceInstanceBase domInstance;
+		private readonly IScriptModel _scriptModel;
 		private readonly IEngine engine;
 		private readonly string[] getServiceItemLabels;
 		private readonly List<Models.Service> services = new List<Models.Service>();
 		private readonly List<Models.ServiceSpecification> specifications = new List<Models.ServiceSpecification>();
 		private readonly ServiceItemView view;
-		private readonly Workflow[] workflows;
-		private readonly List<Option<string>> allScripts;
+		private Workflow[] _workflows;
+		private List<Option<string>> _allScripts;
 		private List<ServiceReservationInstance> bookings = new List<ServiceReservationInstance>();
 
-		public ServiceItemPresenter(IEngine engine, ServiceItemView view, string[] getServiceItemLabels, IServiceInstanceBase domInstance)
+		public ServiceItemPresenter(IEngine engine, ServiceItemView view, string[] getServiceItemLabels, IScriptModel scriptModel)
 		{
 			this.engine = engine;
 			this.view = view;
 			this.getServiceItemLabels = getServiceItemLabels;
-			this.domInstance = domInstance;
-
-			var workflowHelper = new WorkflowHelper(engine);
-			workflows = workflowHelper.GetAllWorkflows().ToArray();
-
-			allScripts = (engine.SendSLNetSingleResponseMessage(new GetInfoMessage(InfoType.Scripts)) as GetScriptsResponseMessage)?.Scripts.OrderBy(x => x).Select(x => new Option<string>(x)).ToList() ?? new List<Option<string>>();
-			allScripts.Insert(0, new Option<string>("-None-", null));
+			this._scriptModel = scriptModel;
 
 			view.TboxLabel.Changed += (sender, args) => ValidateLabel(args.Value);
 			view.ServiceItemType.Changed += (sender, args) => OnUpdateServiceItemType(args.Selected);
@@ -48,12 +44,40 @@
 
 		public string Name => String.IsNullOrWhiteSpace(view.TboxLabel.Text) ? view.TboxLabel.PlaceHolder : view.TboxLabel.Text;
 
-		public ServiceItemsSection Section => new ServiceItemsSection
+		public List<Option<string>> AllScripts
+		{
+			get
+			{
+				if (_allScripts == null)
+				{
+					_allScripts = (engine.SendSLNetSingleResponseMessage(new GetInfoMessage(InfoType.Scripts)) as GetScriptsResponseMessage)?.Scripts.OrderBy(x => x).Select(x => new Option<string>(x)).ToList() ?? new List<Option<string>>();
+					_allScripts.Insert(0, new Option<string>("-None-", null));
+				}
+
+				return _allScripts;
+			}
+		}
+
+		public Workflow[] WorkFlows
+		{
+			get
+			{
+				if (_workflows == null)
+				{
+					var workflowHelper = new WorkflowHelper(engine);
+					_workflows = workflowHelper.GetAllWorkflows().ToArray();
+				}
+
+				return _workflows;
+			}
+		}
+
+		public Models.ServiceItem Section => new Models.ServiceItem
 		{
 			Label = Name,
-			ServiceItemType = view.ServiceItemType.Selected,
+			Type = view.ServiceItemType.Selected,
 			DefinitionReference = view.DefinitionReferences.Selected ?? String.Empty,
-			ServiceItemScript = view.ScriptSelection.Selected ?? String.Empty,
+			Script = view.ScriptSelection.Selected ?? String.Empty,
 			ImplementationReference = GetImplementationReference(),
 		};
 
@@ -91,7 +115,7 @@
 			OnUpdateServiceItemType(view.ServiceItemType.Selected);
 		}
 
-		public void LoadFromModel(ServiceItemsSection section)
+		public void LoadFromModel(Models.ServiceItem section)
 		{
 			// Load correct types
 			LoadFromModel();
@@ -99,11 +123,8 @@
 			view.BtnAdd.Text = "Save";
 			view.TboxLabel.Text = section.Label;
 
-			if (section.ServiceItemType.HasValue)
-			{
-				view.ServiceItemType.Selected = section.ServiceItemType.Value;
-				OnUpdateServiceItemType(section.ServiceItemType.Value);
-			}
+			view.ServiceItemType.Selected = section.Type;
+			OnUpdateServiceItemType(section.Type);
 
 			if (!String.IsNullOrEmpty(section.DefinitionReference))
 			{
@@ -127,9 +148,9 @@
 				}
 			}
 
-			if (!String.IsNullOrEmpty(section.ServiceItemScript) && view.ScriptSelection.Options.Any(o => o.Value == section.ServiceItemScript))
+			if (!String.IsNullOrEmpty(section.Script) && view.ScriptSelection.Options.Any(o => o.Value == section.Script))
 			{
-				view.ScriptSelection.Selected = section.ServiceItemScript;
+				view.ScriptSelection.Selected = section.Script;
 			}
 		}
 
@@ -149,13 +170,13 @@
 			var action = new EditJobAction
 			{
 				DomJobId = job.ID.Id,
-				End = domInstance.GetEndTime(),
+				End = _scriptModel.End,
 			};
 
 			// Only add start update if the job is not already running
 			if (job.JobInfo.JobStart <= DateTime.UtcNow)
 			{
-				action.Start = domInstance.GetStartTime();
+				action.Start = _scriptModel.Start;
 			}
 
 			action.SendToJobHandler(engine, true);
@@ -202,8 +223,8 @@
 		private JobsInstance GetJobForOrder(string label)
 		{
 			var jobFilter = DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription)
-				.Equal($"{domInstance.GetId()} | {label}")
-				.OR(DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription).Equal($"{domInstance.GetId()}|{label}"));
+				.Equal($"{_scriptModel.ID} | {label}")
+				.OR(DomInstanceExposers.FieldValues.DomInstanceField(SlcWorkflowIds.Sections.JobInfo.JobDescription).Equal($"{_scriptModel.ID}|{label}"));
 
 			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
 			return domHelper.DomInstances.Read(jobFilter)
@@ -255,7 +276,7 @@
 		{
 			if (serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 			{
-				var workflowOptions = workflows.Select(x => x.Name).OrderBy(x => x).ToList();
+				var workflowOptions = WorkFlows.Select(x => x.Name).OrderBy(x => x).ToList();
 				view.DefinitionReferences.SetOptions(workflowOptions);
 				if (workflowOptions.Exists(x => x == "Default"))
 				{
@@ -284,7 +305,7 @@
 			}
 			else
 			{
-				view.ScriptSelection.SetOptions(allScripts);
+				view.ScriptSelection.SetOptions(AllScripts);
 				view.ScriptSelection.IsEnabled = true;
 
 				var bookingManagers = engine.FindElementsByProtocol("Skyline Booking Manager").Where(x => x.IsActive).Select(x => x.ElementName).ToArray();
@@ -330,9 +351,9 @@
 				services.AddRange(new DataHelperService(engine.GetUserConnection()).Read());
 			}
 
-			DateTime? currentStart = domInstance.GetStartTime();
-			DateTime? currentEnd = domInstance.GetEndTime();
-			var serviceOptions = services.Where(x => domInstance.GetId().Id != x.ID && FallsWithTimeRange(x, currentStart, currentEnd))
+			DateTime? currentStart = _scriptModel.Start;
+			DateTime? currentEnd = _scriptModel.End;
+			var serviceOptions = services.Where(x => _scriptModel.ID != x.ID && FallsWithTimeRange(x, currentStart, currentEnd))
 				.Select(GetServiceDropDownLabel)
 				.OrderBy(s => s)
 				.ToList();

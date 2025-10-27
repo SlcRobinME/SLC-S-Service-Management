@@ -3,12 +3,13 @@ namespace SLCSMDSGetServicesByCharacteristic
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Library;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using SLC_SM_Common.Extensions;
 
 	/// <summary>
 	/// Represents a data source.
@@ -28,7 +29,6 @@ namespace SLCSMDSGetServicesByCharacteristic
 		private GQIDMS gqiDms;
 		private IConnection _connection;
 		private IDms _dms;
-		private IDma _agent;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -80,11 +80,6 @@ namespace SLCSMDSGetServicesByCharacteristic
 
 			_connection = gqiDms.GetConnection();
 			_dms = _connection.GetDms();
-			_agent = _dms.GetAgents().FirstOrDefault();
-			if (_agent == null)
-			{
-				throw new InvalidOperationException("This operation is supported only on single agent dataminer systems");
-			}
 
 			_serviceHelper = new DataHelpersServiceManagement(args.DMS.GetConnection());
 
@@ -140,27 +135,12 @@ namespace SLCSMDSGetServicesByCharacteristic
 
 		private AlarmLevel TryGetAlarmLevel(Models.Service service)
 		{
-			if (_agent.ServiceExistsSafe(service.Name))
+			if (_dms.ServiceExistsSafe(service.Name, out IDmsService srv))
 			{
-				return _agent.GetService(service.Name).GetState().Level;
+				return srv.GetState().Level;
 			}
 
 			return AlarmLevel.Undefined;
-		}
-	}
-
-	public static class DmaExtensions
-	{
-		public static bool ServiceExistsSafe(this IDma agent, string serviceName)
-		{
-			try
-			{
-				return agent.ServiceExists(serviceName);
-			}
-			catch
-			{
-				return false;
-			}
 		}
 	}
 }

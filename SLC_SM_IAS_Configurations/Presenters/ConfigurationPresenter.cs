@@ -4,16 +4,11 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Text.RegularExpressions;
-
 	using DomHelpers.SlcConfigurations;
-
-	using Library;
-
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
-
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using SLC_SM_IAS_Configurations.Views;
 
 	public class ConfigurationPresenter

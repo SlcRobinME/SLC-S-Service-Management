@@ -2,12 +2,12 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 {
 	using System;
 	using System.Linq;
-	using DomHelpers.SlcServicemanagement;
-	using Library;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 
 	/// <summary>
 	///     Represents a data source.

@@ -64,6 +64,9 @@ namespace SLCSMDSGetTopologyNodes
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
 
 	/// <summary>
 	/// Represents a data source.
@@ -105,16 +108,18 @@ namespace SLCSMDSGetTopologyNodes
 		{
 			try
 			{
-				var smDomHelper = new DomHelper(_dms.SendMessages, SlcServicemanagementIds.ModuleId);
-
-				var domInstance = smDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(_domId)).FirstOrDefault();
-				if (domInstance == null)
-					throw new InvalidOperationException($"Could not find DOM instance with id {_domId}");
-
-				var serviceItems = ServiceInstancesExtentions.GetTypedInstance(domInstance)
-					.GetServiceItems()
-					.Where(i => !i.IsEmpty && !String.IsNullOrEmpty(i.Label))
+				var serviceItems = new DataHelperService(_dms.GetConnection()).Read(ServiceExposers.Guid.Equal(_domId)).FirstOrDefault()
+					?.ServiceItems
+					.Where(i => !String.IsNullOrEmpty(i.Label))
+					.ToList()
+				?? new DataHelperServiceSpecification(_dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(_domId)).FirstOrDefault()
+					?.ServiceItems
+					.Where(i => !String.IsNullOrEmpty(i.Label))
 					.ToList();
+				if (serviceItems == null)
+				{
+					return new GQIPage(Array.Empty<GQIRow>());
+				}
 
 				var workflowPropertyValues = new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId)
 					.DomInstances
@@ -123,7 +128,7 @@ namespace SLCSMDSGetTopologyNodes
 					.ToArray();
 
 				var workflowsFilter = serviceItems
-					.Where(item => item.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+					.Where(item => item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 					.Select(item => DomInstanceExposers.Name.Equal(item.DefinitionReference))
 					.Aggregate<FilterElement<DomInstance>, FilterElement<DomInstance>>(null, (acc, next) => acc == null ? next : acc.OR(next));
 
@@ -134,7 +139,7 @@ namespace SLCSMDSGetTopologyNodes
 					: Enumerable.Empty<DomInstance>().ToList();
 
 				var messages = serviceItems
-					.Where(item => item.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+					.Where(item => item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
 					.Select(item => new GetLiteElementInfo { NameFilter = item.DefinitionReference })
 					.Cast<DMSMessage>()
 					.ToArray();
@@ -167,7 +172,7 @@ namespace SLCSMDSGetTopologyNodes
 				}
 
 				var rows = new List<GQIRow>();
-				foreach (ServiceItemsSection i in serviceItems)
+				foreach (var i in serviceItems)
 				{
 					rows.Add(BuildRow(i, GetReferenceId(i, elements, workflows), GetIcon(i, elements, workflows, workflowPropertyValues, elementIcons)));
 				}
@@ -197,20 +202,20 @@ namespace SLCSMDSGetTopologyNodes
 			return new OnArgumentsProcessedOutputArgs();
 		}
 
-		private string GetReferenceId(ServiceItemsSection item, LiteElementInfoEvent[] elements, List<DomInstance> workflows)
+		private string GetReferenceId(Models.ServiceItem item, LiteElementInfoEvent[] elements, List<DomInstance> workflows)
 		{
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
 			{
 				var element = elements.FirstOrDefault(e => e.Name == item.DefinitionReference);
 				return element != null ? $"{element.DataMinerID}/{element.ElementID}" : String.Empty;
 			}
 
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 			{
 				return workflows.FirstOrDefault(i => i.Name == item.DefinitionReference)?.ID.Id.ToString() ?? String.Empty;
 			}
 
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
 			{
 				return new DataHelperLink(_dms.GetConnection()).Read().Find(x => x.ParentID == _domId.ToString())?.ChildID ?? String.Empty;
 			}
@@ -219,13 +224,13 @@ namespace SLCSMDSGetTopologyNodes
 		}
 
 		private string GetIcon(
-			ServiceItemsSection item,
+			Models.ServiceItem item,
 			LiteElementInfoEvent[] elements,
 			List<DomInstance> workflows,
 			PropertyValuesInstance[] propertyValues,
 			PropertyChangeEventMessage[] icons)
 		{
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
 			{
 				var element = elements.FirstOrDefault(e => e.Name == item.DefinitionReference);
 				if (element == null)
@@ -238,7 +243,7 @@ namespace SLCSMDSGetTopologyNodes
 					.Value ?? String.Empty;
 			}
 
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 			{
 				var workflow = workflows.FirstOrDefault(i => i.Name == item.DefinitionReference);
 				if (workflow == null)
@@ -251,7 +256,7 @@ namespace SLCSMDSGetTopologyNodes
 					.PropertyValues.FirstOrDefault(v => v.PropertyName == "Icon")?.Value ?? String.Empty;
 			}
 
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
 			{
 				return String.Empty;
 			}
@@ -259,13 +264,13 @@ namespace SLCSMDSGetTopologyNodes
 			throw new InvalidOperationException("Unsupported service item type");
 		}
 
-		private GQIRow BuildRow(ServiceItemsSection serviceItem, string referenceId, string icon)
+		private GQIRow BuildRow(Models.ServiceItem serviceItem, string referenceId, string icon)
 		{
 			return new GQIRow(
 				new[]
 				{
-					new GQICell { Value = serviceItem.ServiceItemID.ToString() },
-					new GQICell { Value = serviceItem.ServiceItemType.ToString() },
+					new GQICell { Value = serviceItem.ID.ToString() },
+					new GQICell { Value = serviceItem.Type.ToString() },
 					new GQICell { Value = serviceItem.Label ?? String.Empty },
 					new GQICell { Value = serviceItem.DefinitionReference ?? String.Empty },
 					new GQICell { Value = referenceId ?? String.Empty },

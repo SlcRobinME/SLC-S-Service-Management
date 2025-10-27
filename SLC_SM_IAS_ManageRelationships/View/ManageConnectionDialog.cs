@@ -83,7 +83,7 @@
 			var link = _context.Pair.FindLinkBySource(source.NodeID);
 
 			var existingDestination = _context.Pair.AvailableDestinations
-				.FirstOrDefault(d => d.NodeID == link?.ChildServiceItemInterfaceID);
+				.FirstOrDefault(d => d.NodeID == link?.ChildServiceItemInterfaceId);
 
 			if (existingDestination != null)
 				dropdown.Selected = existingDestination;

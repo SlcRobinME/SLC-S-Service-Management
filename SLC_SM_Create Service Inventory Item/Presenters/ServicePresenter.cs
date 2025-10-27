@@ -4,9 +4,8 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	using Library;
-
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganization;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
@@ -23,13 +22,14 @@
 		private Models.Service instanceToReturn;
 		private bool isEdit = false;
 
-		public ServicePresenter(IEngine engine, DataHelpersServiceManagement repo, ServiceView view, List<string> getServiceLabels)
+		public ServicePresenter(IEngine engine, DataHelpersServiceManagement repo, ServiceView view)
 		{
 			_engine = engine;
 			this.repo = repo;
 			this.view = view;
-			this.getServiceLabels = getServiceLabels;
-			string defaultServiceId = repo.Services.UniqueServiceId();
+			List<Models.Service> services = repo.Services.Read();
+			getServiceLabels = services.Select(x => x.Name).ToList();
+			string defaultServiceId = repo.Services.UniqueServiceId(services);
 			instanceToReturn = new Models.Service
 			{
 				ID = Guid.NewGuid(),

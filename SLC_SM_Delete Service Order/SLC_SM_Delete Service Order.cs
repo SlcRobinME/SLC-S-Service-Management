@@ -55,10 +55,10 @@ namespace SLC_SM_Delete_Service_Order
 {
 	using System;
 	using System.Linq;
-	using DomHelpers.SlcServicemanagement;
-	using Library;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 
