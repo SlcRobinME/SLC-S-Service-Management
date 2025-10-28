@@ -92,7 +92,7 @@ namespace Get_ServiceConfiguration_1
 				filter = filter.OR(DomInstanceExposers.Id.Equal(guid));
 			}
 
-			return helper.DomInstances.Read(filter);
+			return !filter.isEmpty() ? helper.DomInstances.Read(filter) : new List<DomInstance>();
 		}
 
 		private static IList<Guid> GetServiceConfigurationGuids(DomInstance domInstance)

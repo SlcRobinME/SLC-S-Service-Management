@@ -223,32 +223,27 @@ namespace SLC_SM_Create_Service_Inventory_Item
 		private void TryCreateDmsService(Models.Service instance)
 		{
 			var dms = _engine.GetDms();
-			var agent = dms.GetAgents().FirstOrDefault();
-			if (agent == null)
-			{
-				throw new InvalidOperationException($"This operation is valid only on single agent dataminer systems.");
-			}
 
 			if (_engine.FindService(instance.Name) != null) // agent.ServiceExists() throws when service doesn't exist :(
 			{
-				throw new InvalidOperationException($"A dataminer service with name {instance.Name} already exists.");
+				throw new InvalidOperationException($"A DataMiner service with name {instance.Name} already exists.");
 			}
 
 			var serviceConfiguration = new ServiceConfiguration(dms, instance.Name);
-			var serviceId = agent.CreateService(serviceConfiguration);
+			var serviceId = dms.GetAgents().First().CreateService(serviceConfiguration);
 
-			SetServiceIcon(agent, serviceId, instance.Icon);
+			SetServiceIcon(dms, serviceId, instance.Icon);
 		}
 
-		private void SetServiceIcon(IDma agent, DmsServiceId serviceId, string icon)
+		private void SetServiceIcon(IDms dms, DmsServiceId serviceId, string icon)
 		{
-			if (!agent.Dms.PropertyExists("Logo", PropertyType.Service))
+			if (!dms.PropertyExists("Logo", PropertyType.Service))
 			{
-				agent.Dms.CreateProperty("Logo", PropertyType.Service, false, false, false);
+				dms.CreateProperty("Logo", PropertyType.Service, false, false, false);
 			}
 
-			WaitUntilServiceCreated(agent, serviceId, 5000);
-			var service = agent.GetService(serviceId);
+			WaitUntilServiceCreated(serviceId, 5000);
+			var service = dms.GetService(serviceId);
 
 			var property = service.Properties.SingleOrDefault(p => p.Definition.Name == "Logo").AsWritable();
 
@@ -256,7 +251,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			service.Update();
 		}
 
-		private void WaitUntilServiceCreated(IDma agent, DmsServiceId serviceId, int timeout)
+		private void WaitUntilServiceCreated(DmsServiceId serviceId, int timeout)
 		{
 			var sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -271,8 +266,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 		private void CreateNewServiceAndLinkItToServiceOrder(DataHelpersServiceManagement repo, Models.ServiceOrderItem serviceOrder)
 		{
-			List<Models.Service> services = repo.Services.Read();
-			if (serviceOrder.ServiceId.HasValue && services.Exists(s => s.ID == serviceOrder.ServiceId))
+			if (serviceOrder.ServiceId.HasValue && repo.Services.Read(ServiceExposers.Guid.Equal(serviceOrder.ServiceId.Value)).Any())
 			{
 				// Already initialized - don't do anything, safety check
 				return;
@@ -281,7 +275,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			// Create new service item based on order
 			Models.Service newService = new Models.Service
 			{
-				ServiceID = repo.Services.UniqueServiceId(services),
+				ServiceID = repo.Services.UniqueServiceId(),
 				Name = serviceOrder.Name,
 				Description = serviceOrder.Name,
 				StartTime = serviceOrder.StartTime,
@@ -358,8 +352,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				}
 			}
 
-			var dataHelperService = new DataHelperService(_engine.GetUserConnection());
-			Guid newServiceId = dataHelperService.CreateOrUpdate(newService);
+			Guid newServiceId = repo.Services.CreateOrUpdate(newService);
 
 			// Provide link on Service Order
 			serviceOrder.ServiceId = newServiceId;
@@ -404,7 +397,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			}
 
 			return repo.Services.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault()
-			       ?? throw new InvalidOperationException($"No Dom Instance with ID '{domId}' found on the system!");
+				   ?? throw new InvalidOperationException($"No Dom Instance with ID '{domId}' found on the system!");
 		}
 
 		private void InitHelpers()

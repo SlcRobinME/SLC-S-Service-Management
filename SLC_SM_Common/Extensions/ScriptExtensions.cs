@@ -26,14 +26,26 @@
 				throw new ArgumentException($"No script input parameter provided with name '{name}'");
 			}
 
-			try
+			if (param.StartsWith("[") && param.EndsWith("]"))
 			{
 				return JsonConvert.DeserializeObject<ICollection<T>>(param);
 			}
-			catch
+
+			object value;
+			if (typeof(T) == typeof(Guid))
 			{
-				return new List<T> { (T)Convert.ChangeType(param, typeof(T)) };
+				value = Guid.Parse(param);
 			}
+			else if (typeof(T).IsEnum)
+			{
+				value = Enum.Parse(typeof(T), param, ignoreCase: true);
+			}
+			else
+			{
+				value = Convert.ChangeType(param, typeof(T));
+			}
+
+			return new List<T> { (T)value };
 		}
 
 		public static ICollection<string> ReadScriptParamsFromApp(this IEngine engine, string name)

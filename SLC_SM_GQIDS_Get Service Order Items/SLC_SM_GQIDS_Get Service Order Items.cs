@@ -165,25 +165,25 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 			FilterElement<Models.Service> filterService = new ORFilterElement<Models.Service>();
 			foreach (var serviceOrderItem in serviceOrderItems)
 			{
-				if (serviceOrderItem.ServiceOrderItem.ServiceCategoryId.HasValue)
+				if (serviceOrderItem.ServiceOrderItem.ServiceCategoryId.HasValue && serviceOrderItem.ServiceOrderItem.ServiceCategoryId != Guid.Empty)
 				{
 					filterCategory = filterCategory.OR(ServiceCategoryExposers.Guid.Equal(serviceOrderItem.ServiceOrderItem.ServiceCategoryId.Value));
 				}
 
-				if (serviceOrderItem.ServiceOrderItem.SpecificationId.HasValue)
+				if (serviceOrderItem.ServiceOrderItem.SpecificationId.HasValue && serviceOrderItem.ServiceOrderItem.SpecificationId != Guid.Empty)
 				{
 					filterSpecification = filterSpecification.OR(ServiceSpecificationExposers.Guid.Equal(serviceOrderItem.ServiceOrderItem.SpecificationId.Value));
 				}
 
-				if (serviceOrderItem.ServiceOrderItem.ServiceId.HasValue)
+				if (serviceOrderItem.ServiceOrderItem.ServiceId.HasValue && serviceOrderItem.ServiceOrderItem.ServiceId != Guid.Empty)
 				{
 					filterService = filterService.OR(ServiceExposers.Guid.Equal(serviceOrderItem.ServiceOrderItem.ServiceId.Value));
 				}
 			}
 
-			var categories = new DataHelperServiceCategory(connection).Read(filterCategory);
-			var specifications = new DataHelperServiceSpecification(connection).Read(filterSpecification);
-			var services = new DataHelperService(connection).Read(filterService);
+			var categories = !filterCategory.isEmpty() ? new DataHelperServiceCategory(connection).Read(filterCategory) : new List<Models.ServiceCategory>();
+			var specifications = !filterSpecification.isEmpty() ? new DataHelperServiceSpecification(connection).Read(filterSpecification) : new List<Models.ServiceSpecification>();
+			var services = !filterService.isEmpty() ? new DataHelperService(connection).Read(filterService) : new List<Models.Service>();
 
 			return serviceOrderItems.Select(item => BuildRow(item, categories, specifications, services)).ToArray();
 		}

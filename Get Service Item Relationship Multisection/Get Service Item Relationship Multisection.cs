@@ -117,10 +117,14 @@ namespace GetServiceItemRelationshipMultisection
 
 			var items = _serviceInstance?.ServiceItems.Select(i => i.ID.ToString()).ToArray()
 						?? _serviceSpecificationInstance?.ServiceItems.Select(i => i.ID.ToString()).ToArray();
+			if (items == null)
+			{
+				return EmptyPage();
+			}
 
 			return new GQIPage(
 				relationships
-					.Where(r => items.Contains(r.ChildServiceItem) && items.Contains(r.ParentServiceItem))
+					.Where(r => items.Contains(r.ChildServiceItem) || items.Contains(r.ParentServiceItem))
 					.Select(BuildRow)
 					.ToArray());
 		}

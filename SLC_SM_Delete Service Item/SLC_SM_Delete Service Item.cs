@@ -51,6 +51,7 @@ dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 namespace SLC_SM_Delete_Service_Item_1
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 
 	using DomHelpers.SlcServicemanagement;
@@ -67,6 +68,7 @@ namespace SLC_SM_Delete_Service_Item_1
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Scheduling;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
+	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
@@ -279,7 +281,7 @@ namespace SLC_SM_Delete_Service_Item_1
 				filter = filter.OR(ServiceExposers.Guid.Equal(parentId));
 			}
 
-			var services = dataHelper.Read(filter);
+			var services = !filter.isEmpty() ? dataHelper.Read(filter) : new List<Models.Service>();
 			if (services.Count > 1)
 			{
 				return true;
@@ -305,6 +307,7 @@ namespace SLC_SM_Delete_Service_Item_1
 			if (service != null)
 			{
 				DeleteServiceItemFromInstance(dataHelperService, service, serviceItemLabel);
+				return;
 			}
 
 			var dataHelperServiceSpecification = new DataHelperServiceSpecification(_engine.GetUserConnection());
@@ -312,6 +315,7 @@ namespace SLC_SM_Delete_Service_Item_1
 			if (spec != null)
 			{
 				DeleteServiceItemFromInstance(dataHelperServiceSpecification, spec, serviceItemLabel);
+				return;
 			}
 
 			throw new InvalidOperationException($"No item with ID '{domId}' found on the system!");

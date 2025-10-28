@@ -51,6 +51,7 @@ DATE        VERSION        AUTHOR            COMMENTS
 namespace SLC_SM_Delete_Service_1
 {
 	using System;
+	using System.Collections.Generic;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
@@ -130,7 +131,7 @@ namespace SLC_SM_Delete_Service_1
 				filter = filter.OR(ServiceExposers.Guid.Equal(domId));
 			}
 
-			var services = serviceManagementHelper.Services.Read(filter);
+			var services = !filter.isEmpty() ? serviceManagementHelper.Services.Read(filter) : new List<Models.Service>();
 			foreach (var service in services)
 			{
 				if (service.GenerateMonitoringService == true && dms.ServiceExistsSafe(service.Name, out IDmsService dmsService))

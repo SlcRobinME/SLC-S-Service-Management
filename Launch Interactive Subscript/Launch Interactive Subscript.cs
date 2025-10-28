@@ -147,7 +147,7 @@ namespace Launch_Interactive_Subscript_1
 			}
 
 			var configHelper = new DataHelpersConfigurations(engine.GetUserConnection());
-			var configurationParameters = configHelper.ConfigurationParameters.Read(filterConfigParams);
+			var configurationParameters = !filterConfigParams.isEmpty() ? configHelper.ConfigurationParameters.Read(filterConfigParams) : new List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>();
 			return configurationParameters;
 		}
 

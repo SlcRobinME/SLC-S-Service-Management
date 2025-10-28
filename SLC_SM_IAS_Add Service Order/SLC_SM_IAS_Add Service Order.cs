@@ -125,8 +125,6 @@ namespace SLC_SM_IAS_Add_Service_Order_1
 
 		private void RunSafe()
 		{
-			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
-
 			string actionRaw = _engine.ReadScriptParamFromApp("Action");
 			if (!Enum.TryParse(actionRaw, true, out Action action))
 			{
@@ -160,6 +158,7 @@ namespace SLC_SM_IAS_Add_Service_Order_1
 			}
 			else
 			{
+				Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
 				var ordersInstance = serviceOrders.Find(x => x.ID == domId)
 				                     ?? throw new InvalidOperationException($"No Service Order with ID '{domId}' found on the system!");
 				presenter.LoadFromModel(ordersInstance);

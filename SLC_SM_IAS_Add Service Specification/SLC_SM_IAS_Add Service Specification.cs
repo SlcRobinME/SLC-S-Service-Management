@@ -124,8 +124,6 @@ namespace SLC_SM_IAS_Add_Service_Specification
 
 		private void RunSafe()
 		{
-			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
-
 			string actionRaw = _engine.ReadScriptParamFromApp("Action");
 			if (!Enum.TryParse(actionRaw, true, out Action action))
 			{
@@ -158,6 +156,7 @@ namespace SLC_SM_IAS_Add_Service_Specification
 			}
 			else
 			{
+				Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
 				var specification = serviceSpecifications.Find(x => x.ID == domId)
 				                     ?? throw new InvalidOperationException($"No Service Specification with ID '{domId}' found on the system!");
 				presenter.LoadFromModel(specification);
