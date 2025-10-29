@@ -56,6 +56,7 @@ namespace SLCSMCreateJobForServiceItem
 
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Jobs;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.ResourceManager.Objects;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
@@ -168,15 +169,20 @@ namespace SLCSMCreateJobForServiceItem
 
 			var jobId = outputData.DomJobId;
 
-			var transitionJobToTentativeInputData = new ExecuteJobAction
-			{
-				DomJobId = jobId,
-				JobAction = JobAction.SaveAsTentative,
-			};
-			transitionJobToTentativeInputData.SendToJobHandler(engine, true);
-
 			var domWorkflowHelper = new DomHelper(engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
 			var job = FindJob(domWorkflowHelper, jobId);
+
+			if (job.Status == SlcWorkflowIds.Behaviors.Job_Behavior.StatusesEnum.Draft)
+			{
+				var transitionJobToTentativeInputData = new ExecuteJobAction
+				{
+					DomJobId = jobId,
+					JobAction = JobAction.SaveAsTentative,
+				};
+				transitionJobToTentativeInputData.SendToJobHandler(engine, true);
+			}
+
+			job = FindJob(domWorkflowHelper, jobId);
 
 			CreateLink(engine, instance, job);
 			TrySetMonitoringSettingsForJob(job);
