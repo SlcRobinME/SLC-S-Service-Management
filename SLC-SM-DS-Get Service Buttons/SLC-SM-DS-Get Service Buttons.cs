@@ -7,54 +7,26 @@ namespace SLCSMDSGetServiceButtons
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using SLC_SM_Common.Extensions;
 
 	/// <summary>
-	/// Represents a data source.
-	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
+	///     Represents a data source.
+	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
 	[GQIMetaData(Name = "SLC-SM-DS-Get Service Buttons")]
 	public sealed class SLCSMDSGetServiceButtons : IGQIDataSource
 		, IGQIOnInit
 		, IGQIInputArguments
 	{
-
 		private readonly GQIStringArgument serviceReferenceArg = new GQIStringArgument("ServiceReference") { IsRequired = true };
-		private Guid serviceReference;
-
-		private GQIDMS _dms;
 
 		private readonly List<ItemState> itemStateList = new List<ItemState>
 		{
 			ItemStates.newState, ItemStates.designedState, ItemStates.reservedState, ItemStates.activeState, ItemStates.terminatedState, ItemStates.retiredState,
 		};
 
-		public OnInitOutputArgs OnInit(OnInitInputArgs args)
-		{
-			// Initialize the data source
-			// See: https://aka.dataminer.services/igqioninit-oninit
-			_dms = args.DMS;
-			return default;
-		}
-
-		public GQIArgument[] GetInputArguments()
-		{
-			// Define data source input arguments
-			// See: https://aka.dataminer.services/igqiinputarguments-getinputarguments
-			return new GQIArgument[]
-			{
-				serviceReferenceArg,
-			};
-		}
-
-		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
-		{
-			// Process input argument values
-			// See: https://aka.dataminer.services/igqiinputarguments-onargumentsprocessed
-			if (!Guid.TryParse(args.GetArgumentValue(serviceReferenceArg), out serviceReference))
-				serviceReference = Guid.Empty;
-
-			return new OnArgumentsProcessedOutputArgs();
-		}
+		private Guid serviceReference;
+		private GQIDMS _dms;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -70,33 +42,69 @@ namespace SLCSMDSGetServiceButtons
 			};
 		}
 
+		public GQIArgument[] GetInputArguments()
+		{
+			// Define data source input arguments
+			// See: https://aka.dataminer.services/igqiinputarguments-getinputarguments
+			return new GQIArgument[]
+			{
+				serviceReferenceArg,
+			};
+		}
+
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			// Define data source rows
-			// See: https://aka.dataminer.services/igqidatasource-getnextpage
-			var domHelper = new DomHelper(_dms.SendMessages, SlcServicemanagementIds.ModuleId);
-			var filter = DomInstanceExposers.Id.Equal(serviceReference);
-			var instance = domHelper.DomInstances.Read(filter).FirstOrDefault() ?? throw new Exception($"Could not find service order with id {serviceReference}");
-			ItemState currentState = itemStateList.SingleOrDefault(state => state.Id == instance.StatusId);
-
-			List<ButtonConfig> activeButtons = ButtonCollection.ButtonList.Where(button => button.ApplicableStates.Contains(currentState)).ToList();
-
-			List<GQIRow> rows = activeButtons.Select(
-					button => new GQIRow(
-						new[]
-						{
-							new GQICell { Value = button.Name },
-							new GQICell { Value = button.ScriptToExecute },
-							new GQICell { Value = button.PreviousState.NameId },
-							new GQICell { Value = button.NextState.NameId },
-							new GQICell { Value = button.IsHappyFlow },
-						}))
-				.ToList();
-
-			return new GQIPage(rows.ToArray())
+			try
 			{
-				HasNextPage = false,
-			};
+				var domHelper = new DomHelper(_dms.SendMessages, SlcServicemanagementIds.ModuleId);
+				var filter = DomInstanceExposers.Id.Equal(serviceReference);
+				var instance = domHelper.DomInstances.Read(filter).FirstOrDefault() ?? throw new NotSupportedException($"Could not find service order with id {serviceReference}");
+				ItemState currentState = itemStateList.SingleOrDefault(state => state.Id == instance.StatusId);
+
+				List<ButtonConfig> activeButtons = ButtonCollection.ButtonList.Where(button => button.ApplicableStates.Contains(currentState)).ToList();
+
+				List<GQIRow> rows = activeButtons.Select(
+						button => new GQIRow(
+							new[]
+							{
+								new GQICell { Value = button.Name },
+								new GQICell { Value = button.ScriptToExecute },
+								new GQICell { Value = button.PreviousState.NameId },
+								new GQICell { Value = button.NextState.NameId },
+								new GQICell { Value = button.IsHappyFlow },
+							}))
+					.ToList();
+
+				return new GQIPage(rows.ToArray())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage("GQIDS|Get Service Buttons Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
+		}
+
+		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
+		{
+			// Process input argument values
+			// See: https://aka.dataminer.services/igqiinputarguments-onargumentsprocessed
+			if (!Guid.TryParse(args.GetArgumentValue(serviceReferenceArg), out serviceReference))
+			{
+				serviceReference = Guid.Empty;
+			}
+
+			return new OnArgumentsProcessedOutputArgs();
+		}
+
+		public OnInitOutputArgs OnInit(OnInitInputArgs args)
+		{
+			// Initialize the data source
+			// See: https://aka.dataminer.services/igqioninit-oninit
+			_dms = args.DMS;
+			return default;
 		}
 
 		public static class ButtonCollection

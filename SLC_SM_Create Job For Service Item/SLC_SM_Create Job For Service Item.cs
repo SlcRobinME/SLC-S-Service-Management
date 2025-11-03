@@ -180,9 +180,9 @@ namespace SLCSMCreateJobForServiceItem
 					JobAction = JobAction.SaveAsTentative,
 				};
 				transitionJobToTentativeInputData.SendToJobHandler(engine, true);
-			}
 
-			job = FindJob(domWorkflowHelper, jobId);
+				job = FindJob(domWorkflowHelper, jobId);
+			}
 
 			CreateLink(engine, instance, job);
 			TrySetMonitoringSettingsForJob(job);

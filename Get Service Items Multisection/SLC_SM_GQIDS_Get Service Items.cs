@@ -12,6 +12,7 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 	using Skyline.DataMiner.Net.ResourceManager.Objects;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+	using SLC_SM_Common.Extensions;
 	using SLDataGateway.API.Querying;
 
 	// Required to mark the interface as a GQI data source
@@ -20,16 +21,10 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 	{
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = true };
-		private GQIDMS dms;
+		private GQIDMS _dms;
 
 		// variable where input argument will be stored
 		private Guid instanceDomId;
-
-		public DMSMessage GenerateInformationEvent(string message)
-		{
-			var generateAlarmMessage = new GenerateAlarmMessage(GenerateAlarmMessage.AlarmSeverity.Information, message) { Status = GenerateAlarmMessage.AlarmStatus.Cleared };
-			return dms.SendMessage(generateAlarmMessage);
-		}
 
 		public GQIColumn[] GetColumns()
 		{
@@ -64,11 +59,18 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			////GenerateInformationEvent("GetNextPage started");
-			return new GQIPage(GetMultiSection())
+			try
 			{
-				HasNextPage = false,
-			};
+				return new GQIPage(GetMultiSection())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage("GQIDS|Get Service Items Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -84,7 +86,7 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			dms = args.DMS;
+			_dms = args.DMS;
 			return default;
 		}
 
@@ -121,7 +123,7 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 				return new ImplementationItemInfo();
 			}
 
-			var inst = new DomHelper(dms.SendMessages, SlcWorkflowIds.ModuleId).DomInstances.Read(DomInstanceExposers.Id.Equal(id)).FirstOrDefault();
+			var inst = new DomHelper(_dms.SendMessages, SlcWorkflowIds.ModuleId).DomInstances.Read(DomInstanceExposers.Id.Equal(id)).FirstOrDefault();
 			if (inst != null)
 			{
 				var jobInst = new JobsInstance(inst);
@@ -132,7 +134,7 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 				};
 			}
 
-			var serv = new DataHelperService(dms.GetConnection()).Read(ServiceExposers.Guid.Equal(id)).FirstOrDefault();
+			var serv = new DataHelperService(_dms.GetConnection()).Read(ServiceExposers.Guid.Equal(id)).FirstOrDefault();
 			if (serv != null)
 			{
 				return new ImplementationItemInfo
@@ -142,17 +144,17 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 			}
 
 			var request = new ManagerStoreStartPagingRequest<ReservationInstance>(ReservationInstanceExposers.ID.Equal(id).ToQuery(), 10);
-			var reservation = ((ManagerStorePagingResponse<ReservationInstance>)dms.SendMessage(request))?.Objects?.FirstOrDefault() as ServiceReservationInstance;
+			var reservation = ((ManagerStorePagingResponse<ReservationInstance>)_dms.SendMessage(request))?.Objects?.FirstOrDefault() as ServiceReservationInstance;
 			if (reservation != null)
 			{
 				string customReference = null;
 				if (!String.IsNullOrEmpty(definitionReference))
 				{
-					var liteElementInfoEvent = dms.SendMessage(new GetElementByNameMessage(definitionReference)) as ElementInfoEventMessage;
+					var liteElementInfoEvent = _dms.SendMessage(new GetElementByNameMessage(definitionReference)) as ElementInfoEventMessage;
 					customReference = liteElementInfoEvent?.GetPropertyValue("App Link");
 				}
 
-				var serviceInfoEventMessage = dms.SendMessage(new GetServiceStateMessage { DataMinerID = reservation.ServiceID.DataMinerID, ServiceID = reservation.ServiceID.SID }) as ServiceStateEventMessage;
+				var serviceInfoEventMessage = _dms.SendMessage(new GetServiceStateMessage { DataMinerID = reservation.ServiceID.DataMinerID, ServiceID = reservation.ServiceID.SID }) as ServiceStateEventMessage;
 
 				return new ImplementationItemInfo
 				{
@@ -170,20 +172,19 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 
 		private GQIRow[] GetMultiSection()
 		{
-			////GenerateInformationEvent("Get Service Items Multisection started");
 			if (instanceDomId == Guid.Empty)
 			{
 				// return th empty list
 				return Array.Empty<GQIRow>();
 			}
 
-			var service = new DataHelperService(dms.GetConnection()).Read(ServiceExposers.Guid.Equal(instanceDomId)).FirstOrDefault();
+			var service = new DataHelperService(_dms.GetConnection()).Read(ServiceExposers.Guid.Equal(instanceDomId)).FirstOrDefault();
 			if (service != null)
 			{
 				return service.ServiceItems.Select(BuildRow).ToArray();
 			}
 
-			var spec = new DataHelperServiceSpecification(dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(instanceDomId)).FirstOrDefault();
+			var spec = new DataHelperServiceSpecification(_dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(instanceDomId)).FirstOrDefault();
 			if (spec != null)
 			{
 				return spec.ServiceItems.Select(BuildRow).ToArray();

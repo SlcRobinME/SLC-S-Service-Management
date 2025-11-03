@@ -11,6 +11,7 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+	using SLC_SM_Common.Extensions;
 
 	// Required to mark the interface as a GQI data source
 	[GQIMetaData(Name = "Get_ServiceOrderItems")]
@@ -67,10 +68,18 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			return new GQIPage(GetMultiSection())
+			try
 			{
-				HasNextPage = false,
-			};
+				return new GQIPage(GetMultiSection())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage("GQIDS|Get Service Order Items Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)

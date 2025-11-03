@@ -62,6 +62,7 @@ namespace SLCSMDSGetServiceByServiceType
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using SLC_SM_Common.Extensions;
 	using static DomHelpers.SlcConfigurations.SlcConfigurationsIds.Sections;
+	using AlarmLevel = Skyline.DataMiner.Core.DataMinerSystem.Common.AlarmLevel;
 
 	/// <summary>
 	/// Represents a data source.
@@ -76,6 +77,7 @@ namespace SLCSMDSGetServiceByServiceType
 		private IGQILogger _logger;
 		private Skyline.DataMiner.Net.IConnection _connection;
 		private IDms _dms;
+		private GQIDMS _gqiDms;
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
@@ -85,8 +87,8 @@ namespace SLCSMDSGetServiceByServiceType
 			_configurationDomHelper = new DomHelper(args.DMS.SendMessages, SlcConfigurationsIds.ModuleId);
 			_logger = args.Logger;
 
-			var gqiDms = args.DMS;
-			_connection = gqiDms.GetConnection();
+			_gqiDms = args.DMS;
+			_connection = _gqiDms.GetConnection();
 			_dms = _connection.GetDms();
 
 			return new OnInitOutputArgs();
@@ -128,38 +130,43 @@ namespace SLCSMDSGetServiceByServiceType
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			// Define data source rows
-			// See: https://aka.dataminer.services/igqidatasource-getnextpage
-
-			var configurationaParameterInfos = GetConfigurationParameterInfos();
-			var configurationParametersValues = GetConfigurationParameterValues(configurationaParameterInfos);
-			var serviceConfigurationValues = GetServiceConfigurationValues(configurationParametersValues);
-			var services = GetServices(serviceConfigurationValues)
-				.Select(s => new ServiceRow(s))
-				.ToList();
-
-			var configurationParameterNames = new[]
+			try
 			{
-				"Service Type",
-				"Reception Type",
-				"Channel ID",
-				"Video Format",
-				"Distribution Type",
-				"Region",
-			};
-			foreach (var serviceRow in services)
-			{
-				Compose(
-					serviceRow,
-					serviceConfigurationValues,
-					configurationParametersValues,
-					configurationaParameterInfos,
-					configurationParameterNames);
+				var configurationaParameterInfos = GetConfigurationParameterInfos();
+				var configurationParametersValues = GetConfigurationParameterValues(configurationaParameterInfos);
+				var serviceConfigurationValues = GetServiceConfigurationValues(configurationParametersValues);
+				var services = GetServices(serviceConfigurationValues)
+					.Select(s => new ServiceRow(s))
+					.ToList();
+
+				var configurationParameterNames = new[]
+				{
+					"Service Type",
+					"Reception Type",
+					"Channel ID",
+					"Video Format",
+					"Distribution Type",
+					"Region",
+				};
+				foreach (var serviceRow in services)
+				{
+					Compose(
+						serviceRow,
+						serviceConfigurationValues,
+						configurationParametersValues,
+						configurationaParameterInfos,
+						configurationParameterNames);
+				}
+
+				return new GQIPage(services
+					.Where(s => s.ParameterValues.TryGetValue("Service Type", out _))
+					.Select(BuildRow).ToArray());
 			}
-
-			return new GQIPage(services
-				.Where(s => s.ParameterValues.TryGetValue("Service Type", out _))
-				.Select(BuildRow).ToArray());
+			catch (Exception e)
+			{
+				_gqiDms.GenerateInformationMessage("GQIDS|Get Services By Type Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		private void Compose(
@@ -315,7 +322,7 @@ namespace SLCSMDSGetServiceByServiceType
 			return result.Select(r => new ServicesInstance(r));
 		}
 
-		private Skyline.DataMiner.Core.DataMinerSystem.Common.AlarmLevel TryGetAlarmLevel(ServiceRow service)
+		private AlarmLevel TryGetAlarmLevel(ServiceRow service)
 		{
 			var serviceName = service.Service.ServiceInfo.ServiceName;
 			if (_dms.ServiceExistsSafe(serviceName, out IDmsService srv))

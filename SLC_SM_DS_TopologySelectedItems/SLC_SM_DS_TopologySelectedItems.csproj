@@ -17,4 +17,7 @@
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.5.10" />
     <PackageReference Include="skyline.dataminer.projectapi.servicemanagement" Version="1.0.1-alpha.9" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SLC_SM_Common\SLC_SM_Common.csproj" />
+  </ItemGroup>
 </Project>

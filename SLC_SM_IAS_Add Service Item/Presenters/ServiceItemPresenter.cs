@@ -6,6 +6,8 @@
 	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -44,13 +46,14 @@
 
 		public string Name => String.IsNullOrWhiteSpace(view.TboxLabel.Text) ? view.TboxLabel.PlaceHolder : view.TboxLabel.Text;
 
-		public List<Option<string>> AllScripts
+		public List<Option<string>> AllBookingScripts
 		{
 			get
 			{
 				if (_allScripts == null)
 				{
-					_allScripts = (engine.SendSLNetSingleResponseMessage(new GetInfoMessage(InfoType.Scripts)) as GetScriptsResponseMessage)?.Scripts.OrderBy(x => x).Select(x => new Option<string>(x)).ToList() ?? new List<Option<string>>();
+					List<IDmsAutomationScript> dmsAutomationScripts = engine.GetDms().GetScripts().Where(x => x.Parameters.Any(p => p.Description == "Booking Manager Element Info")).OrderBy(x => x.Name).ToList();
+					_allScripts = dmsAutomationScripts.Select(x => new Option<string>(x.Name)).ToList();
 					_allScripts.Insert(0, new Option<string>("-None-", null));
 				}
 
@@ -243,6 +246,7 @@
 			if (serviceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
 			{
 				UpdateImplementationReferenceForTypeSrmBooking(selectedDefinitionReference);
+				UpdateLabelPlaceholder(selectedDefinitionReference);
 
 				var el = engine.FindElement(selectedDefinitionReference);
 				if (el == null)
@@ -305,7 +309,7 @@
 			}
 			else
 			{
-				view.ScriptSelection.SetOptions(AllScripts);
+				view.ScriptSelection.SetOptions(AllBookingScripts);
 				view.ScriptSelection.IsEnabled = true;
 
 				var bookingManagers = engine.FindElementsByProtocol("Skyline Booking Manager").Where(x => x.IsActive).Select(x => x.ElementName).ToArray();

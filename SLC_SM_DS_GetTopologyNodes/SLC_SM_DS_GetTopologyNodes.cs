@@ -63,6 +63,7 @@ namespace SLCSMDSGetTopologyNodes
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+	using SLC_SM_Common.Extensions;
 	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
 
 	/// <summary>
@@ -167,7 +168,7 @@ namespace SLCSMDSGetTopologyNodes
 			}
 			catch (Exception e)
 			{
-				_dms.SendMessage(new GenerateAlarmMessage(GenerateAlarmMessage.AlarmSeverity.Information, "Topology Nodes Exception: " + e) { Status = GenerateAlarmMessage.AlarmStatus.Cleared });
+				_dms.GenerateInformationMessage("GQIDS|Get Topology Nodes Exception: " + e);
 				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
 		}

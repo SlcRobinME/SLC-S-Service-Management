@@ -7,9 +7,11 @@ namespace SLCSMDSGetServicesByCharacteristic
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using SLC_SM_Common.Extensions;
+	using AlarmLevel = Skyline.DataMiner.Core.DataMinerSystem.Common.AlarmLevel;
 
 	/// <summary>
 	/// Represents a data source.
@@ -57,12 +59,18 @@ namespace SLCSMDSGetServicesByCharacteristic
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			// Define data source rows
-			// See: https://aka.dataminer.services/igqidatasource-getnextpage
-			return new GQIPage(BuildPage())
+			try
 			{
-				HasNextPage = false,
-			};
+				return new GQIPage(BuildPage())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				gqiDms.GenerateInformationMessage("GQIDS|Get Services By Characteristic Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)

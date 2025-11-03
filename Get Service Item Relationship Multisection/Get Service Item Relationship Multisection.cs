@@ -56,9 +56,11 @@ namespace GetServiceItemRelationshipMultisection
 	using DomHelpers.SlcWorkflow;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+	using SLC_SM_Common.Extensions;
 
 	/// <summary>
 	///     Represents a data source.
@@ -72,7 +74,7 @@ namespace GetServiceItemRelationshipMultisection
 		private Models.Service _serviceInstance;
 		private Models.ServiceSpecification _serviceSpecificationInstance;
 		private DomHelper _wfDomHelper;
-		private GQIDMS dms;
+		private GQIDMS _dms;
 		private WorkflowsInstance[] _workflows;
 
 		public GQIColumn[] GetColumns()
@@ -102,31 +104,39 @@ namespace GetServiceItemRelationshipMultisection
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			if (_specificationId == Guid.Empty)
+			try
 			{
-				return EmptyPage();
+				if (_specificationId == Guid.Empty)
+				{
+					return EmptyPage();
+				}
+
+				Init();
+
+				var relationships = _serviceInstance?.ServiceItemsRelationships ?? _serviceSpecificationInstance?.ServiceItemsRelationships;
+				if (relationships == null)
+				{
+					return EmptyPage();
+				}
+
+				var items = _serviceInstance?.ServiceItems.Select(i => i.ID.ToString()).ToArray()
+				            ?? _serviceSpecificationInstance?.ServiceItems.Select(i => i.ID.ToString()).ToArray();
+				if (items == null)
+				{
+					return EmptyPage();
+				}
+
+				return new GQIPage(
+					relationships
+						.Where(r => items.Contains(r.ChildServiceItem) || items.Contains(r.ParentServiceItem))
+						.Select(BuildRow)
+						.ToArray());
 			}
-
-			Init();
-
-			var relationships = _serviceInstance?.ServiceItemsRelationships ?? _serviceSpecificationInstance?.ServiceItemsRelationships;
-			if (relationships == null)
+			catch (Exception e)
 			{
-				return EmptyPage();
+				_dms.GenerateInformationMessage("GQIDMS Relationship Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
-
-			var items = _serviceInstance?.ServiceItems.Select(i => i.ID.ToString()).ToArray()
-						?? _serviceSpecificationInstance?.ServiceItems.Select(i => i.ID.ToString()).ToArray();
-			if (items == null)
-			{
-				return EmptyPage();
-			}
-
-			return new GQIPage(
-				relationships
-					.Where(r => items.Contains(r.ChildServiceItem) || items.Contains(r.ParentServiceItem))
-					.Select(BuildRow)
-					.ToArray());
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -141,8 +151,7 @@ namespace GetServiceItemRelationshipMultisection
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			dms = args.DMS;
-
+			_dms = args.DMS;
 			return default;
 		}
 
@@ -171,8 +180,8 @@ namespace GetServiceItemRelationshipMultisection
 
 		private string GetInterfaceName(string serviceItemId, string interfaceId)
 		{
-			var serviceItem = _serviceInstance.ServiceItems.FirstOrDefault(item => item.ID.ToString() == serviceItemId)
-								?? _serviceSpecificationInstance.ServiceItems.FirstOrDefault(item => item.ID.ToString() == serviceItemId)
+			var serviceItem = _serviceInstance?.ServiceItems.FirstOrDefault(item => item.ID.ToString() == serviceItemId)
+								?? _serviceSpecificationInstance?.ServiceItems.FirstOrDefault(item => item.ID.ToString() == serviceItemId)
 								?? throw new InvalidOperationException($"No Service Item found on the system with ID '{serviceItemId}'");
 
 			var type = serviceItem.Type;
@@ -219,17 +228,17 @@ namespace GetServiceItemRelationshipMultisection
 
 		private void Init()
 		{
-			_wfDomHelper = new DomHelper(dms.SendMessages, SlcWorkflowIds.ModuleId);
+			_wfDomHelper = new DomHelper(_dms.SendMessages, SlcWorkflowIds.ModuleId);
 
 			_workflows = _wfDomHelper.DomInstances
 				.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcWorkflowIds.Definitions.Workflows.Id))
 				.Select(w => new WorkflowsInstance(w))
 				.ToArray();
 
-			_serviceInstance = new DataHelperService(dms.GetConnection()).Read(ServiceExposers.Guid.Equal(_specificationId)).FirstOrDefault();
+			_serviceInstance = new DataHelperService(_dms.GetConnection()).Read(ServiceExposers.Guid.Equal(_specificationId)).FirstOrDefault();
 			if (_serviceInstance == null)
 			{
-				_serviceSpecificationInstance = new DataHelperServiceSpecification(dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(_specificationId)).FirstOrDefault();
+				_serviceSpecificationInstance = new DataHelperServiceSpecification(_dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(_specificationId)).FirstOrDefault();
 			}
 		}
 	}

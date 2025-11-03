@@ -3,6 +3,7 @@
 	using Library;
 
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
 	public class ServiceConfigurationView : Dialog
@@ -26,5 +27,7 @@
 		public Section Details { get; } = new Section();
 
 		public Section LifeCycleDetails { get; } = new Section();
+
+		public DropDown<Models.ConfigurationParameter> AddParameter { get; } = new DropDown<Models.ConfigurationParameter>();
 	}
 }

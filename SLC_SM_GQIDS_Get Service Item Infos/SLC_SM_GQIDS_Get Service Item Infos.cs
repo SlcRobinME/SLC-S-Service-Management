@@ -8,6 +8,7 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+	using SLC_SM_Common.Extensions;
 
 	/// <summary>
 	///     Represents a data source.
@@ -17,7 +18,7 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 	public sealed class SLCSMGQIDSGetServiceItemInfos : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = false };
-		private GQIDMS dms;
+		private GQIDMS _dms;
 
 		// variable where input argument will be stored
 		private Guid instanceDomId;
@@ -50,10 +51,18 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			return new GQIPage(GetRows())
+			try
 			{
-				HasNextPage = false,
-			};
+				return new GQIPage(GetRows())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage("GQIDS|Get Service Item Info Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -69,7 +78,7 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			dms = args.DMS;
+			_dms = args.DMS;
 			return default;
 		}
 
@@ -80,7 +89,7 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 				return Array.Empty<GQIRow>();
 			}
 
-			DataHelpersServiceManagement helpers = new DataHelpersServiceManagement(dms.GetConnection());
+			DataHelpersServiceManagement helpers = new DataHelpersServiceManagement(_dms.GetConnection());
 			Models.Service service = helpers.Services.Read(ServiceExposers.Guid.Equal(instanceDomId)).FirstOrDefault();
 			if (service == null)
 			{
@@ -96,16 +105,16 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 			string org = String.Empty;
 			if (service.OrganizationId.HasValue)
 			{
-				org = new DataHelpersPeopleAndOrganizations(dms.GetConnection()).Organizations.Read().Find(x => x.ID == service.OrganizationId.Value)?.Name ?? String.Empty;
+				org = new DataHelpersPeopleAndOrganizations(_dms.GetConnection()).Organizations.Read().Find(x => x.ID == service.OrganizationId.Value)?.Name ?? String.Empty;
 			}
 
 			string alarmLevel = String.Empty;
 			if (service.GenerateMonitoringService.GetValueOrDefault())
 			{
-				var liteServiceInfoEvent = dms.SendMessage(new GetLiteServiceInfo { NameFilter = service.Name }) as LiteServiceInfoEvent;
+				var liteServiceInfoEvent = _dms.SendMessage(new GetLiteServiceInfo { NameFilter = service.Name }) as LiteServiceInfoEvent;
 				if (liteServiceInfoEvent != null)
 				{
-					alarmLevel = (dms.SendMessage(new GetServiceStateMessage { DataMinerID = liteServiceInfoEvent.DataMinerID, ServiceID = liteServiceInfoEvent.ID }) as ServiceStateEventMessage)?.Level.ToString() ?? String.Empty;
+					alarmLevel = (_dms.SendMessage(new GetServiceStateMessage { DataMinerID = liteServiceInfoEvent.DataMinerID, ServiceID = liteServiceInfoEvent.ID }) as ServiceStateEventMessage)?.Level.ToString() ?? String.Empty;
 				}
 			}
 
