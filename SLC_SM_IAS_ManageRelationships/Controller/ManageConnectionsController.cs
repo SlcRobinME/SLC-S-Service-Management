@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
@@ -21,7 +20,7 @@
 		private readonly IssueCollector _issueCollector;
 
 		private ManageConnectionDialog _dialog;
-		private IServiceInstanceBase _serviceInstance;
+		private IServiceItem _serviceInstance;
 
 		private int _nextPairIndex = 0;
 
@@ -64,7 +63,7 @@
 
 		public void BuildLinkMap()
 		{
-			_serviceInstance = _model.GetDomInstance(_data.DomId);
+			_serviceInstance = _model.GetInstance(_data.DomId);
 
 			var serviceItemNodes = _model.GetServiceItems(_serviceInstance, _data.ServiceIds);
 			var sequentialPairs = _model.ToSequentialPairs(serviceItemNodes);
@@ -166,7 +165,7 @@
 			return false;
 		}
 
-		private ServiceItemLinkMap CreateLinkMapFromPair((ServiceItemsSection, ServiceItemsSection) pair)
+		private ServiceItemLinkMap CreateLinkMapFromPair((Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem, Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem) pair)
 		{
 			var links = _model.FindRelationshipsBetweenPair(_serviceInstance, pair);
 

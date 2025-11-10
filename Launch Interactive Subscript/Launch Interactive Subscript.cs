@@ -55,13 +55,13 @@ namespace Launch_Interactive_Subscript_1
 	using System.IO;
 	using System.Linq;
 	using DomHelpers.SlcConfigurations;
-	using DomHelpers.SlcServicemanagement;
-	using Library;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Converters;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 
 	/// <summary>
@@ -98,8 +98,8 @@ namespace Launch_Interactive_Subscript_1
 					return;
 				}
 
-				var configHelper = new DataHelpersConfigurations(engine.GetUserConnection());
-				var configurationParameters = configHelper.ConfigurationParameters.Read();
+
+				var configurationParameters = GetFilteredConfigurationParameters(engine, service);
 
 				List<ServiceCharacteristic> serviceCharacteristics = service.Configurations.Select(
 						x => new ServiceCharacteristic
@@ -115,7 +115,7 @@ namespace Launch_Interactive_Subscript_1
 				var serviceItemDetails = new ServiceItemDetails
 				{
 					Name = service.Name.Split(Path.GetInvalidFileNameChars())[0],
-					Start = new DateTimeOffset(service.StartTime.Value).ToUnixTimeMilliseconds(),
+					Start = service.StartTime.HasValue ? new DateTimeOffset(service.StartTime.Value).ToUnixTimeMilliseconds() : new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)).ToUnixTimeMilliseconds(),
 					End = service.EndTime.HasValue ? new DateTimeOffset(service.EndTime.Value).ToUnixTimeMilliseconds() : default(long?),
 					ServiceCharacteristics = serviceCharacteristics,
 					ServiceItemCharacteristics = new List<ServiceCharacteristic>(),
@@ -130,6 +130,25 @@ namespace Launch_Interactive_Subscript_1
 			{
 				engine.ExitFail(e.Message);
 			}
+		}
+
+		private static List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> GetFilteredConfigurationParameters(IEngine engine, Models.Service service)
+		{
+			FilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> filterConfigParams =
+				new ORFilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>();
+			foreach (Guid? guid in service.Configurations.Select(x => x.ConfigurationParameter?.ConfigurationParameterId))
+			{
+				if (!guid.HasValue)
+				{
+					continue;
+				}
+
+				filterConfigParams = filterConfigParams.OR(ConfigurationParameterExposers.Guid.Equal(guid.Value));
+			}
+
+			var configHelper = new DataHelpersConfigurations(engine.GetUserConnection());
+			var configurationParameters = !filterConfigParams.isEmpty() ? configHelper.ConfigurationParameters.Read(filterConfigParams) : new List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>();
+			return configurationParameters;
 		}
 
 		private static string RunScript(IEngine engine, string scriptName, string bookingManagerElementName, ServiceItemDetails serviceItemDetails)

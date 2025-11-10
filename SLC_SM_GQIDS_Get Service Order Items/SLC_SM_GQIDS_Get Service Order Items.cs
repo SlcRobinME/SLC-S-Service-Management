@@ -8,7 +8,10 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+	using SLC_SM_Common.Extensions;
 
 	// Required to mark the interface as a GQI data source
 	[GQIMetaData(Name = "Get_ServiceOrderItems")]
@@ -65,10 +68,18 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			return new GQIPage(GetMultiSection())
+			try
 			{
-				HasNextPage = false,
-			};
+				return new GQIPage(GetMultiSection())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage("GQIDS|Get Service Order Items Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -150,19 +161,40 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 			}
 
 			IConnection connection = _dms.GetConnection();
-			var orders = new DataHelperServiceOrder(connection).Read();
-			var categories = new DataHelperServiceCategory(connection).Read();
-			var specifications = new DataHelperServiceSpecification(connection).Read();
-			var services = new DataHelperService(connection).Read();
-
-			// create filter to filter event instances with specific dom event ids
-			var instance = orders.Find(x => x.ID == _instanceDomId);
-			if (instance == null)
+			var order = new DataHelperServiceOrder(connection).Read(ServiceOrderExposers.Guid.Equal(_instanceDomId)).FirstOrDefault();
+			if (order == null)
 			{
 				return Array.Empty<GQIRow>();
 			}
 
-			return instance.OrderItems.Where(x => x?.ServiceOrderItem != null).Select(item => BuildRow(item, categories, specifications, services)).ToArray();
+			var serviceOrderItems = order.OrderItems.Where(x => x?.ServiceOrderItem != null).ToList();
+
+			FilterElement<Models.ServiceCategory> filterCategory = new ORFilterElement<Models.ServiceCategory>();
+			FilterElement<Models.ServiceSpecification> filterSpecification = new ORFilterElement<Models.ServiceSpecification>();
+			FilterElement<Models.Service> filterService = new ORFilterElement<Models.Service>();
+			foreach (var serviceOrderItem in serviceOrderItems)
+			{
+				if (serviceOrderItem.ServiceOrderItem.ServiceCategoryId.HasValue && serviceOrderItem.ServiceOrderItem.ServiceCategoryId != Guid.Empty)
+				{
+					filterCategory = filterCategory.OR(ServiceCategoryExposers.Guid.Equal(serviceOrderItem.ServiceOrderItem.ServiceCategoryId.Value));
+				}
+
+				if (serviceOrderItem.ServiceOrderItem.SpecificationId.HasValue && serviceOrderItem.ServiceOrderItem.SpecificationId != Guid.Empty)
+				{
+					filterSpecification = filterSpecification.OR(ServiceSpecificationExposers.Guid.Equal(serviceOrderItem.ServiceOrderItem.SpecificationId.Value));
+				}
+
+				if (serviceOrderItem.ServiceOrderItem.ServiceId.HasValue && serviceOrderItem.ServiceOrderItem.ServiceId != Guid.Empty)
+				{
+					filterService = filterService.OR(ServiceExposers.Guid.Equal(serviceOrderItem.ServiceOrderItem.ServiceId.Value));
+				}
+			}
+
+			var categories = !filterCategory.isEmpty() ? new DataHelperServiceCategory(connection).Read(filterCategory) : new List<Models.ServiceCategory>();
+			var specifications = !filterSpecification.isEmpty() ? new DataHelperServiceSpecification(connection).Read(filterSpecification) : new List<Models.ServiceSpecification>();
+			var services = !filterService.isEmpty() ? new DataHelperService(connection).Read(filterService) : new List<Models.Service>();
+
+			return serviceOrderItems.Select(item => BuildRow(item, categories, specifications, services)).ToArray();
 		}
 	}
 }

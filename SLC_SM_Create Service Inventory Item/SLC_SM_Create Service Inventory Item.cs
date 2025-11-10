@@ -55,17 +55,17 @@ namespace SLC_SM_Create_Service_Inventory_Item
 	using System.Linq;
 	using System.Threading;
 	using DomHelpers.SlcServicemanagement;
-
-	using Library;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
-	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_Create_Service_Inventory_Item.Presenters;
 	using SLC_SM_Create_Service_Inventory_Item.Views;
 
@@ -143,12 +143,15 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				return;
 			}
 
-			var serviceSpecificationInstance = repo.ServiceSpecifications.Read().First(x => x.ID == instance.ServiceSpecificationId);
+			var serviceSpecificationInstance = instance.ServiceSpecificationId.HasValue ? repo.ServiceSpecifications.Read(ServiceSpecificationExposers.Guid.Equal(instance.ServiceSpecificationId.Value)).FirstOrDefault() : null;
 
-			//instance.Icon = serviceSpecificationInstance.Icon;
-			instance.Description = serviceSpecificationInstance.Description;
+			if (serviceSpecificationInstance != null)
+			{
+				//instance.Icon = serviceSpecificationInstance.Icon;
+				instance.Description = serviceSpecificationInstance.Description;
+			}
 
-			if (serviceSpecificationInstance.Configurations != null)
+			if (serviceSpecificationInstance?.Configurations != null)
 			{
 				instance.Configurations = serviceSpecificationInstance.Configurations
 					.Where(x => x?.ConfigurationParameter != null)
@@ -166,7 +169,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 					.ToList();
 			}
 
-			if (serviceSpecificationInstance.ServiceItemsRelationships != null)
+			if (serviceSpecificationInstance?.ServiceItemsRelationships != null)
 			{
 				foreach (var relationship in serviceSpecificationInstance.ServiceItemsRelationships)
 				{
@@ -177,7 +180,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				}
 			}
 
-			if (serviceSpecificationInstance.ServiceItems != null)
+			if (serviceSpecificationInstance?.ServiceItems != null)
 			{
 				foreach (var item in serviceSpecificationInstance.ServiceItems)
 				{
@@ -220,32 +223,27 @@ namespace SLC_SM_Create_Service_Inventory_Item
 		private void TryCreateDmsService(Models.Service instance)
 		{
 			var dms = _engine.GetDms();
-			var agent = dms.GetAgents().FirstOrDefault();
-			if (agent == null)
-			{
-				throw new InvalidOperationException($"This operation is valid only on single agent dataminer systems.");
-			}
 
 			if (_engine.FindService(instance.Name) != null) // agent.ServiceExists() throws when service doesn't exist :(
 			{
-				throw new InvalidOperationException($"A dataminer service with name {instance.Name} already exists.");
+				throw new InvalidOperationException($"A DataMiner service with name {instance.Name} already exists.");
 			}
 
 			var serviceConfiguration = new ServiceConfiguration(dms, instance.Name);
-			var serviceId = agent.CreateService(serviceConfiguration);
+			var serviceId = dms.GetAgents().First().CreateService(serviceConfiguration);
 
-			SetServiceIcon(agent, serviceId, instance.Icon);
+			SetServiceIcon(dms, serviceId, instance.Icon);
 		}
 
-		private void SetServiceIcon(IDma agent, DmsServiceId serviceId, string icon)
+		private void SetServiceIcon(IDms dms, DmsServiceId serviceId, string icon)
 		{
-			if (!agent.Dms.PropertyExists("Logo", PropertyType.Service))
+			if (!dms.PropertyExists("Logo", PropertyType.Service))
 			{
-				agent.Dms.CreateProperty("Logo", PropertyType.Service, false, false, false);
+				dms.CreateProperty("Logo", PropertyType.Service, false, false, false);
 			}
 
-			WaitUntilServiceCreated(agent, serviceId, 5000);
-			var service = agent.GetService(serviceId);
+			WaitUntilServiceCreated(serviceId, 5000);
+			var service = dms.GetService(serviceId);
 
 			var property = service.Properties.SingleOrDefault(p => p.Definition.Name == "Logo").AsWritable();
 
@@ -253,7 +251,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			service.Update();
 		}
 
-		private void WaitUntilServiceCreated(IDma agent, DmsServiceId serviceId, int timeout)
+		private void WaitUntilServiceCreated(DmsServiceId serviceId, int timeout)
 		{
 			var sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -262,37 +260,75 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				if (sw.ElapsedMilliseconds > timeout)
 					throw new TimeoutException($"Service {serviceId} was not created within {timeout} ms.");
 
-				Thread.Sleep(100);
+				Thread.Sleep(250);
 			}
 		}
 
-		private void CreateNewServiceAndLinkItToServiceOrder(DataHelpersServiceManagement repo, Models.ServiceOrderItem serviceOrder)
+		private void CreateNewServiceAndLinkItToServiceOrder(DataHelpersServiceManagement repo, Models.ServiceOrderItem serviceOrderItem)
 		{
-			List<Models.Service> services = repo.Services.Read();
-			if (serviceOrder.ServiceId.HasValue && services.Exists(s => s.ID == serviceOrder.ServiceId))
+			if (serviceOrderItem.ServiceId.HasValue && repo.Services.Read(ServiceExposers.Guid.Equal(serviceOrderItem.ServiceId.Value)).Any())
 			{
 				// Already initialized - don't do anything, safety check
 				return;
 			}
 
 			// Create new service item based on order
+			Guid newServiceId = CreateServiceItemFromOrderItem(repo, serviceOrderItem);
+
+			// Provide link on Service Order
+			serviceOrderItem.ServiceId = newServiceId;
+			repo.ServiceOrderItems.CreateOrUpdate(serviceOrderItem);
+
+			// Update state
+			var domInstanceId = new DomInstanceId(serviceOrderItem.ID);
+			if (serviceOrderItem.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.New)
+			{
+				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.New_To_Acknowledged);
+				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
+			}
+
+			if (serviceOrderItem.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.Acknowledged)
+			{
+				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
+			}
+
+			// Update state of main Service Order as well
+			Models.ServiceOrder order = repo.ServiceOrders.Read(ServiceOrderExposers.ServiceOrderItemsExposers.ServiceOrderItem.Equal(serviceOrderItem)).FirstOrDefault();
+			if (order != null)
+			{
+				var orderId = new DomInstanceId(order.ID);
+				if (order.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.New)
+				{
+					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.New_To_Acknowledged);
+					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
+				}
+
+				if (order.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Acknowledged)
+				{
+					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
+				}
+			}
+		}
+
+		private static Guid CreateServiceItemFromOrderItem(DataHelpersServiceManagement repo, Models.ServiceOrderItem serviceOrderItem)
+		{
 			Models.Service newService = new Models.Service
 			{
-				ServiceID = repo.Services.UniqueServiceId(services),
-				Name = serviceOrder.Name,
-				Description = serviceOrder.Name,
-				StartTime = serviceOrder.StartTime,
-				EndTime = serviceOrder.EndTime,
+				ServiceID = repo.Services.UniqueServiceId(),
+				Name = serviceOrderItem.Name,
+				Description = serviceOrderItem.Name,
+				StartTime = serviceOrderItem.StartTime,
+				EndTime = serviceOrderItem.EndTime,
 				Icon = String.Empty,
-				ServiceSpecificationId = serviceOrder.SpecificationId,
-				Category = repo.ServiceCategories.Read().Find(x => x.ID == serviceOrder.ServiceCategoryId),
+				ServiceSpecificationId = serviceOrderItem.SpecificationId,
+				Category = serviceOrderItem.ServiceCategoryId.HasValue ? repo.ServiceCategories.Read(ServiceCategoryExposers.Guid.Equal(serviceOrderItem.ServiceCategoryId.Value)).FirstOrDefault() : null,
 				ServiceItems = new List<Models.ServiceItem>(),
 				ServiceItemsRelationships = new List<Models.ServiceItemRelationShip>(),
 			};
 
-			if (serviceOrder.Configurations != null)
+			if (serviceOrderItem.Configurations != null)
 			{
-				newService.Configurations = serviceOrder.Configurations
+				newService.Configurations = serviceOrderItem.Configurations
 					.Where(x => x?.ConfigurationParameter != null)
 					.Select(
 						x =>
@@ -308,7 +344,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 					.ToList();
 			}
 
-			var spec = repo.ServiceSpecifications.Read().Find(x => x.ID == serviceOrder.SpecificationId);
+			var spec = serviceOrderItem.SpecificationId.HasValue ? repo.ServiceSpecifications.Read(ServiceSpecificationExposers.Guid.Equal(serviceOrderItem.SpecificationId.Value)).FirstOrDefault() : null;
 			if (spec != null)
 			{
 				newService.Icon = spec.Icon;
@@ -355,53 +391,19 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				}
 			}
 
-			var dataHelperService = new DataHelperService(_engine.GetUserConnection());
-			Guid newServiceId = dataHelperService.CreateOrUpdate(newService);
-
-			// Provide link on Service Order
-			serviceOrder.ServiceId = newServiceId;
-			repo.ServiceOrderItems.CreateOrUpdate(serviceOrder);
-
-			// Update state
-			var domInstanceId = new DomInstanceId(serviceOrder.ID);
-			if (serviceOrder.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.New)
-			{
-				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.New_To_Acknowledged);
-				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
-			}
-
-			if (serviceOrder.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.Acknowledged)
-			{
-				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
-			}
-
-			// Update state of main Service Order as well
-			Models.ServiceOrder order = repo.ServiceOrders.Read().Find(x => x.OrderItems.Exists(o => o.ServiceOrderItem.ID == serviceOrder.ID));
-			if (order != null)
-			{
-				var orderId = new DomInstanceId(order.ID);
-				if (order.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.New)
-				{
-					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.New_To_Acknowledged);
-					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
-				}
-
-				if (order.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Acknowledged)
-				{
-					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
-				}
-			}
+			Guid newServiceId = repo.Services.CreateOrUpdate(newService);
+			return newServiceId;
 		}
 
-		private Models.Service GetService(DataHelpersServiceManagement repo, Guid domId)
+		private static Models.Service GetService(DataHelpersServiceManagement repo, Guid domId)
 		{
 			if (domId == Guid.Empty)
 			{
 				throw new InvalidOperationException("No existing DOM ID was provided as script input!");
 			}
 
-			return repo.Services.Read().Find(x => x.ID == domId)
-			       ?? throw new InvalidOperationException($"No Dom Instance with ID '{domId}' found on the system!");
+			return repo.Services.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault()
+				   ?? throw new InvalidOperationException($"No Dom Instance with ID '{domId}' found on the system!");
 		}
 
 		private void InitHelpers()
@@ -424,14 +426,14 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			// Init views
 			var view = new ServiceView(_engine);
-			var presenter = new ServicePresenter(_engine, repo, view, repo.Services.Read().Select(x => x.Name).ToList());
+			var presenter = new ServicePresenter(_engine, repo, view);
 
 			if (action == Action.AddItem)
 			{
 				var d = new MessageDialog(_engine, "Create Service Inventory Item from the selected service order item?") { Title = "Create Service Inventory Item From Order Item" };
 				d.OkButton.Pressed += (sender, args) =>
 				{
-					var serviceOrderItem = repo.ServiceOrderItems.Read().Find(x => x.ID == domId);
+					var serviceOrderItem = repo.ServiceOrderItems.Read(ServiceOrderItemExposers.Guid.Equal(domId)).FirstOrDefault();
 					if (domId != Guid.Empty && serviceOrderItem == null)
 					{
 						throw new InvalidOperationException($"No Service Order Item with ID '{domId}' found on the system!");
@@ -456,6 +458,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			}
 			else
 			{
+				// EDIT MODE
 				view.BtnAdd.Text = "Save";
 				presenter.LoadFromModel(GetService(repo, domId));
 				view.BtnAdd.Pressed += (sender, args) =>

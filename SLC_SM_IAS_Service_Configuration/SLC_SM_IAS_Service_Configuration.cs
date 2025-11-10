@@ -48,24 +48,22 @@ DATE		VERSION		AUTHOR			COMMENTS
 28/05/2025	1.0.0.1		RME, Skyline	Initial version
 ****************************************************************************
 */
-
 namespace SLC_SM_IAS_Service_Configuration
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
-	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Service_Configuration.Presenters;
 	using SLC_SM_IAS_Service_Configuration.Views;
 
 	/// <summary>
-	/// Represents a DataMiner Automation script.
+	///     Represents a DataMiner Automation script.
 	/// </summary>
 	public class Script
 	{
@@ -73,7 +71,7 @@ namespace SLC_SM_IAS_Service_Configuration
 		private IEngine _engine;
 
 		/// <summary>
-		/// The script entry point.
+		///     The script entry point.
 		/// </summary>
 		/// <param name="engine">Link with SLAutomation process.</param>
 		public void Run(IEngine engine)
@@ -120,8 +118,8 @@ namespace SLC_SM_IAS_Service_Configuration
 			// Input
 			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
 
-			var instance = new DataHelperService(_engine.GetUserConnection()).Read().Find(x => x.ID == domId)
-				?? throw new InvalidOperationException($"Instance with ID '{domId}' does not exist");
+			var instance = new DataHelperService(_engine.GetUserConnection()).Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault()
+			               ?? throw new InvalidOperationException($"Instance with ID '{domId}' does not exist");
 
 			// Model-View-Presenter
 			var view = new ServiceConfigurationView(_engine);

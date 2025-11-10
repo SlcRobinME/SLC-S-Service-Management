@@ -52,13 +52,11 @@ DATE		VERSION		AUTHOR			COMMENTS
 namespace SLC_SM_IAS_Service_Spec_Configuration
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using DomHelpers.SlcServicemanagement;
-	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;

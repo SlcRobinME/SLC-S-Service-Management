@@ -51,14 +51,14 @@ DATE        VERSION        AUTHOR            COMMENTS
 namespace SLC_SM_Delete_Service_1
 {
 	using System;
-	using DomHelpers.SlcServicemanagement;
-	using Library;
+	using System.Collections.Generic;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 	using SLC_SM_Common.Extensions;
@@ -131,7 +131,7 @@ namespace SLC_SM_Delete_Service_1
 				filter = filter.OR(ServiceExposers.Guid.Equal(domId));
 			}
 
-			var services = serviceManagementHelper.Services.Read(filter);
+			var services = !filter.isEmpty() ? serviceManagementHelper.Services.Read(filter) : new List<Models.Service>();
 			foreach (var service in services)
 			{
 				if (service.GenerateMonitoringService == true && dms.ServiceExistsSafe(service.Name, out IDmsService dmsService))

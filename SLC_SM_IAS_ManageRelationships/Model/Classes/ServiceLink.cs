@@ -2,27 +2,27 @@
 {
 	using System.Collections.Generic;
 	using System.Linq;
-
-	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
-
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+	using SLC_SM_IAS_ManageRelationships.Model;
 
 	internal class ServiceLink : IDefinitionObject
 	{
-		private readonly List<Models.Link> _existingRelationships;
-		private readonly IServiceInstanceBase _serviceItem;
+		private readonly IEngine _engine;
+		private readonly IServiceItem _serviceItem;
 
-		public ServiceLink(IEngine engine, IServiceInstanceBase serviceInfo)
+		public ServiceLink(IEngine engine, IServiceItem serviceItem)
 		{
-			_serviceItem = serviceInfo;
-			_existingRelationships = new DataHelperLink(engine.GetUserConnection()).Read();
+			_engine = engine;
+			_serviceItem = serviceItem;
 		}
 
 		IEnumerable<NodesSection> IDefinitionObject.GetAvailableInputs()
 		{
-			return _existingRelationships.Any(r => r.ChildID == _serviceItem.GetId().Id.ToString())
+			return new DataHelperLink(_engine.GetUserConnection()).Read(LinkExposers.ChildID.Equal(_serviceItem.Guid.ToString())).Any()
 				? Enumerable.Empty<NodesSection>()
 				: new[] { new NodesSection { NodeID = "0", NodeAlias = "Default Service Link Input" } };
 		}

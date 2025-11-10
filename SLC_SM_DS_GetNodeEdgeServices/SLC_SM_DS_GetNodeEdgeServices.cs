@@ -48,7 +48,6 @@ DATE		VERSION		AUTHOR			COMMENTS
 08/09/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
-
 namespace SLCSMDSGetNodeEdgeServices
 {
 	using System;
@@ -57,12 +56,15 @@ namespace SLCSMDSGetNodeEdgeServices
 	using DomHelpers.SlcConfigurations;
 	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using SLC_SM_Common.Extensions;
 
 	/// <summary>
-	/// Represents a data source.
-	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
+	///     Represents a data source.
+	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
 	[GQIMetaData(Name = "SLC_SM_DS_GetNodeEdgeServices")]
 	public sealed class SLCSMDSGetNodeEdgeServices : IGQIDataSource
@@ -74,30 +76,7 @@ namespace SLCSMDSGetNodeEdgeServices
 		private DomHelper _serviceMangerDomHelper;
 		private DomHelper _configurationDomHelper;
 		private string _serviceType;
-
-		public OnInitOutputArgs OnInit(OnInitInputArgs args)
-		{
-			// Initialize the data source
-			// See: https://aka.dataminer.services/igqioninit-oninit
-			_logger = args.Logger;
-			_serviceMangerDomHelper = new DomHelper(args.DMS.SendMessages, SlcServicemanagementIds.ModuleId);
-			_configurationDomHelper = new DomHelper(args.DMS.SendMessages, SlcConfigurationsIds.ModuleId);
-			return new OnInitOutputArgs();
-		}
-
-		public GQIArgument[] GetInputArguments()
-		{
-			// Define data source input arguments
-			// See: https://aka.dataminer.services/igqiinputarguments-getinputarguments
-			return _arguments.GetInputArguments();
-		}
-
-		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
-		{
-			// Process input argument values
-			// See: https://aka.dataminer.services/igqiinputarguments-onargumentsprocessed
-			return _arguments.OnArgumentsProcessed(args);
-		}
+		private GQIDMS _dms;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -115,75 +94,60 @@ namespace SLCSMDSGetNodeEdgeServices
 			}
 		}
 
-		private GQIColumn[] GetNodeColumns()
+		public GQIArgument[] GetInputArguments()
 		{
-			return new GQIColumn[]
-			{
-				new GQIStringColumn("Service Id"),
-				new GQIStringColumn("Service Name"),
-				new GQIBooleanColumn("Selected"),
-				new GQIStringColumn("Service Type"),
-			};
-		}
-
-		private GQIColumn[] GetEdgeColumns()
-		{
-			return new GQIColumn[]
-			{
-				new GQIStringColumn("Source Id"),
-				new GQIStringColumn("Destination Id"),
-			};
+			// Define data source input arguments
+			// See: https://aka.dataminer.services/igqiinputarguments-getinputarguments
+			return _arguments.GetInputArguments();
 		}
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			if (!TryGetServiceByDomId(_arguments.DomId, out ServicesInstance service))
-				return new GQIPage(Array.Empty<GQIRow>());
-
-			var relatedServices = GetRelatedServices(service);
-			var rows = BuildRows(service, relatedServices);
-
-			return new GQIPage(rows);
-		}
-
-		private IEnumerable<ServicesInstance> GetRelatedServices(ServicesInstance service)
-		{
-			_serviceType = GetServiceType(service);
-
-			switch (_serviceType)
+			try
 			{
-				case "Channel Distribution":
-					return GetChannelDistributionRelatedServices(service);
+				if (!TryGetServiceByDomId(_arguments.DomId, out ServicesInstance service))
+				{
+					return new GQIPage(Array.Empty<GQIRow>());
+				}
 
-				case "Channel Acquisition":
-					return GetChannelAcquisitionRelatedServices(service);
+				var relatedServices = GetRelatedServices(service);
+				var rows = BuildRows(service, relatedServices);
 
-				default:
-					return Enumerable.Empty<ServicesInstance>();
+				return new GQIPage(rows);
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage("Topology Nodes Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
 		}
 
-		private GQIRow[] BuildRows(ServicesInstance service, IEnumerable<ServicesInstance> relatedServices)
+		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
-			switch (_arguments.NodeOrEdge)
-			{
-				case "Node":
-					return BuildNodeRows(service, relatedServices);
-
-				case "Edge":
-					return BuildEdgeRows(service, relatedServices);
-
-				default:
-					throw new InvalidOperationException(
-						$"Invalid NodeOrEdge argument: '{_arguments.NodeOrEdge}'. Expected 'Node' or 'Edge'.");
-			}
+			// Process input argument values
+			// See: https://aka.dataminer.services/igqiinputarguments-onargumentsprocessed
+			return _arguments.OnArgumentsProcessed(args);
 		}
 
-		private GQIRow[] BuildNodeRows(ServicesInstance service, IEnumerable<ServicesInstance> relatedServices)
+		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			return new[] { BuildNodeRow(service) }
-				.Concat(relatedServices.Select(BuildNodeRow))
-				.ToArray();
+			// Initialize the data source
+			// See: https://aka.dataminer.services/igqioninit-oninit
+			_dms = args.DMS;
+			_logger = args.Logger;
+			_serviceMangerDomHelper = new DomHelper(args.DMS.SendMessages, SlcServicemanagementIds.ModuleId);
+			_configurationDomHelper = new DomHelper(args.DMS.SendMessages, SlcConfigurationsIds.ModuleId);
+			return new OnInitOutputArgs();
+		}
+
+		private GQIRow BuildEdgeRow(ServicesInstance source, ServicesInstance destination)
+		{
+			return new GQIRow(
+				new[]
+				{
+					new GQICell { Value = source.ID.Id.ToString() },
+					new GQICell { Value = destination.ID.Id.ToString() },
+				});
 		}
 
 		private GQIRow[] BuildEdgeRows(ServicesInstance service, IEnumerable<ServicesInstance> relatedServices)
@@ -206,33 +170,103 @@ namespace SLCSMDSGetNodeEdgeServices
 			}
 		}
 
-		private bool TryGetServiceByDomId(Guid domId, out ServicesInstance service)
+		private GQIRow BuildNodeRow(ServicesInstance service)
 		{
-			service = null;
+			bool isSelected = service.ID.Id == _arguments.DomId;
+			string oppositeServiceType = _serviceType == "Channel Acquisition" ? "Channel Distribution" : "Channel Acquisition";
 
-			var domService = _serviceMangerDomHelper.DomInstances
-				.Read(DomInstanceExposers.Id.Equal(domId))
-				.SingleOrDefault();
-
-			if (domService == null)
-			{
-				return false;
-			}
-
-			service = new ServicesInstance(domService);
-			return true;
+			return new GQIRow(
+				new[]
+				{
+					new GQICell { Value = service.ID.Id.ToString() },
+					new GQICell { Value = service.Name },
+					new GQICell { Value = service.ID.Id == _arguments.DomId },
+					new GQICell { Value = isSelected ? _serviceType : oppositeServiceType },
+				});
 		}
 
-		private string GetServiceType(ServicesInstance service)
+		private GQIRow[] BuildNodeRows(ServicesInstance service, IEnumerable<ServicesInstance> relatedServices)
 		{
-			var parameterInfo = GetServiceTypeParameterInfo();
-			var configurationParameterValues = GetConfigurationParameterValuesForService(service);
+			return new[] { BuildNodeRow(service) }
+				.Concat(relatedServices.Select(BuildNodeRow))
+				.ToArray();
+		}
 
-			var match = configurationParameterValues
-				.SingleOrDefault(cpv =>
-					cpv.ConfigurationParameterValue.ConfigurationParameterReference == parameterInfo.ID.Id);
+		private FilterElement<DomInstance> BuildOrFilter(IEnumerable<FilterElement<DomInstance>> filters)
+		{
+			return filters.Aggregate((f1, f2) => f1.OR(f2));
+		}
 
-			return match != null ? match.ConfigurationParameterValue.StringValue : null;
+		private GQIRow[] BuildRows(ServicesInstance service, IEnumerable<ServicesInstance> relatedServices)
+		{
+			switch (_arguments.NodeOrEdge)
+			{
+				case "Node":
+					return BuildNodeRows(service, relatedServices);
+
+				case "Edge":
+					return BuildEdgeRows(service, relatedServices);
+
+				default:
+					throw new InvalidOperationException(
+						$"Invalid NodeOrEdge argument: '{_arguments.NodeOrEdge}'. Expected 'Node' or 'Edge'.");
+			}
+		}
+
+		private IEnumerable<ServicesInstance> GetChannelAcquisitionRelatedServices(ServicesInstance service)
+		{
+			var filter =
+				DomInstanceExposers.DomDefinitionId.Equal(SlcServicemanagementIds.Definitions.Services.Id)
+					.AND(
+						DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemType)
+							.Equal(SlcServicemanagementIds.Enums.Serviceitemtypes.Service))
+					.AND(
+						DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ImplementationReference)
+							.Equal(service.ID.Id.ToString()));
+
+			return _serviceMangerDomHelper.DomInstances.Read(filter)
+				.Select(s => new ServicesInstance(s));
+		}
+
+		private IEnumerable<ServicesInstance> GetChannelDistributionRelatedServices(ServicesInstance service)
+		{
+			var serviceItems = service.ServiceItemses
+				.Where(si => si.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service);
+
+			var filters = serviceItems
+				.Select(
+					si =>
+					{
+						Guid guid;
+						return Guid.TryParse(si.ImplementationReference, out guid)
+							? (FilterElement<DomInstance>)DomInstanceExposers.Id.Equal(guid)
+							: null;
+					})
+				.Where(f => f != null)
+				.ToList();
+
+			if (!filters.Any())
+			{
+				return Enumerable.Empty<ServicesInstance>();
+			}
+
+			var filter = filters.Aggregate((f1, f2) => f1.OR(f2));
+
+			return _serviceMangerDomHelper.DomInstances.Read(filter)
+				.Select(s => new ServicesInstance(s));
+		}
+
+		private IEnumerable<ConfigurationParameterValueInstance> GetConfigurationParameterValues(
+			IEnumerable<ServiceConfigurationValueInstance> serviceConfigurationValues)
+		{
+			var filter = BuildOrFilter(
+				serviceConfigurationValues
+					.Select(
+						scv => DomInstanceExposers.Id.Equal(
+							scv.ServiceConfigurationValue.ConfigurationParameterValue.Value)));
+
+			var domInstances = _configurationDomHelper.DomInstances.Read(filter);
+			return domInstances.Select(cpv => new ConfigurationParameterValueInstance(cpv));
 		}
 
 		private IEnumerable<ConfigurationParameterValueInstance> GetConfigurationParameterValuesForService(ServicesInstance service)
@@ -252,6 +286,43 @@ namespace SLCSMDSGetNodeEdgeServices
 			return GetConfigurationParameterValues(serviceConfigurationValues);
 		}
 
+		private GQIColumn[] GetEdgeColumns()
+		{
+			return new GQIColumn[]
+			{
+				new GQIStringColumn("Source Id"),
+				new GQIStringColumn("Destination Id"),
+			};
+		}
+
+		private GQIColumn[] GetNodeColumns()
+		{
+			return new GQIColumn[]
+			{
+				new GQIStringColumn("Service Id"),
+				new GQIStringColumn("Service Name"),
+				new GQIBooleanColumn("Selected"),
+				new GQIStringColumn("Service Type"),
+			};
+		}
+
+		private IEnumerable<ServicesInstance> GetRelatedServices(ServicesInstance service)
+		{
+			_serviceType = GetServiceType(service);
+
+			switch (_serviceType)
+			{
+				case "Channel Distribution":
+					return GetChannelDistributionRelatedServices(service);
+
+				case "Channel Acquisition":
+					return GetChannelAcquisitionRelatedServices(service);
+
+				default:
+					return Enumerable.Empty<ServicesInstance>();
+			}
+		}
+
 		private IEnumerable<ServiceConfigurationValueInstance> GetServiceConfigurationValues(IEnumerable<Guid> parameterIds)
 		{
 			var filter = BuildOrFilter(parameterIds.Select(id => DomInstanceExposers.Id.Equal(id)));
@@ -259,20 +330,17 @@ namespace SLCSMDSGetNodeEdgeServices
 			return domInstances.Select(cp => new ServiceConfigurationValueInstance(cp));
 		}
 
-		private IEnumerable<ConfigurationParameterValueInstance> GetConfigurationParameterValues(
-			IEnumerable<ServiceConfigurationValueInstance> serviceConfigurationValues)
+		private string GetServiceType(ServicesInstance service)
 		{
-			var filter = BuildOrFilter(serviceConfigurationValues
-				.Select(scv => DomInstanceExposers.Id.Equal(
-					scv.ServiceConfigurationValue.ConfigurationParameterValue.Value)));
+			var parameterInfo = GetServiceTypeParameterInfo();
+			var configurationParameterValues = GetConfigurationParameterValuesForService(service);
 
-			var domInstances = _configurationDomHelper.DomInstances.Read(filter);
-			return domInstances.Select(cpv => new ConfigurationParameterValueInstance(cpv));
-		}
+			var match = configurationParameterValues
+				.SingleOrDefault(
+					cpv =>
+						cpv.ConfigurationParameterValue.ConfigurationParameterReference == parameterInfo.ID.Id);
 
-		private FilterElement<DomInstance> BuildOrFilter(IEnumerable<FilterElement<DomInstance>> filters)
-		{
-			return filters.Aggregate((f1, f2) => f1.OR(f2));
+			return match != null ? match.ConfigurationParameterValue.StringValue : null;
 		}
 
 		private ConfigurationParametersInstance GetServiceTypeParameterInfo()
@@ -291,65 +359,21 @@ namespace SLCSMDSGetNodeEdgeServices
 			return new ConfigurationParametersInstance(domInfo);
 		}
 
-		private IEnumerable<ServicesInstance> GetChannelDistributionRelatedServices(ServicesInstance service)
+		private bool TryGetServiceByDomId(Guid domId, out ServicesInstance service)
 		{
-			var serviceItems = service.ServiceItemses
-				.Where(si => si.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service);
+			service = null;
 
-			var filters = serviceItems
-				.Select(si =>
-				{
-					Guid guid;
-					return Guid.TryParse(si.ImplementationReference, out guid)
-						? (FilterElement<DomInstance>)DomInstanceExposers.Id.Equal(guid)
-						: null;
-				})
-				.Where(f => f != null)
-				.ToList();
+			var domService = _serviceMangerDomHelper.DomInstances
+				.Read(DomInstanceExposers.Id.Equal(domId))
+				.SingleOrDefault();
 
-			if (!filters.Any())
-				return Enumerable.Empty<ServicesInstance>();
-
-			var filter = filters.Aggregate((f1, f2) => f1.OR(f2));
-
-			return _serviceMangerDomHelper.DomInstances.Read(filter)
-				.Select(s => new ServicesInstance(s));
-		}
-
-		private IEnumerable<ServicesInstance> GetChannelAcquisitionRelatedServices(ServicesInstance service)
-		{
-			var filter =
-				DomInstanceExposers.DomDefinitionId.Equal(SlcServicemanagementIds.Definitions.Services.Id)
-				.AND(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ServiceItemType)
-					.Equal(SlcServicemanagementIds.Enums.Serviceitemtypes.Service))
-				.AND(DomInstanceExposers.FieldValues.DomInstanceField(SlcServicemanagementIds.Sections.ServiceItems.ImplementationReference)
-					.Equal(service.ID.Id.ToString()));
-
-			return _serviceMangerDomHelper.DomInstances.Read(filter)
-				.Select(s => new ServicesInstance(s));
-		}
-
-		private GQIRow BuildNodeRow(ServicesInstance service)
-		{
-			bool isSelected = service.ID.Id == _arguments.DomId;
-			string oppositeServiceType = _serviceType == "Channel Acquisition" ? "Channel Distribution" : "Channel Acquisition";
-
-			return new GQIRow(new[]
+			if (domService == null)
 			{
-				new GQICell { Value = service.ID.Id.ToString() },
-				new GQICell { Value = service.Name },
-				new GQICell { Value = service.ID.Id == _arguments.DomId },
-				new GQICell { Value = isSelected ? _serviceType : oppositeServiceType },
-			});
-		}
+				return false;
+			}
 
-		private GQIRow BuildEdgeRow(ServicesInstance source, ServicesInstance destination)
-		{
-			return new GQIRow(new[]
-			{
-				new GQICell { Value = source.ID.Id.ToString() },
-				new GQICell { Value = destination.ID.Id.ToString() },
-			});
+			service = new ServicesInstance(domService);
+			return true;
 		}
 	}
 }

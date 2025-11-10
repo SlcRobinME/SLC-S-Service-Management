@@ -8,18 +8,19 @@
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using SLC_SM_IAS_ManageRelationships.Controller;
+	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
 
 	internal class ManageConnectionsModel
 	{
 		private readonly IEngine _engine;
-		private readonly DomHelper _smDomHelper;
 		private readonly DomHelper _wfDomHelper;
 
 		public ManageConnectionsModel(IEngine engine)
 		{
 			_engine = engine;
-			_smDomHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
 			_wfDomHelper = new DomHelper(_engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
 		}
 
@@ -47,7 +48,7 @@
 		/// </summary>
 		/// <param name="source">A list of Service Items to be connected in sequence.</param>
 		/// <returns>A list of Service Item pairs between which a relationship will be built. </returns>
-		public IEnumerable<(ServiceItemsSection, ServiceItemsSection)> ToSequentialPairs(IEnumerable<ServiceItemsSection> source)
+		public IEnumerable<(Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem, Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem)> ToSequentialPairs(IEnumerable<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem> source)
 		{
 			using (var enumerator = source.GetEnumerator())
 			{
@@ -63,58 +64,87 @@
 			}
 		}
 
-		public List<ServiceItemRelationshipSection> FindRelationshipsBetweenPair(
-			IServiceInstanceBase instance,
-			(ServiceItemsSection, ServiceItemsSection) pair)
+		public List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItemRelationShip> FindRelationshipsBetweenPair(
+			IServiceItem instance,
+			(Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem, Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem) pair)
 		{
-			var relationships = GetRelationships(instance);
-			var parentId = pair.Item1.ServiceItemID.ToString();
-			var childId = pair.Item2.ServiceItemID.ToString();
+			var relationships = instance.ServiceItemRelationShips;
+			var parentId = pair.Item1.ID.ToString();
+			var childId = pair.Item2.ID.ToString();
 
 			return relationships.Where(r =>
 				r.ParentServiceItem == parentId &&
 				r.ChildServiceItem == childId).ToList();
 		}
 
-		public IServiceInstanceBase GetDomInstance(Guid domId)
+		public IServiceItem GetInstance(Guid domId)
 		{
-			var instance = _smDomHelper.DomInstances
-				.Read(DomInstanceExposers.Id.Equal(domId))
-				.FirstOrDefault();
+			Models.Service service = new DataHelperService(_engine.GetUserConnection()).Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault();
+			if (service != null)
+			{
+				return new ScriptServiceItem
+				{
+					Guid = service.ID,
+					ServiceItems = service.ServiceItems,
+					ServiceItemRelationShips = service.ServiceItemsRelationships,
+				};
+			}
 
-			if (instance == null)
-				throw new InvalidOperationException($"Could not find the DOM instance with id {domId}");
+			Models.ServiceSpecification spec = new DataHelperServiceSpecification(_engine.GetUserConnection()).Read(ServiceSpecificationExposers.Guid.Equal(domId)).FirstOrDefault();
+			if (spec != null)
+			{
+				return new ScriptServiceItem
+				{
+					Guid = spec.ID,
+					ServiceItems = spec.ServiceItems,
+					ServiceItemRelationShips = spec.ServiceItemsRelationships,
+				};
+			}
 
-			return ServiceInstancesExtentions.GetTypedInstance(instance);
+			throw new InvalidOperationException($"Could not find the DOM instance with id {domId}");
 		}
 
-		public IEnumerable<ServiceItemsSection> GetServiceItems(
-			IServiceInstanceBase instance,
+		public IEnumerable<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem> GetServiceItems(
+			IServiceItem instance,
 			IEnumerable<string> serviceItemIds)
 		{
-			var items = instance.GetServiceItems();
-			return GetServiceItemsFromList(items, serviceItemIds);
+			return instance.ServiceItems.Where(x => serviceItemIds.Contains(x.ID.ToString()));
 		}
 
-		public void Update(List<ServiceItemLinkMap> linkMap, IServiceInstanceBase instance)
+		public void Update(List<ServiceItemLinkMap> linkMap, IServiceItem instance)
 		{
-			var relationships = GetRelationshipsMutable(instance);
+			var relationships = instance.ServiceItemRelationShips;
 
 			foreach (var link in linkMap.SelectMany(pair => pair.Links))
 			{
 				var existing = relationships
 					.FirstOrDefault(r => r.ParentServiceItem == link.ParentServiceItem &&
 					r.ChildServiceItem == link.ChildServiceItem &&
-					r.ParentServiceItemInterfaceID == link.ParentServiceItemInterfaceID);
+					r.ParentServiceItemInterfaceId == link.ParentServiceItemInterfaceId);
 
 				if (existing != null)
 					relationships.Remove(existing);
 
-				if (!String.IsNullOrEmpty(link.ChildServiceItemInterfaceID))
+				if (!String.IsNullOrEmpty(link.ChildServiceItemInterfaceId))
 					relationships.Add(link);
 			}
 
-			instance.Save(_smDomHelper);
+			var dataHelperService = new DataHelperService(_engine.GetUserConnection());
+			Models.Service service = dataHelperService.Read(ServiceExposers.Guid.Equal(instance.Guid)).FirstOrDefault();
+			if (service != null)
+			{
+				service.ServiceItemsRelationships = relationships;
+				dataHelperService.CreateOrUpdate(service);
+				return;
+			}
+
+			var dataHelperServiceSpecification = new DataHelperServiceSpecification(_engine.GetUserConnection());
+			Models.ServiceSpecification spec = dataHelperServiceSpecification.Read(ServiceSpecificationExposers.Guid.Equal(instance.Guid)).FirstOrDefault();
+			if (spec != null)
+			{
+				spec.ServiceItemsRelationships = relationships;
+				dataHelperServiceSpecification.CreateOrUpdate(spec);
+			}
 		}
 
 		public string CreateServiceItem(Guid domId, string definitionReference, string type)
@@ -133,48 +163,24 @@
 			return _engine.GetScriptOutput("ServiceItemId");
 		}
 
-		public IDefinitionObject ResolveDefinitionReference(IServiceInstanceBase instance, ServiceItemsSection serviceItem)
+		public IDefinitionObject ResolveDefinitionReference(IServiceItem instance, Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem serviceItem)
 		{
-			var existingRelationships = GetRelationships(instance);
-			if (serviceItem.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+			if (serviceItem.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 			{
-				return new WorkflowsInstanceAdapter(serviceItem, GetWorkflowbyName(serviceItem.DefinitionReference), existingRelationships);
+				return new WorkflowsInstanceAdapter(serviceItem, GetWorkflowbyName(serviceItem.DefinitionReference), instance.ServiceItemRelationShips);
 			}
 
-			if (serviceItem.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+			if (serviceItem.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
 			{
-				return new SRMBooking(serviceItem, existingRelationships);
+				return new SRMBooking(serviceItem, instance.ServiceItemRelationShips);
 			}
 
-			if (serviceItem.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
+			if (serviceItem.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
 			{
 				return new ServiceLink(_engine, instance);
 			}
 
 			throw new ArgumentException($"Unknown definition reference: {serviceItem.DefinitionReference}");
-		}
-
-		private IEnumerable<ServiceItemsSection> GetServiceItemsFromList(
-			IEnumerable<ServiceItemsSection> serviceItems,
-			IEnumerable<string> serviceItemIds)
-		{
-			var itemsById = serviceItems
-				.Where(n => n.ServiceItemID.HasValue)
-				.ToDictionary(n => n.ServiceItemID.Value.ToString());
-
-			return serviceItemIds
-				.Select(id => itemsById.TryGetValue(id, out var item) ? item : null)
-				.Where(item => item != null);
-		}
-
-		private IList<ServiceItemRelationshipSection> GetRelationshipsMutable(IServiceInstanceBase instance)
-		{
-			return instance.GetServiceItemRelationships();
-		}
-
-		private IList<ServiceItemRelationshipSection> GetRelationships(IServiceInstanceBase instance)
-		{
-			return GetRelationshipsMutable(instance).ToList(); // Copy
 		}
 	}
 }

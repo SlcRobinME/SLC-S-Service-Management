@@ -48,38 +48,26 @@ DATE		VERSION		AUTHOR			COMMENTS
 11/06/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
-
 namespace SLCSMDSTopologySelectedItems
 {
 	using System;
 	using System.Linq;
 	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using SLC_SM_Common.Extensions;
 
 	/// <summary>
-	/// Represents a data source.
-	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
+	///     Represents a data source.
+	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
 	[GQIMetaData(Name = "SLC_SM_DS_TopologySelectedItems")]
-	public sealed class SLCSMDSTopologySelectedItems : IGQIDataSource, IGQIInputArguments
+	public sealed class SLCSMDSTopologySelectedItems : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
 		private readonly GQIStringArgument nodeIdsArg = new GQIStringArgument("NodeIds") { IsRequired = false };
-		private string _nodeIds;
-
 		private readonly GQIStringArgument connectionIdsArg = new GQIStringArgument("ConnectionIds") { IsRequired = false };
+		private string _nodeIds;
 		private string _connectionIds;
-
-		public GQIArgument[] GetInputArguments()
-		{
-			return new GQIArgument[] { nodeIdsArg, connectionIdsArg };
-		}
-
-		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
-		{
-			_nodeIds = args.GetArgumentValue(nodeIdsArg);
-			_connectionIds = args.GetArgumentValue(connectionIdsArg);
-
-			return new OnArgumentsProcessedOutputArgs();
-		}
+		private GQIDMS _dms;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -90,38 +78,66 @@ namespace SLCSMDSTopologySelectedItems
 			};
 		}
 
+		public GQIArgument[] GetInputArguments()
+		{
+			return new GQIArgument[] { nodeIdsArg, connectionIdsArg };
+		}
+
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			string ids, type;
+			try
+			{
+				string ids;
+				string type;
 
-			if ((_nodeIds == null || !_nodeIds.Any())
-				&& (_connectionIds == null || !_connectionIds.Any()))
-			{
-				type = "None";
-				ids = String.Empty;
-			}
-			else if (_nodeIds != null && _nodeIds.Any())
-			{
-				type = "Node";
-				ids = _nodeIds;
-			}
-			else
-			{
-				type = "Connection";
-				ids = _connectionIds;
-			}
+				if ((_nodeIds == null || !_nodeIds.Any())
+				    && (_connectionIds == null || !_connectionIds.Any()))
+				{
+					type = "None";
+					ids = String.Empty;
+				}
+				else if (_nodeIds != null && _nodeIds.Any())
+				{
+					type = "Node";
+					ids = _nodeIds;
+				}
+				else
+				{
+					type = "Connection";
+					ids = _connectionIds;
+				}
 
-			return new GQIPage(new[] { BuildRow(type, ids) });
+				return new GQIPage(new[] { BuildRow(type, ids) });
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage("GQIDS|Get Topology Selected Item Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
+		}
+
+		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
+		{
+			_nodeIds = args.GetArgumentValue(nodeIdsArg);
+			_connectionIds = args.GetArgumentValue(connectionIdsArg);
+
+			return new OnArgumentsProcessedOutputArgs();
 		}
 
 		private GQIRow BuildRow(string type, string ids)
 		{
 			return new GQIRow(
-			new[]
-			{
+				new[]
+				{
 					new GQICell { Value = type },
 					new GQICell { Value = ids },
-			});
+				});
+		}
+
+		public OnInitOutputArgs OnInit(OnInitInputArgs args)
+		{
+			_dms = args.DMS;
+			return default;
 		}
 	}
 }

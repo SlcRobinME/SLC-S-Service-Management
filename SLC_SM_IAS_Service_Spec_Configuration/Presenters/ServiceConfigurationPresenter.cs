@@ -4,16 +4,11 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Text.RegularExpressions;
-
 	using DomHelpers.SlcConfigurations;
-
-	using Library;
-
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Net.Helper;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-
 	using SLC_SM_IAS_Service_Spec_Configuration.Views;
 
 	public class ServiceConfigurationPresenter
@@ -23,7 +18,6 @@
 		private readonly InteractiveController controller;
 		private readonly Models.ServiceSpecification instance;
 		private readonly ServiceConfigurationView view;
-		private DataHelpersConfigurations repoConfig;
 		private DataHelpersServiceManagement repoService;
 
 		public ServiceConfigurationPresenter(IEngine engine, InteractiveController controller, ServiceConfigurationView view, Models.ServiceSpecification instance)
@@ -33,21 +27,22 @@
 			this.view = view;
 			this.instance = instance;
 
-			view.BtnCancel.Pressed += (sender, args) => throw new ScriptAbortException("OK");
-			view.BtnShowValueDetails.Pressed += (sender, args) =>
+			view.BtnCancel.Pressed += OnCancelButtonPressed;
+			view.BtnUpdate.Pressed += OnUpdateButtonPressed;
+
+			view.BtnShowValueDetails.Pressed += OnBtnShowValueDetailsPressed;
+			view.BtnShowLifeCycleDetails.Pressed += OnBtnShowLifeCycleDetailsPressed;
+
+			view.AddParameter.Changed += (sender, args) =>
 			{
-				view.BtnShowValueDetails.Text = view.Details.IsVisible ? view.BtnShowValueDetails.Text.Replace("Hide", "Show") : view.BtnShowValueDetails.Text.Replace("Show", "Hide");
-				view.Details.IsVisible = !view.Details.IsVisible;
-			};
-			view.BtnShowLifeCycleDetails.Pressed += (sender, args) =>
-			{
-				view.BtnShowLifeCycleDetails.Text = view.LifeCycleDetails.IsVisible ? view.BtnShowLifeCycleDetails.Text.Replace("Hide", "Show") : view.BtnShowLifeCycleDetails.Text.Replace("Show", "Hide");
-				view.LifeCycleDetails.IsVisible = !view.LifeCycleDetails.IsVisible;
-			};
-			view.BtnUpdate.Pressed += (sender, args) =>
-			{
-				StoreModels();
-				throw new ScriptAbortException("OK");
+				if (args.Selected == null)
+				{
+					return;
+				}
+
+				AddConfigModel(args.Selected);
+				BuildUI(view.Details.IsVisible, view.LifeCycleDetails.IsVisible);
+				view.AddParameter.Selected = null;
 			};
 		}
 
@@ -57,10 +52,33 @@
 			Delete,
 		}
 
+		private void OnBtnShowLifeCycleDetailsPressed(object sender, EventArgs e)
+		{
+			view.BtnShowLifeCycleDetails.Text = view.LifeCycleDetails.IsVisible ? view.BtnShowLifeCycleDetails.Text.Replace("Hide", "Show") : view.BtnShowLifeCycleDetails.Text.Replace("Show", "Hide");
+			view.LifeCycleDetails.IsVisible = !view.LifeCycleDetails.IsVisible;
+		}
+
+		private void OnBtnShowValueDetailsPressed(object sender, EventArgs e)
+		{
+			view.BtnShowValueDetails.Text = view.Details.IsVisible ? view.BtnShowValueDetails.Text.Replace("Hide", "Show") : view.BtnShowValueDetails.Text.Replace("Show", "Hide");
+			view.Details.IsVisible = !view.Details.IsVisible;
+		}
+
+		private void OnCancelButtonPressed(object sender, EventArgs e)
+		{
+			throw new ScriptAbortException("OK");
+		}
+
+		private void OnUpdateButtonPressed(object sender, EventArgs e)
+		{
+			StoreModels();
+			throw new ScriptAbortException("OK");
+		}
+
 		public void LoadFromModel()
 		{
 			repoService = new DataHelpersServiceManagement(engine.GetUserConnection());
-			repoConfig = new DataHelpersConfigurations(engine.GetUserConnection());
+			var repoConfig = new DataHelpersConfigurations(engine.GetUserConnection());
 
 			var configParams = repoConfig.ConfigurationParameters.Read();
 
@@ -78,6 +96,10 @@
 					configurations.Add(dataRecord);
 				}
 			}
+
+			var parameterOptions = configParams.Select(x => new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>(x.Name, x)).OrderBy(x => x.DisplayValue).ToList();
+			parameterOptions.Insert(0, new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>("- Add -", null));
+			view.AddParameter.SetOptions(parameterOptions);
 
 			BuildUI(false, false);
 		}
@@ -210,20 +232,7 @@
 			view.LifeCycleDetails.IsVisible = showLifeCycleDetails;
 
 			view.AddWidget(new WhiteSpace(), ++row, 0);
-			var parameterOptions = repoConfig.ConfigurationParameters.Read().Select(x => new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>(x.Name, x)).OrderBy(x => x.DisplayValue).ToList();
-			parameterOptions.Insert(0, new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>("- Add -", null));
-			var parameter = new DropDown<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>(parameterOptions);
-			view.AddWidget(parameter, ++row, 1);
-			parameter.Changed += (sender, args) =>
-			{
-				if (args.Selected == null)
-				{
-					return;
-				}
-
-				AddConfigModel(args.Selected);
-				BuildUI(view.Details.IsVisible, view.LifeCycleDetails.IsVisible);
-			};
+			view.AddWidget(view.AddParameter, ++row, 1);
 
 			view.AddWidget(new WhiteSpace(), ++row, 0);
 			view.AddWidget(view.BtnUpdate, ++row, 0);
@@ -242,7 +251,9 @@
 			var isFixed = new CheckBox { IsChecked = record.ConfigurationParamValue.ValueFixed };
 			var link = new CheckBox { IsChecked = record.ConfigurationParamValue.LinkedConfigurationReference != null };
 			var na = new CheckBox { IsChecked = false };
-			var unit = new DropDown<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>(new[] { new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>("-", null) }) { IsEnabled = false, MaxWidth = 80 };
+			var unit = new DropDown<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>(
+				new[] { new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>("-", null) })
+			{ IsEnabled = false, MaxWidth = 80 };
 			var start = new Numeric { IsEnabled = false, MaxWidth = 100 };
 			var end = new Numeric { IsEnabled = false, MaxWidth = 100 };
 			var step = new Numeric { IsEnabled = false, Minimum = 0, Maximum = 1, MaxWidth = 100 };
@@ -284,7 +295,7 @@
 							double maximum = record.ConfigurationParamValue.NumberOptions.MaxRange ?? 10_000;
 							int decimalVal = Convert.ToInt32(record.ConfigurationParamValue.NumberOptions.Decimals);
 							double stepSize = record.ConfigurationParamValue.NumberOptions.StepSize ?? 1;
-							Numeric value = new Numeric(record.ConfigurationParamValue.DoubleValue ?? record.ConfigurationParamValue.NumberOptions.DefaultValue ?? 0)
+							Numeric value = new Numeric(record.ConfigurationParamValue.DoubleValue ?? record.ConfigurationParamValue.NumberOptions.DefaultValue ?? minimum)
 							{
 								Minimum = minimum,
 								Maximum = maximum,
@@ -332,16 +343,22 @@
 								record.ConfigurationParamValue.NumberOptions.StepSize = args.Value;
 							};
 							unit.Changed += (sender, args) => record.ConfigurationParamValue.NumberOptions.DefaultUnit = args.Selected;
-							value.Changed += (sender, args) => { record.ConfigurationParamValue.DoubleValue = args.Value; };
+							value.Changed += (sender, args) =>
+							{
+								if (args.Value != args.Previous)
+								{
+									record.ConfigurationParamValue.DoubleValue = args.Value;
+								}
+							};
 							view.AddWidget(value, row, 4);
 
-							bool hasValue = record.ConfigurationParamValue.DoubleValue.HasValue || record.ConfigurationParamValue.NumberOptions.DefaultValue.HasValue;
+							bool hasValue = record.ConfigurationParamValue.DoubleValue.HasValue;
 							na.IsChecked = !hasValue;
 							value.IsEnabled = hasValue;
 							na.Changed += (sender, args) =>
 							{
 								value.IsEnabled = !args.IsChecked;
-								if (!args.IsChecked)
+								if (args.IsChecked)
 								{
 									record.ConfigurationParamValue.DoubleValue = null;
 								}
@@ -366,12 +383,14 @@
 							}
 
 							values.IsEnabled = true;
-							if (record.ConfigurationParamValue.StringValue == null)
-							{
-								record.ConfigurationParamValue.StringValue = value.Selected?.Value;
-							}
 
-							value.Changed += (sender, args) => { record.ConfigurationParamValue.StringValue = args.SelectedOption.DisplayValue; };
+							value.Changed += (sender, args) =>
+							{
+								if (args.Selected != args.Previous)
+								{
+									record.ConfigurationParamValue.StringValue = args.SelectedOption.DisplayValue;
+								}
+							};
 							values.Pressed += (sender, args) =>
 							{
 								var optionsView = new DiscreteValuesView(engine);
@@ -396,13 +415,13 @@
 							};
 							view.AddWidget(value, row, 4);
 
-							bool hasValue = discretes.Count > 0;
+							bool hasValue = !String.IsNullOrEmpty(record.ConfigurationParamValue.StringValue);
 							na.IsChecked = !hasValue;
 							value.IsEnabled = hasValue;
 							na.Changed += (sender, args) =>
 							{
 								value.IsEnabled = !args.IsChecked;
-								if (!args.IsChecked)
+								if (args.IsChecked)
 								{
 									record.ConfigurationParamValue.StringValue = null;
 								}
@@ -419,6 +438,11 @@
 							};
 							value.Changed += (sender, args) =>
 							{
+								if (args.Previous == args.Value)
+								{
+									return;
+								}
+
 								if (record.ConfigurationParamValue.TextOptions?.Regex != null && !Regex.IsMatch(args.Value, record.ConfigurationParamValue.TextOptions.Regex))
 								{
 									value.ValidationState = UIValidationState.Invalid;
@@ -433,13 +457,13 @@
 							};
 							view.AddWidget(value, row, 4);
 
-							bool hasValue = !String.IsNullOrEmpty(record.ConfigurationParamValue.StringValue) || !String.IsNullOrEmpty(record.ConfigurationParamValue.TextOptions?.Default);
+							bool hasValue = !String.IsNullOrEmpty(record.ConfigurationParamValue.StringValue);
 							na.IsChecked = !hasValue;
 							value.IsEnabled = hasValue;
 							na.Changed += (sender, args) =>
 							{
 								value.IsEnabled = !args.IsChecked;
-								if (!args.IsChecked)
+								if (args.IsChecked)
 								{
 									record.ConfigurationParamValue.StringValue = null;
 								}
@@ -470,25 +494,9 @@
 			view.AddWidget(delete, row, 15);
 		}
 
-		private List<Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>> GetUnits(Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.NumberParameterOptions numberValueOptions, Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter parameter)
-		{
-			var units = new List<Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>>();
-			if (numberValueOptions?.DefaultUnit != null)
-			{
-				units.AddRange(numberValueOptions.Units.Select(x => new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>(x.Name, x)));
-			}
-			else if (parameter.NumberOptions?.DefaultUnit != null)
-			{
-				units.AddRange(parameter.NumberOptions.Units.Select(x => new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>(x.Name, x)));
-			}
-
-			units = units.OrderBy(x => x.DisplayValue).ToList();
-
-			units.Insert(0, new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>("-", null));
-			return units;
-		}
-
-		private Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit GetDefaultUnit(Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.NumberParameterOptions numberValueOptions, Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter parameter)
+		private Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit GetDefaultUnit(
+			Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.NumberParameterOptions numberValueOptions,
+			Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter parameter)
 		{
 			if (numberValueOptions != null)
 			{
@@ -501,6 +509,26 @@
 			}
 
 			return null;
+		}
+
+		private List<Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>> GetUnits(
+			Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.NumberParameterOptions numberValueOptions,
+			Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter parameter)
+		{
+			var units = new List<Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>>();
+			if (numberValueOptions?.Units != null)
+			{
+				units.AddRange(numberValueOptions.Units.Select(x => new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>(x.Name, x)));
+			}
+			else if (parameter.NumberOptions?.Units != null)
+			{
+				units.AddRange(parameter.NumberOptions.Units.Select(x => new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>(x.Name, x)));
+			}
+
+			units = units.OrderBy(x => x.DisplayValue).ToList();
+
+			units.Insert(0, new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationUnit>("-", null));
+			return units;
 		}
 
 		private sealed class DataRecord

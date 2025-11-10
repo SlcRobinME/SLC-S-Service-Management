@@ -1,8 +1,11 @@
 namespace SLCSMDSGetServiceOrderItemButtons
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Core.DataMinerSystem.Common;
+	using SLC_SM_Common.Extensions;
 
 	/// <summary>
 	///     Represents a data source.
@@ -20,6 +23,8 @@ namespace SLCSMDSGetServiceOrderItemButtons
 			ItemStates.newState, ItemStates.acknowledgedState, ItemStates.inprogressState, ItemStates.rejectState, ItemStates.failedState, ItemStates.partialState, ItemStates.heldState,
 			ItemStates.pendingState, ItemStates.completedState, ItemStates.assesscancellationState, ItemStates.pendingcancellationState, ItemStates.cancelledState,
 		};
+
+		private GQIDMS _dms;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -42,25 +47,33 @@ namespace SLCSMDSGetServiceOrderItemButtons
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			ItemState currentState = itemStateList.Single(state => state.Id == currentStateIdInput);
-
-			List<ButtonConfig> activeButtons = ButtonCollection.ButtonList.Where(button => button.ApplicableStates.Contains(currentState)).ToList();
-
-			List<GQIRow> rows = activeButtons.Select(
-					button => new GQIRow(
-						new[]
-						{
-							new GQICell { Value = button.Name },
-							new GQICell { Value = button.ScriptToExecute },
-							new GQICell { Value = button.PreviousState.NameId },
-							new GQICell { Value = button.NextState.NameId },
-						}))
-				.ToList();
-
-			return new GQIPage(rows.ToArray())
+			try
 			{
-				HasNextPage = false,
-			};
+				ItemState currentState = itemStateList.Single(state => state.Id == currentStateIdInput);
+
+				List<ButtonConfig> activeButtons = ButtonCollection.ButtonList.Where(button => button.ApplicableStates.Contains(currentState)).ToList();
+
+				List<GQIRow> rows = activeButtons.Select(
+						button => new GQIRow(
+							new[]
+							{
+								new GQICell { Value = button.Name },
+								new GQICell { Value = button.ScriptToExecute },
+								new GQICell { Value = button.PreviousState.NameId },
+								new GQICell { Value = button.NextState.NameId },
+							}))
+					.ToList();
+
+				return new GQIPage(rows.ToArray())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage("GQIDS|Get Service Order Item Buttons Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -72,11 +85,7 @@ namespace SLCSMDSGetServiceOrderItemButtons
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			return default;
-		}
-
-		public OnPrepareFetchOutputArgs OnPrepareFetch(OnPrepareFetchInputArgs args)
-		{
+			_dms = args.DMS;
 			return default;
 		}
 

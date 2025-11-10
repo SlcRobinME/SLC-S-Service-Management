@@ -2,16 +2,15 @@
 {
 	using System.Collections.Generic;
 	using System.Linq;
-
-	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 
 	internal class SRMBooking : IDefinitionObject
 	{
-		private readonly IList<ServiceItemRelationshipSection> _existingRelationships;
-		private readonly ServiceItemsSection _serviceItem;
+		private readonly IList<Models.ServiceItemRelationShip> _existingRelationships;
+		private readonly Models.ServiceItem _serviceItem;
 
-		public SRMBooking(ServiceItemsSection serviceItem, IList<ServiceItemRelationshipSection> existingRelationships)
+		public SRMBooking(Models.ServiceItem serviceItem, IList<Models.ServiceItemRelationShip> existingRelationships)
 		{
 			_serviceItem = serviceItem;
 			_existingRelationships = existingRelationships;
@@ -19,7 +18,7 @@
 
 		IEnumerable<NodesSection> IDefinitionObject.GetAvailableInputs()
 		{
-			return _existingRelationships.Any(r => r.ChildServiceItem == _serviceItem.ServiceItemID.ToString())
+			return _existingRelationships.Any(r => r.ChildServiceItem == _serviceItem.ID.ToString())
 				? Enumerable.Empty<NodesSection>()
 				: new[] { new NodesSection { NodeID = "0", NodeAlias = "Default SRM Input" } };
 		}

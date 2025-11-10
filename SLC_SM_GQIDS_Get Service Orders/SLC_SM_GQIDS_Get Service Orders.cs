@@ -8,10 +8,9 @@ namespace SLC_SM_GQIDS_Get_Service_Orders
 
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganization;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
-
+	using SLC_SM_Common.Extensions;
 	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
 
 	// Required to mark the interface as a GQI data source
@@ -37,12 +36,6 @@ namespace SLC_SM_GQIDS_Get_Service_Orders
 
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
 		private GQIDMS _dms;
-
-		public DMSMessage GenerateInformationEvent(string message)
-		{
-			var generateAlarmMessage = new GenerateAlarmMessage(GenerateAlarmMessage.AlarmSeverity.Information, message) { Status = GenerateAlarmMessage.AlarmStatus.Cleared };
-			return _dms.SendMessage(generateAlarmMessage);
-		}
 
 		public GQIColumn[] GetColumns()
 		{
@@ -74,8 +67,8 @@ namespace SLC_SM_GQIDS_Get_Service_Orders
 			}
 			catch (Exception e)
 			{
-				GenerateInformationEvent(e.ToString());
-				return new GQIPage(Array.Empty<GQIRow>());
+				_dms.GenerateInformationMessage("GQIDS|Get Service Orders Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
 		}
 

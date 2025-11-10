@@ -1,61 +1,53 @@
 ﻿namespace Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions
 {
-	using System.IO;
+	using System;
 	using System.Text;
 
 	public static class StringExtensions
 	{
-		public static string Wrap(this string text, int width)
+		public static string Wrap(this string text, int lineWidth)
 		{
-			var result = new StringBuilder();
-
-			using (var sr = new StringReader(text))
+			if (String.IsNullOrEmpty(text) || lineWidth < 1)
 			{
-				string line;
-				while ((line = sr.ReadLine()) != null)
+				return text;
+			}
+
+			var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+			var sb = new StringBuilder();
+
+			foreach (var originalLine in lines)
+			{
+				var words = originalLine.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+				var currentLine = new StringBuilder();
+
+				foreach (var word in words)
 				{
-					if (result.Length > 0)
+					// If adding this word would exceed the limit, start a new line
+					if (currentLine.Length + word.Length > lineWidth)
 					{
-						result.AppendLine();
+						if (currentLine.Length > 0)
+						{
+							sb.AppendLine(currentLine.ToString().TrimEnd());
+						}
+
+						currentLine.Clear();
 					}
 
-					result.Append(WrapLine(line, width));
+					currentLine.Append(word + " ");
 				}
-			}
 
-			return result.ToString();
-		}
-
-		public static string WrapLine(this string text, int width)
-		{
-			var result = new StringBuilder();
-			var line = new StringBuilder();
-
-			var words = text.Split(' ');
-
-			foreach (var word in words)
-			{
-				if (line.Length + word.Length >= width)
+				// Add remaining text in the current line
+				if (currentLine.Length > 0)
 				{
-					if (result.Length > 0)
-						result.AppendLine();
-					result.Append(line.ToString());
-					line.Clear();
+					sb.AppendLine(currentLine.ToString().TrimEnd());
 				}
-
-				if (line.Length > 0)
-					line.Append(" ");
-				line.Append(word);
+				else
+				{
+					sb.AppendLine(); // preserve empty lines
+				}
 			}
 
-			if (line.Length > 0)
-			{
-				if (result.Length > 0)
-					result.AppendLine();
-				result.Append(line.ToString());
-			}
-
-			return result.ToString();
+			return sb.ToString().TrimEnd(); // remove trailing newline
 		}
 	}
 }

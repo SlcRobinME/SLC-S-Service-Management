@@ -1,4 +1,4 @@
-﻿namespace SLC_SM_AS_SetIcon
+﻿namespace SLC_SM_AS_DeleteServiceCategory
 {
 	using System;
 	using Skyline.DataMiner.Automation;

@@ -52,15 +52,14 @@ DATE		VERSION		AUTHOR			COMMENTS
 namespace SLC_SM_IAS_Service_Order_Configuration
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-	using Newtonsoft.Json;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
-	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using SLC_SM_IAS_Service_Order_Configuration.Presenters;
 	using SLC_SM_IAS_Service_Order_Configuration.Views;
 
@@ -120,7 +119,7 @@ namespace SLC_SM_IAS_Service_Order_Configuration
 			// Input
 			Guid domId = _engine.ReadScriptParamFromApp<Guid>("DOM ID");
 
-			var instance = new DataHelperServiceOrderItem(_engine.GetUserConnection()).Read().Find(x => x.ID == domId)
+			var instance = new DataHelperServiceOrderItem(_engine.GetUserConnection()).Read(ServiceOrderItemExposers.Guid.Equal(domId)).FirstOrDefault()
 				?? throw new InvalidOperationException($"Instance with ID '{domId}' does not exist");
 
 			// Model-View-Presenter

@@ -3,12 +3,15 @@ namespace SLCSMDSGetServicesByCharacteristic
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Library;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using SLC_SM_Common.Extensions;
+	using AlarmLevel = Skyline.DataMiner.Core.DataMinerSystem.Common.AlarmLevel;
 
 	/// <summary>
 	/// Represents a data source.
@@ -28,7 +31,6 @@ namespace SLCSMDSGetServicesByCharacteristic
 		private GQIDMS gqiDms;
 		private IConnection _connection;
 		private IDms _dms;
-		private IDma _agent;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -57,12 +59,18 @@ namespace SLCSMDSGetServicesByCharacteristic
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			// Define data source rows
-			// See: https://aka.dataminer.services/igqidatasource-getnextpage
-			return new GQIPage(BuildPage())
+			try
 			{
-				HasNextPage = false,
-			};
+				return new GQIPage(BuildPage())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				gqiDms.GenerateInformationMessage("GQIDS|Get Services By Characteristic Exception: " + e);
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -80,11 +88,6 @@ namespace SLCSMDSGetServicesByCharacteristic
 
 			_connection = gqiDms.GetConnection();
 			_dms = _connection.GetDms();
-			_agent = _dms.GetAgents().FirstOrDefault();
-			if (_agent == null)
-			{
-				throw new InvalidOperationException("This operation is supported only on single agent dataminer systems");
-			}
 
 			_serviceHelper = new DataHelpersServiceManagement(args.DMS.GetConnection());
 
@@ -140,27 +143,12 @@ namespace SLCSMDSGetServicesByCharacteristic
 
 		private AlarmLevel TryGetAlarmLevel(Models.Service service)
 		{
-			if (_agent.ServiceExistsSafe(service.Name))
+			if (_dms.ServiceExistsSafe(service.Name, out IDmsService srv))
 			{
-				return _agent.GetService(service.Name).GetState().Level;
+				return srv.GetState().Level;
 			}
 
 			return AlarmLevel.Undefined;
-		}
-	}
-
-	public static class DmaExtensions
-	{
-		public static bool ServiceExistsSafe(this IDma agent, string serviceName)
-		{
-			try
-			{
-				return agent.ServiceExists(serviceName);
-			}
-			catch
-			{
-				return false;
-			}
 		}
 	}
 }

@@ -48,43 +48,34 @@ DATE		VERSION		AUTHOR			COMMENTS
 26/06/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
-
 namespace SLCSMDSGetTopologyNodes
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using DomHelpers.SlcProperties;
 	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
-
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+	using SLC_SM_Common.Extensions;
+	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
 
 	/// <summary>
-	/// Represents a data source.
-	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
+	///     Represents a data source.
+	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
 	[GQIMetaData(Name = "SLC_SM_DS_GetTopologyNodes")]
 	public sealed class SLCSMDSGetTopologyNodes : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = true };
 		private Guid _domId;
-
 		private GQIDMS _dms;
-
-		public OnInitOutputArgs OnInit(OnInitInputArgs args)
-		{
-			// Initialize the data source
-			// See: https://aka.dataminer.services/igqioninit-oninit
-			_dms = args.DMS;
-
-			return default;
-		}
 
 		public GQIColumn[] GetColumns()
 		{
@@ -101,20 +92,21 @@ namespace SLCSMDSGetTopologyNodes
 			};
 		}
 
+		public GQIArgument[] GetInputArguments()
+		{
+			return new GQIArgument[]
+			{
+				domIdArg,
+			};
+		}
+
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
 			try
 			{
-				var smDomHelper = new DomHelper(_dms.SendMessages, SlcServicemanagementIds.ModuleId);
-
-				var domInstance = smDomHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(_domId)).FirstOrDefault();
-				if (domInstance == null)
-					throw new InvalidOperationException($"Could not find DOM instance with id {_domId}");
-
-				var serviceItems = ServiceInstancesExtentions.GetTypedInstance(domInstance)
-					.GetServiceItems()
-					.Where(i => !i.IsEmpty && !String.IsNullOrEmpty(i.Label))
-					.ToList();
+				var serviceItems = new DataHelperService(_dms.GetConnection()).Read(ServiceExposers.Guid.Equal(_domId)).FirstOrDefault()?.ServiceItems.Where(i => !String.IsNullOrEmpty(i.Label)).ToList()
+				                   ?? new DataHelperServiceSpecification(_dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(_domId)).FirstOrDefault()?.ServiceItems.Where(i => !String.IsNullOrEmpty(i.Label)).ToList()
+				                   ?? new List<Models.ServiceItem>();
 
 				var workflowPropertyValues = new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId)
 					.DomInstances
@@ -123,7 +115,7 @@ namespace SLCSMDSGetTopologyNodes
 					.ToArray();
 
 				var workflowsFilter = serviceItems
-					.Where(item => item.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+					.Where(item => item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 					.Select(item => DomInstanceExposers.Name.Equal(item.DefinitionReference))
 					.Aggregate<FilterElement<DomInstance>, FilterElement<DomInstance>>(null, (acc, next) => acc == null ? next : acc.OR(next));
 
@@ -134,7 +126,7 @@ namespace SLCSMDSGetTopologyNodes
 					: Enumerable.Empty<DomInstance>().ToList();
 
 				var messages = serviceItems
-					.Where(item => item.ServiceItemType.Value == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+					.Where(item => item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
 					.Select(item => new GetLiteElementInfo { NameFilter = item.DefinitionReference })
 					.Cast<DMSMessage>()
 					.ToArray();
@@ -167,7 +159,7 @@ namespace SLCSMDSGetTopologyNodes
 				}
 
 				var rows = new List<GQIRow>();
-				foreach (ServiceItemsSection i in serviceItems)
+				foreach (var i in serviceItems)
 				{
 					rows.Add(BuildRow(i, GetReferenceId(i, elements, workflows), GetIcon(i, elements, workflows, workflowPropertyValues, elementIcons)));
 				}
@@ -176,56 +168,53 @@ namespace SLCSMDSGetTopologyNodes
 			}
 			catch (Exception e)
 			{
-				_dms.SendMessage(new GenerateAlarmMessage(GenerateAlarmMessage.AlarmSeverity.Information, "Topology Nodes Exception: " + e) { Status = GenerateAlarmMessage.AlarmStatus.Cleared });
+				_dms.GenerateInformationMessage("GQIDS|Get Topology Nodes Exception: " + e);
 				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
-		}
-
-		public GQIArgument[] GetInputArguments()
-		{
-			return new GQIArgument[]
-			{
-				domIdArg,
-			};
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
 			if (!Guid.TryParse(args.GetArgumentValue(domIdArg), out _domId))
+			{
 				_domId = Guid.Empty;
+			}
 
 			return new OnArgumentsProcessedOutputArgs();
 		}
 
-		private string GetReferenceId(ServiceItemsSection item, LiteElementInfoEvent[] elements, List<DomInstance> workflows)
+		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
-			{
-				var element = elements.FirstOrDefault(e => e.Name == item.DefinitionReference);
-				return element != null ? $"{element.DataMinerID}/{element.ElementID}" : String.Empty;
-			}
+			// Initialize the data source
+			// See: https://aka.dataminer.services/igqioninit-oninit
+			_dms = args.DMS;
 
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
-			{
-				return workflows.FirstOrDefault(i => i.Name == item.DefinitionReference)?.ID.Id.ToString() ?? String.Empty;
-			}
+			return default;
+		}
 
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
-			{
-				return new DataHelperLink(_dms.GetConnection()).Read().Find(x => x.ParentID == _domId.ToString())?.ChildID ?? String.Empty;
-			}
-
-			throw new InvalidOperationException("Unsupported service item type");
+		private GQIRow BuildRow(Models.ServiceItem serviceItem, string referenceId, string icon)
+		{
+			return new GQIRow(
+				Guid.NewGuid().ToString(),
+				new[]
+				{
+					new GQICell { Value = serviceItem.ID.ToString() },
+					new GQICell { Value = serviceItem.Type.ToString() },
+					new GQICell { Value = serviceItem.Label ?? String.Empty },
+					new GQICell { Value = serviceItem.DefinitionReference ?? String.Empty },
+					new GQICell { Value = referenceId ?? String.Empty },
+					new GQICell { Value = icon ?? String.Empty },
+				});
 		}
 
 		private string GetIcon(
-			ServiceItemsSection item,
+			Models.ServiceItem item,
 			LiteElementInfoEvent[] elements,
 			List<DomInstance> workflows,
 			PropertyValuesInstance[] propertyValues,
 			PropertyChangeEventMessage[] icons)
 		{
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
 			{
 				var element = elements.FirstOrDefault(e => e.Name == item.DefinitionReference);
 				if (element == null)
@@ -234,11 +223,12 @@ namespace SLCSMDSGetTopologyNodes
 				}
 
 				return icons
-					.FirstOrDefault(i => i.DataMinerID == element.DataMinerID && i.ElementID == element.ElementID)?
+					.FirstOrDefault(i => i.DataMinerID == element.DataMinerID && i.ElementID == element.ElementID)
+					?
 					.Value ?? String.Empty;
 			}
 
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 			{
 				var workflow = workflows.FirstOrDefault(i => i.Name == item.DefinitionReference);
 				if (workflow == null)
@@ -247,11 +237,13 @@ namespace SLCSMDSGetTopologyNodes
 				}
 
 				return propertyValues
-					.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())?
-					.PropertyValues.FirstOrDefault(v => v.PropertyName == "Icon")?.Value ?? String.Empty;
+					.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())
+					?
+					.PropertyValues.FirstOrDefault(v => v.PropertyName == "Icon")
+					?.Value ?? String.Empty;
 			}
 
-			if (item.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
 			{
 				return String.Empty;
 			}
@@ -259,18 +251,25 @@ namespace SLCSMDSGetTopologyNodes
 			throw new InvalidOperationException("Unsupported service item type");
 		}
 
-		private GQIRow BuildRow(ServiceItemsSection serviceItem, string referenceId, string icon)
+		private string GetReferenceId(Models.ServiceItem item, LiteElementInfoEvent[] elements, List<DomInstance> workflows)
 		{
-			return new GQIRow(
-				new[]
-				{
-					new GQICell { Value = serviceItem.ServiceItemID.ToString() },
-					new GQICell { Value = serviceItem.ServiceItemType.ToString() },
-					new GQICell { Value = serviceItem.Label ?? String.Empty },
-					new GQICell { Value = serviceItem.DefinitionReference ?? String.Empty },
-					new GQICell { Value = referenceId ?? String.Empty },
-					new GQICell { Value = icon ?? String.Empty },
-				});
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+			{
+				var element = elements.FirstOrDefault(e => e.Name == item.DefinitionReference);
+				return element != null ? $"{element.DataMinerID}/{element.ElementID}" : String.Empty;
+			}
+
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+			{
+				return workflows.FirstOrDefault(i => i.Name == item.DefinitionReference)?.ID.Id.ToString() ?? String.Empty;
+			}
+
+			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service)
+			{
+				return new DataHelperLink(_dms.GetConnection()).Read().Find(x => x.ParentID == _domId.ToString())?.ChildID ?? String.Empty;
+			}
+
+			throw new InvalidOperationException("Unsupported service item type");
 		}
 	}
 }

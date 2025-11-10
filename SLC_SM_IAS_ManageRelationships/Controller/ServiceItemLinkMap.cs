@@ -1,22 +1,21 @@
 ﻿namespace SLC_SM_IAS_ManageRelationships.Controller
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 
 	public class ServiceItemLinkMap
 	{
-		public ServiceItemsSection SourceNode { get; set; }
+		public Models.ServiceItem SourceNode { get; set; }
 
-		public ServiceItemsSection DestinationNode { get; set; }
+		public Models.ServiceItem DestinationNode { get; set; }
 
 		public IEnumerable<NodesSection> AvailableSources { get; set; }
 
 		public IEnumerable<NodesSection> AvailableDestinations { get; set; }
 
-		public List<ServiceItemRelationshipSection> Links { get; set; }
+		public List<Models.ServiceItemRelationShip> Links { get; set; }
 
 		public bool HasSources => AvailableSources.Any();
 
@@ -30,27 +29,27 @@
 
 		public bool HasLink(NodesSection source, NodesSection destination)
 		{
-			return Links.Any(l => l.ParentServiceItemInterfaceID == source.NodeID && l.ChildServiceItemInterfaceID == destination.NodeID);
+			return Links.Any(l => l.ParentServiceItemInterfaceId == source.NodeID && l.ChildServiceItemInterfaceId == destination.NodeID);
 		}
 
 		public void AddLink(string sourceInterface, string destinationInterface)
 		{
-			Links.Add(new ServiceItemRelationshipSection
+			Links.Add(new Models.ServiceItemRelationShip
 			{
 				Type = "Connection",
-				ParentServiceItem = SourceNode.ServiceItemID.ToString(),
-				ParentServiceItemInterfaceID = sourceInterface,
-				ChildServiceItem = DestinationNode.ServiceItemID.ToString(),
-				ChildServiceItemInterfaceID = destinationInterface,
+				ParentServiceItem = SourceNode.ID.ToString(),
+				ParentServiceItemInterfaceId = sourceInterface,
+				ChildServiceItem = DestinationNode.ID.ToString(),
+				ChildServiceItemInterfaceId = destinationInterface,
 			});
 		}
 
-		public ServiceItemRelationshipSection FindLinkBySource(string sourceInterface)
+		public Models.ServiceItemRelationShip FindLinkBySource(string sourceInterface)
 		{
-			return Links.FirstOrDefault(l => l.ParentServiceItemInterfaceID == sourceInterface);
+			return Links.FirstOrDefault(l => l.ParentServiceItemInterfaceId == sourceInterface);
 		}
 
-		public void RemoveLink(ServiceItemRelationshipSection link)
+		public void RemoveLink(Models.ServiceItemRelationShip link)
 		{
 			Links.Remove(link);
 		}

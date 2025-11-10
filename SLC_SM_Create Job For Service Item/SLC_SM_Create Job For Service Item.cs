@@ -51,24 +51,21 @@ DATE        VERSION        AUTHOR            COMMENTS
 namespace SLCSMCreateJobForServiceItem
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
-
-	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
-	using Newtonsoft.Json;
 
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Jobs;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.ResourceManager.Objects;
-	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Relationships;
 	using Skyline.DataMiner.Utils.MediaOps.Helpers.Workflows;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
-	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS.Dialogs;
 	using OutputData = Skyline.DataMiner.Utils.MediaOps.Common.IOData.Scheduling.Scripts.JobHandler.OutputData;
 
 	/// <summary>
@@ -125,27 +122,21 @@ namespace SLCSMCreateJobForServiceItem
 				throw new InvalidOperationException("No DOM ID provided as input to the script");
 			}
 
-			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
-
-			var domInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(domId)).FirstOrDefault()
-							  ?? throw new InvalidOperationException($"No DOM Instance with ID '{domId}' found on the system!");
-
 			string label = engine.ReadScriptParamFromApp("Service Item Label");
 
-			var instance = ServiceInstancesExtentions.GetTypedInstance(domInstance);
-			ServiceItemsSection serviceItemsSection = instance.GetServiceItems().SingleOrDefault(s => s.Label == label);
-			if (serviceItemsSection == null)
-			{
-				throw new InvalidOperationException($"Could not find the service item section with label {label}");
-			}
+			var dataHelperService = new DataHelperService(engine.GetUserConnection());
+			var instance = dataHelperService.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault()
+			               ?? throw new InvalidOperationException($"No Service exists with ID '{domId}'");
+			var serviceItemsSection = instance.ServiceItems.SingleOrDefault(s => s.Label == label)
+				?? throw new InvalidOperationException($"Could not find the service item section with label '{label}'");
 
 			var workflowHelper = new WorkflowHelper(engine);
 			var workflow = workflowHelper.GetAllWorkflows().FirstOrDefault(x => x.Name == serviceItemsSection.DefinitionReference)
 						   ?? throw new InvalidOperationException($"No Workflow found on the system with name '{serviceItemsSection.DefinitionReference}'");
 
-			if (instance.GetEndTime() < DateTime.UtcNow)
+			if (instance.EndTime.HasValue && instance.EndTime.Value < DateTime.UtcNow)
 			{
-				throw new InvalidOperationException($"End time lies in the past ({instance.GetEndTime()}), not possible to create a job for a past event");
+				throw new InvalidOperationException($"End time lies in the past ({instance.EndTime}), not possible to create a job for a past event");
 			}
 
 			engine.Log("Gonna create job configuration");
@@ -178,26 +169,31 @@ namespace SLCSMCreateJobForServiceItem
 
 			var jobId = outputData.DomJobId;
 
-			var transitionJobToTentativeInputData = new ExecuteJobAction
-			{
-				DomJobId = jobId,
-				JobAction = JobAction.SaveAsTentative,
-			};
-			transitionJobToTentativeInputData.SendToJobHandler(engine, true);
-
 			var domWorkflowHelper = new DomHelper(engine.SendSLNetMessages, SlcWorkflowIds.ModuleId);
 			var job = FindJob(domWorkflowHelper, jobId);
 
+			if (job.Status == SlcWorkflowIds.Behaviors.Job_Behavior.StatusesEnum.Draft)
+			{
+				var transitionJobToTentativeInputData = new ExecuteJobAction
+				{
+					DomJobId = jobId,
+					JobAction = JobAction.SaveAsTentative,
+				};
+				transitionJobToTentativeInputData.SendToJobHandler(engine, true);
+
+				job = FindJob(domWorkflowHelper, jobId);
+			}
+
 			CreateLink(engine, instance, job);
-			TrySetMonitoringSettingsForJob(instance, job);
+			TrySetMonitoringSettingsForJob(job);
 
 			job.Save(domWorkflowHelper);
 
 			serviceItemsSection.ImplementationReference = jobId.ToString();
-			AddOrUpdateServiceItemToInstance(domHelper, instance, serviceItemsSection, label);
+			AddOrUpdateServiceItemToInstance(dataHelperService, instance, serviceItemsSection, label);
 		}
 
-		private void CreateLink(IEngine engine, IServiceInstanceBase instance, JobsInstance job)
+		private void CreateLink(IEngine engine, Models.Service instance, JobsInstance job)
 		{
 			var relationshipHelper = new RelationshipsHelper(engine);
 
@@ -208,18 +204,18 @@ namespace SLCSMCreateJobForServiceItem
 			relationshipHelper.CreateLink(linkDetailsConfiguration);
 		}
 
-		private LinkConfiguration CreateLinkDetailsConfiguration(IServiceInstanceBase instance, JobsInstance job, Guid serviceObjectType, Guid jobObjectType)
+		private LinkConfiguration CreateLinkDetailsConfiguration(Models.Service instance, JobsInstance job, Guid serviceObjectType, Guid jobObjectType)
 		{
-			var linkConfiguration = new LinkConfiguration()
+			var linkConfiguration = new LinkConfiguration
 			{
-				Child = new LinkDetailsConfiguration()
+				Child = new LinkDetailsConfiguration
 				{
 					DomObjectTypeId = serviceObjectType,
-					ObjectId = instance.GetId().Id.ToString(),
-					ObjectName = instance.GetName(),
-					URL = "Link to open the service panel on service iventory app",
+					ObjectId = instance.ID.ToString(),
+					ObjectName = instance.Name,
+					URL = "Link to open the service panel on service inventory app",
 				},
-				Parent = new LinkDetailsConfiguration()
+				Parent = new LinkDetailsConfiguration
 				{
 					DomObjectTypeId = jobObjectType,
 					ObjectId = job.ID.Id.ToString(),
@@ -230,17 +226,17 @@ namespace SLCSMCreateJobForServiceItem
 			return linkConfiguration;
 		}
 
-		private CreateJobAction CreateJobConfiguration(IServiceInstanceBase instance, ServiceItemsSection serviceItemsSection, Workflow workflow)
+		private CreateJobAction CreateJobConfiguration(Models.Service instance, Models.ServiceItem serviceItemsSection, Workflow workflow)
 		{
 			return new CreateJobAction
 			{
-				Name = $"{instance.GetName()} | {serviceItemsSection.Label}",
-				Description = $"{instance.GetId()} | {serviceItemsSection.Label}",
+				Name = $"{instance.Name} | {serviceItemsSection.Label}",
+				Description = $"{instance.ID} | {serviceItemsSection.Label}",
 				DomWorkflowId = workflow.Id,
 				Source = "Scheduling",
 				DesiredJobStatus = DesiredJobStatus.Tentative,
-				Start = instance.GetStartTime() ?? throw new InvalidOperationException("No Start Time configured to create the job from"),
-				End = instance.GetEndTime() ?? ReservationInstance.PermanentEnd,
+				Start = instance.StartTime ?? throw new InvalidOperationException("No Start Time configured to create the job from"),
+				End = instance.EndTime ?? ReservationInstance.PermanentEnd,
 			};
 		}
 
@@ -249,7 +245,7 @@ namespace SLCSMCreateJobForServiceItem
 			var objectType = relationshipHelper.GetObjectType(name);
 			if (objectType == null)
 			{
-				return relationshipHelper.CreateObjectType(new ObjectTypeConfiguration()
+				return relationshipHelper.CreateObjectType(new ObjectTypeConfiguration
 				{
 					Name = name,
 				});
@@ -258,7 +254,7 @@ namespace SLCSMCreateJobForServiceItem
 			return objectType.Id;
 		}
 
-		private void TrySetMonitoringSettingsForJob(IServiceInstanceBase instance, JobsInstance job)
+		private void TrySetMonitoringSettingsForJob(JobsInstance job)
 		{
 			job.MonitoringSettings.AtJobStart = SlcWorkflowIds.Enums.Atjobstart.CreateServiceAtWorkflowStart;
 			job.MonitoringSettings.AtJobEnd = SlcWorkflowIds.Enums.Atjobend.DeleteServiceIfOneExists;
@@ -276,21 +272,21 @@ namespace SLCSMCreateJobForServiceItem
 			return default;
 		}
 
-		private void AddOrUpdateServiceItemToInstance(DomHelper helper, IServiceInstanceBase instance, ServiceItemsSection newSection, string oldLabel)
+		private void AddOrUpdateServiceItemToInstance(DataHelperService helper, Models.Service instance, Models.ServiceItem newSection, string oldLabel)
 		{
-			var oldItem = instance.GetServiceItems().FirstOrDefault(x => x.Label == oldLabel);
+			var oldItem = instance.ServiceItems.FirstOrDefault(x => x.Label == oldLabel);
 			if (oldItem != null)
 			{
-				instance.GetServiceItems().Remove(oldItem);
+				instance.ServiceItems.Remove(oldItem);
 			}
 			else
 			{
-				long[] ids = instance.GetServiceItems().Where(x => x.ServiceItemID.HasValue).Select(x => x.ServiceItemID.Value).OrderBy(x => x).ToArray();
-				newSection.ServiceItemID = ids.Any() ? ids.Max() + 1 : 0;
+				long[] ids = instance.ServiceItems.Select(x => x.ID).OrderBy(x => x).ToArray();
+				newSection.ID = ids.Any() ? ids.Max() + 1 : 0;
 			}
 
-			instance.GetServiceItems().Add(newSection);
-			instance.Save(helper);
+			instance.ServiceItems.Add(newSection);
+			helper.CreateOrUpdate(instance);
 		}
 	}
 }

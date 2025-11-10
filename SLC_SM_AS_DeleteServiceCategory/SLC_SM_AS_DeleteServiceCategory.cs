@@ -48,30 +48,24 @@ DATE		VERSION		AUTHOR			COMMENTS
 28/08/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
-
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using DomHelpers.SlcServicemanagement;
-using Skyline.DataMiner.Automation;
-using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-using Skyline.DataMiner.Net.Messages.SLDataGateway;
-using SLC_SM_AS_SetIcon;
-
-namespace SLCSMASDeleteServiceCategory
+namespace SLC_SM_AS_DeleteServiceCategory
 {
+	using System;
+	using System.Linq;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+
 	/// <summary>
-	/// Represents a DataMiner Automation script.
+	///     Represents a DataMiner Automation script.
 	/// </summary>
 	public class Script
 	{
 		private ScriptData _scriptData;
-		private DomHelper _domHelper;
 
 		/// <summary>
-		/// The script entry point.
+		///     The script entry point.
 		/// </summary>
 		/// <param name="engine">Link with SLAutomation process.</param>
 		public void Run(IEngine engine)
@@ -110,18 +104,11 @@ namespace SLCSMASDeleteServiceCategory
 		private void RunSafe(IEngine engine)
 		{
 			_scriptData = new ScriptData(engine);
-			_domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
 
-			var filter = DomInstanceExposers.Id.Equal(_scriptData.DomId);
-			var instance = _domHelper.DomInstances.Read(filter).FirstOrDefault();
-
-			if (instance == null)
-			{
-				throw new Exception($"Could not find instance with id {_scriptData.DomId}");
-			}
-
-			var serviceCategory = new ServiceCategoryInstance(instance);
-			serviceCategory.Delete(_domHelper);
+			var dataHelper = new DataHelperServiceCategory(engine.GetUserConnection());
+			var serviceCategory = dataHelper.Read(ServiceCategoryExposers.Guid.Equal(_scriptData.DomId)).FirstOrDefault()
+			                      ?? throw new InvalidOperationException($"Could not find instance with ID {_scriptData.DomId}");
+			dataHelper.TryDelete(serviceCategory);
 		}
 	}
 }

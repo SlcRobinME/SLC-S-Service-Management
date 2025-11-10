@@ -54,16 +54,8 @@ namespace SLCSMDemo
 	using System;
 	using System.Linq;
 
-	using DomHelpers.SlcConfigurations;
-	using DomHelpers.SlcServicemanagement;
-
-	using Library;
-
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-
-	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
