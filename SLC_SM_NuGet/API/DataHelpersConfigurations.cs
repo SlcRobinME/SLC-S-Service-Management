@@ -21,6 +21,12 @@
 			TextParameterOptions = new DataHelperTextParameterOptions(connection);
 			DiscreteValues = new DataHelperDiscreteValues(connection);
 			ConfigurationUnits = new DataHelperConfigurationUnit(connection);
+			ProfileDefinitions = new DataHelperProfileDefinition(connection);
+			Profiles = new DataHelperProfile(connection);
+			ReferencedConfigurationParameters = new DataHelperReferencedConfigurationParameter(connection);
+			ReferencedProfileDefinitions = new DataHelperReferencedProfileDefinition(connection);
+			ProtocolTests = new DataHelperProtocolTest(connection);
+			Scripts = new DataHelperScript(connection);
 		}
 
 		/// <summary>
