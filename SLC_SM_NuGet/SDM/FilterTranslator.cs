@@ -100,6 +100,24 @@
 			/*CONFIGURATION DISCRETE VALUE OPTIONS*/
 			[DiscreteValueExposers.Guid.fieldName] = HandleGuid,
 
+			/*CONFIGURATION PROFILE DEFINITIONS*/
+			[ProfileDefinitionExposers.ID.fieldName] = HandleGuid,
+
+			/*CONFIGURATION PROFILES*/
+			[ProfileExposers.ID.fieldName] = HandleGuid,
+
+			/*CONFIGURATION REFERENCED OCNFIGURATION PARAMETERS*/
+			[ReferencedConfigurationParametersExposers.ID.fieldName] = HandleGuid,
+
+			/*CONFIGURATION REFERENCED PROFILE DEFINITIONS*/
+			[ReferencedProfileDefinitionsExposers.ID.fieldName] = HandleGuid,
+
+			/*CONFIGURATION PROTOCOL TESTS*/
+			[ProtocolTestExposers.ID.fieldName] = HandleGuid,
+
+			/*CONFIGURATION SCRIPTS*/
+			[ScriptExposers.ID.fieldName] = HandleGuid,
+
 			/*LINK*/
 			[LinkExposers.Guid.fieldName] = HandleGuid,
 			[LinkExposers.ChildID.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcRelationshipsIds.Sections.LinkInfo.ChildObjectID), comparer, (string)value),
@@ -111,15 +129,15 @@
 			[OrganizationExposers.Guid.fieldName] = HandleGuid,
 			[OrganizationExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.OrganizationName), comparer, (string)value),
 			[OrganizationExposers.Category.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.OrganizationInformation.Category), comparer, (Guid)value),
-			
+
 			[PeopleExposers.Guid.fieldName] = HandleGuid,
 			[PeopleExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.PeopleInformation.FullName), comparer, (string)value),
 			[PeopleExposers.Organization.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.Organization.Organization_57695f03), comparer, (Guid)value),
 			[PeopleExposers.Experience.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.PeopleInformation.ExperienceLevel), comparer, (Guid)value),
-			
+
 			[CategoryExposers.Guid.fieldName] = HandleGuid,
 			[CategoryExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.CategoryInformation.Category), comparer, (string)value),
-		
+
 			[ExperienceLevelExposers.Guid.fieldName] = HandleGuid,
 			[ExperienceLevelExposers.Value.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcPeople_OrganizationsIds.Sections.ExperienceInformation.Experience), comparer, (string)value),
 		};
