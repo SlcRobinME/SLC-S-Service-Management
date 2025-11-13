@@ -48,70 +48,53 @@ DATE		VERSION		AUTHOR			COMMENTS
 11/09/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
-
 namespace SLCSMDSGetServiceByServiceType
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using DomHelpers.SlcConfigurations;
-	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using SLC_SM_Common.Extensions;
-	using static DomHelpers.SlcConfigurations.SlcConfigurationsIds.Sections;
-	using AlarmLevel = Skyline.DataMiner.Core.DataMinerSystem.Common.AlarmLevel;
+	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
 
 	/// <summary>
-	/// Represents a data source.
-	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
+	///     Represents a data source.
+	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
-	[GQIMetaData(Name = "SLC_SM_DS_GetServiceByServiceType")]
+	[GQIMetaData(Name = DataSourceName)]
 	public sealed class SLCSMDSGetServiceByServiceType : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
+		private const string DataSourceName = "SLC_SM_DS_GetServiceByServiceType";
 		private readonly Arguments _arguments = new Arguments();
-		private DomHelper _serviceMangerDomHelper;
-		private DomHelper _configurationDomHelper;
 		private IGQILogger _logger;
 		private Skyline.DataMiner.Net.IConnection _connection;
 		private IDms _dms;
 		private GQIDMS _gqiDms;
 
-		public OnInitOutputArgs OnInit(OnInitInputArgs args)
+		private static readonly string configParamNameServiceType = "Service Type";
+		private static readonly string configParamNameReceptionType = "Reception Type";
+		private static readonly string configParamNameChannelId = "Channel ID";
+		private static readonly string configParamNameVideoFormat = "Video Format";
+		private static readonly string configParamNameDistributionType = "Distribution Type";
+		private static readonly string configParamNameRegion = "Region";
+		private static readonly string[] configurationParameterNames = new[]
 		{
-			// Initialize the data source
-			// See: https://aka.dataminer.services/igqioninit-oninit
-			_serviceMangerDomHelper = new DomHelper(args.DMS.SendMessages, SlcServicemanagementIds.ModuleId);
-			_configurationDomHelper = new DomHelper(args.DMS.SendMessages, SlcConfigurationsIds.ModuleId);
-			_logger = args.Logger;
-
-			_gqiDms = args.DMS;
-			_connection = _gqiDms.GetConnection();
-			_dms = _connection.GetDms();
-
-			return new OnInitOutputArgs();
-		}
-
-		public GQIArgument[] GetInputArguments()
-		{
-			// Define data source input arguments
-			// See: https://aka.dataminer.services/igqiinputarguments-getinputarguments
-			return _arguments.GetInputArguments();
-		}
-
-		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
-		{
-			// Process input argument values
-			// See: https://aka.dataminer.services/igqiinputarguments-onargumentsprocessed
-			return _arguments.OnArgumentsProcessed(args);
-		}
+			configParamNameServiceType,
+			configParamNameReceptionType,
+			configParamNameChannelId,
+			configParamNameVideoFormat,
+			configParamNameDistributionType,
+			configParamNameRegion,
+		};
 
 		public GQIColumn[] GetColumns()
 		{
-			// Define data source columns
-			// See: https://aka.dataminer.services/igqidatasource-getcolumns
 			return new GQIColumn[]
 			{
 				new GQIStringColumn("Service Id"),
@@ -128,221 +111,101 @@ namespace SLCSMDSGetServiceByServiceType
 			};
 		}
 
+		public GQIArgument[] GetInputArguments()
+		{
+			return _arguments.GetInputArguments();
+		}
+
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
+		{
+			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
+		}
+
+		private GQIPage BuildupRows()
 		{
 			try
 			{
-				var configurationaParameterInfos = GetConfigurationParameterInfos();
-				var configurationParametersValues = GetConfigurationParameterValues(configurationaParameterInfos);
-				var serviceConfigurationValues = GetServiceConfigurationValues(configurationParametersValues);
-				var services = GetServices(serviceConfigurationValues)
-					.Select(s => new ServiceRow(s))
-					.ToList();
-
-				var configurationParameterNames = new[]
+				FilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> filterConfigParams = new ORFilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>();
+				foreach (string configurationParameterName in configurationParameterNames)
 				{
-					"Service Type",
-					"Reception Type",
-					"Channel ID",
-					"Video Format",
-					"Distribution Type",
-					"Region",
-				};
-				foreach (var serviceRow in services)
-				{
-					Compose(
-						serviceRow,
-						serviceConfigurationValues,
-						configurationParametersValues,
-						configurationaParameterInfos,
-						configurationParameterNames);
+					filterConfigParams = filterConfigParams.OR(ConfigurationParameterExposers.Name.Equal(configurationParameterName));
 				}
 
-				return new GQIPage(services
-					.Where(s => s.ParameterValues.TryGetValue("Service Type", out _))
-					.Select(BuildRow).ToArray());
+				var configurationHelper = new DataHelperConfigurationParameter(_gqiDms.GetConnection());
+				var configurationParameters = configurationHelper.Read(filterConfigParams);
+
+				var services = new List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service>();
+				var serviceHelper = new DataHelperService(_gqiDms.GetConnection());
+				foreach (var configurationParameter in configurationParameters)
+				{
+					services.AddRange(serviceHelper.GetServicesByCharacteristic(configurationParameter.Name));
+				}
+
+				return new GQIPage(
+					services
+						.Select(service => BuildRow(service, configurationParameters))
+						.ToArray());
 			}
 			catch (Exception e)
 			{
-				_gqiDms.GenerateInformationMessage("GQIDS|Get Services By Type Exception: " + e);
+				_gqiDms.GenerateInformationMessage($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
+				_logger.Error($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
 				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
 		}
 
-		private void Compose(
-			ServiceRow serviceRow,
-			List<ServiceConfigurationValueInstance> allServiceConfigurationValues,
-			List<ConfigurationParameterValueInstance> allConfigurationParametersValues,
-			List<ConfigurationParametersInstance> allConfigurationParameterInfos,
-			string[] targetParameterNames)
+		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
-			// Pre-index for performance
-			var scvLookup = allServiceConfigurationValues.ToDictionary(scv => scv.ID.Id);
-			var cvLookup = allConfigurationParametersValues.ToDictionary(cv => cv.ID.Id);
-			var infoLookup = allConfigurationParameterInfos
-				.Where(info => targetParameterNames.Contains(info.ConfigurationParameterInfo.ParameterName))
-				.ToDictionary(info => info.ID.Id, info => info.ConfigurationParameterInfo.ParameterName);
+			return _arguments.OnArgumentsProcessed(args);
+		}
 
-			foreach (var scvid in serviceRow.Service.ServiceInfo.ServiceConfigurationParameters)
-			{
-				if (!scvLookup.TryGetValue(scvid, out var serviceConfig))
-					continue;
+		public OnInitOutputArgs OnInit(OnInitInputArgs args)
+		{
+			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
 
-				// unwrap nullable Guid
-				var cvId = serviceConfig.ServiceConfigurationValue.ConfigurationParameterValue;
-				if (!cvId.HasValue)
-					continue;
+			_gqiDms = args.DMS;
+			_connection = _gqiDms.GetConnection();
+			_dms = _connection.GetDms();
 
-				if (!cvLookup.TryGetValue(cvId.Value, out var cv))
-					continue;
+			return new OnInitOutputArgs();
+		}
 
-				var referenceId = cv.ConfigurationParameterValue.ConfigurationParameterReference;
-				if (referenceId.HasValue && infoLookup.TryGetValue(referenceId.Value, out var paramName))
+		private GQIRow BuildRow(Models.Service service, List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> configurationParameters)
+		{
+			int alarmLevel = _logger.PerformanceLogger("Get Alarm Level", () => (int)TryGetAlarmLevel(service));
+			var serviceType = configurationParameters.Find(x => x.Name == configParamNameServiceType)?.ID;
+			var receptionType = configurationParameters.Find(x => x.Name == configParamNameReceptionType)?.ID;
+			var channelId = configurationParameters.Find(x => x.Name == configParamNameChannelId)?.ID;
+			var videoFormat = configurationParameters.Find(x => x.Name == configParamNameVideoFormat)?.ID;
+			var distType = configurationParameters.Find(x => x.Name == configParamNameDistributionType)?.ID;
+			var region = configurationParameters.Find(x => x.Name == configParamNameRegion)?.ID;
+
+			return new GQIRow(
+				new[]
 				{
-					serviceRow.ParameterValues[paramName] = cv.ConfigurationParameterValue.StringValue;
-				}
-			}
+					new GQICell { Value = service.ID.ToString() },
+					new GQICell { Value = service.Name },
+					new GQICell { Value = service.Icon ?? String.Empty },
+					new GQICell { Value = service.Status.ToString() },
+					new GQICell { Value = alarmLevel },
+					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == serviceType)?.ConfigurationParameter.StringValue ?? String.Empty },
+					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == receptionType)?.ConfigurationParameter.StringValue ?? String.Empty },
+					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == channelId)?.ConfigurationParameter.StringValue ?? String.Empty },
+					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == videoFormat)?.ConfigurationParameter.StringValue ?? String.Empty },
+					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == distType)?.ConfigurationParameter.StringValue ?? String.Empty },
+					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == region)?.ConfigurationParameter.StringValue ?? String.Empty },
+				});
 		}
 
-		private GQIRow BuildRow(ServiceRow service)
+		private AlarmLevel TryGetAlarmLevel(Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service service)
 		{
-			return new GQIRow(new[]
-			{
-				new GQICell { Value = service.Service.ID.Id.ToString() },
-				new GQICell { Value = service.Service.ServiceInfo.ServiceName },
-				new GQICell { Value = service.Service.ServiceInfo.Icon },
-				new GQICell { Value = service.Service.Status.ToString() },
-				new GQICell { Value = (int) TryGetAlarmLevel(service) },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Service Type", out var type) ? type : String.Empty },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Reception Type", out var receptionType) ? receptionType : String.Empty },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Channel ID", out var channelId) ? channelId : String.Empty },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Video Format", out var videoFormat) ? videoFormat : String.Empty },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Distribution Type", out var distType) ? distType : String.Empty },
-				new GQICell { Value = service.ParameterValues.TryGetValue("Region", out var region) ? region : String.Empty },
-			});
-		}
-
-		private List<ConfigurationParametersInstance> GetConfigurationParameterInfos()
-		{
-			var filters = new[]
-			{
-				(FilterElement<DomInstance>) DomInstanceExposers.FieldValues.DomInstanceField(ConfigurationParameterInfo.ParameterName).Equal("Service Type"),
-				(FilterElement<DomInstance>) DomInstanceExposers.FieldValues.DomInstanceField(ConfigurationParameterInfo.ParameterName).Equal("Reception Type"),
-				(FilterElement<DomInstance>) DomInstanceExposers.FieldValues.DomInstanceField(ConfigurationParameterInfo.ParameterName).Equal("Service Type"),
-				(FilterElement<DomInstance>) DomInstanceExposers.FieldValues.DomInstanceField(ConfigurationParameterInfo.ParameterName).Equal("Channel ID"),
-				(FilterElement<DomInstance>) DomInstanceExposers.FieldValues.DomInstanceField(ConfigurationParameterInfo.ParameterName).Equal("Video Format"),
-				(FilterElement<DomInstance>) DomInstanceExposers.FieldValues.DomInstanceField(ConfigurationParameterInfo.ParameterName).Equal("Distribution Type"),
-				(FilterElement<DomInstance>) DomInstanceExposers.FieldValues.DomInstanceField(ConfigurationParameterInfo.ParameterName).Equal("Region"),
-			};
-
-			var results = _configurationDomHelper.DomInstances.Read(filters.Aggregate((f1, f2) => f1.OR(f2)));
-			return results.Select(r => new ConfigurationParametersInstance(r)).ToList();
-		}
-
-		private List<ConfigurationParameterValueInstance> GetConfigurationParameterValues(List<ConfigurationParametersInstance> configurationParameterInfos)
-		{
-			var serviceTypeInfo = configurationParameterInfos
-				.SingleOrDefault(i => i.ConfigurationParameterInfo.ParameterName == "Service Type");
-
-			var allFilters = configurationParameterInfos
-				.Where(info => serviceTypeInfo == null || info.ID.Id != serviceTypeInfo.ID.Id)
-				.Select(info =>
-					(FilterElement<DomInstance>)DomInstanceExposers.FieldValues
-						.DomInstanceField(ConfigurationParameterValue.ConfigurationParameterReference)
-						.Equal(info.ID.Id))
-				.ToList();
-
-			FilterElement<DomInstance> filterForOthers = null;
-			if (allFilters.Any())
-			{
-				filterForOthers = allFilters.Aggregate((f1, f2) => f1.OR(f2));
-			}
-
-			FilterElement<DomInstance> finalFilter = filterForOthers;
-
-			if (serviceTypeInfo != null)
-			{
-				var serviceTypeFilter =
-					DomInstanceExposers.FieldValues.DomInstanceField(ConfigurationParameterValue.ConfigurationParameterReference)
-						.Equal(serviceTypeInfo.ID.Id)
-					.AND(
-					DomInstanceExposers.FieldValues.DomInstanceField(ConfigurationParameterValue.StringValue)
-						.Equal(_arguments.ServiceType));
-
-				if (filterForOthers != null)
-				{
-					finalFilter = filterForOthers.OR(serviceTypeFilter);
-				}
-				else
-				{
-					finalFilter = serviceTypeFilter;
-				}
-			}
-
-			// If no filters at all, return empty sequence
-			if (finalFilter == null)
-				return new List<ConfigurationParameterValueInstance>();
-
-			var results = _configurationDomHelper.DomInstances.Read(finalFilter);
-			return results.Select(r => new ConfigurationParameterValueInstance(r)).ToList();
-		}
-
-		private List<ServiceConfigurationValueInstance> GetServiceConfigurationValues(List<ConfigurationParameterValueInstance> configurationParameterValues)
-		{
-			var filters = configurationParameterValues
-				.Select(configValue =>
-					(FilterElement<DomInstance>)DomInstanceExposers.FieldValues
-						.DomInstanceField(SlcServicemanagementIds.Sections.ServiceConfigurationValue.ConfigurationParameterValue)
-						.Equal(configValue.ID.Id))
-				.ToList();
-
-			var filter = filters.Any()
-				? filters.Aggregate((f1, f2) => f1.OR(f2))
-				: new FALSEFilterElement<DomInstance>();
-
-			var results = _serviceMangerDomHelper.DomInstances.Read(filter);
-			return results.Select(r => new ServiceConfigurationValueInstance(r)).ToList();
-		}
-
-		private IEnumerable<ServicesInstance> GetServices(
-			IEnumerable<ServiceConfigurationValueInstance> serviceConfigurationValues)
-		{
-			var filters = serviceConfigurationValues
-				.Select(serviceConfigValue =>
-					(FilterElement<DomInstance>)DomInstanceExposers.FieldValues
-						.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfigurationParameters)
-						.Contains(serviceConfigValue.ID.Id))
-				.ToList();
-
-			var filter = filters.Any()
-				? filters.Aggregate((f1, f2) => f1.OR(f2))
-				: new FALSEFilterElement<DomInstance>();
-
-			var result = _serviceMangerDomHelper.DomInstances.Read(filter);
-			return result.Select(r => new ServicesInstance(r));
-		}
-
-		private AlarmLevel TryGetAlarmLevel(ServiceRow service)
-		{
-			var serviceName = service.Service.ServiceInfo.ServiceName;
-			if (_dms.ServiceExistsSafe(serviceName, out IDmsService srv))
+			if (_dms.ServiceExistsSafe(service.Name, out IDmsService srv))
 			{
 				return srv.GetState().Level;
 			}
 
 			return AlarmLevel.Undefined;
 		}
-	}
-
-	internal class ServiceRow
-	{
-		public ServiceRow(ServicesInstance service)
-		{
-			Service = service;
-		}
-
-		public ServicesInstance Service { get; }
-
-		public Dictionary<string, string> ParameterValues { get; } = new Dictionary<string, string>();
 	}
 }

@@ -70,12 +70,14 @@ namespace SLCSMDSGetTopologyNodes
 	///     Represents a data source.
 	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
-	[GQIMetaData(Name = "SLC_SM_DS_GetTopologyNodes")]
+	[GQIMetaData(Name = DataSourceName)]
 	public sealed class SLCSMDSGetTopologyNodes : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
+		private const string DataSourceName = "SLC_SM_DS_GetTopologyNodes";
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = true };
 		private Guid _domId;
 		private GQIDMS _dms;
+		private IGQILogger _logger;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -102,75 +104,7 @@ namespace SLCSMDSGetTopologyNodes
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			try
-			{
-				var serviceItems = new DataHelperService(_dms.GetConnection()).Read(ServiceExposers.Guid.Equal(_domId)).FirstOrDefault()?.ServiceItems.Where(i => !String.IsNullOrEmpty(i.Label)).ToList()
-				                   ?? new DataHelperServiceSpecification(_dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(_domId)).FirstOrDefault()?.ServiceItems.Where(i => !String.IsNullOrEmpty(i.Label)).ToList()
-				                   ?? new List<Models.ServiceItem>();
-
-				var workflowPropertyValues = new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId)
-					.DomInstances
-					.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcPropertiesIds.Definitions.PropertyValues.Id))
-					.Select(p => new PropertyValuesInstance(p))
-					.ToArray();
-
-				var workflowsFilter = serviceItems
-					.Where(item => item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
-					.Select(item => DomInstanceExposers.Name.Equal(item.DefinitionReference))
-					.Aggregate<FilterElement<DomInstance>, FilterElement<DomInstance>>(null, (acc, next) => acc == null ? next : acc.OR(next));
-
-				var workflows = workflowsFilter != null
-					? new DomHelper(_dms.SendMessages, SlcWorkflowIds.ModuleId)
-						.DomInstances
-						.Read(workflowsFilter)
-					: Enumerable.Empty<DomInstance>().ToList();
-
-				var messages = serviceItems
-					.Where(item => item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
-					.Select(item => new GetLiteElementInfo { NameFilter = item.DefinitionReference })
-					.Cast<DMSMessage>()
-					.ToArray();
-
-				LiteElementInfoEvent[] elements = Array.Empty<LiteElementInfoEvent>();
-				PropertyChangeEventMessage[] elementIcons = Array.Empty<PropertyChangeEventMessage>();
-				if (messages.Any())
-				{
-					elements = _dms.SendMessages(messages)
-						.OfType<LiteElementInfoEvent>()
-						.ToArray();
-
-					if (elements.Any())
-					{
-						var getPropertyMessages = elements
-							.Select(
-								element => new GetPropertyValueMessage
-								{
-									ObjectID = $"{element.DataMinerID}/{element.ElementID}",
-									ObjectType = "Element",
-									PropertyName = "Icon",
-								})
-							.Cast<DMSMessage>()
-							.ToArray();
-
-						elementIcons = _dms.SendMessages(getPropertyMessages)
-							.OfType<PropertyChangeEventMessage>()
-							.ToArray();
-					}
-				}
-
-				var rows = new List<GQIRow>();
-				foreach (var i in serviceItems)
-				{
-					rows.Add(BuildRow(i, GetReferenceId(i, elements, workflows), GetIcon(i, elements, workflows, workflowPropertyValues, elementIcons)));
-				}
-
-				return new GQIPage(rows.ToArray());
-			}
-			catch (Exception e)
-			{
-				_dms.GenerateInformationMessage("GQIDS|Get Topology Nodes Exception: " + e);
-				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
-			}
+			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -185,10 +119,9 @@ namespace SLCSMDSGetTopologyNodes
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			// Initialize the data source
-			// See: https://aka.dataminer.services/igqioninit-oninit
 			_dms = args.DMS;
-
+			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
 			return default;
 		}
 
@@ -205,6 +138,98 @@ namespace SLCSMDSGetTopologyNodes
 					new GQICell { Value = referenceId ?? String.Empty },
 					new GQICell { Value = icon ?? String.Empty },
 				});
+		}
+
+		private GQIPage BuildupRows()
+		{
+			try
+			{
+				var serviceItems = _logger.PerformanceLogger(
+					"Get Service Items",
+					() =>
+						new DataHelperService(_dms.GetConnection()).Read(ServiceExposers.Guid.Equal(_domId)).FirstOrDefault()?.ServiceItems.Where(i => !String.IsNullOrEmpty(i.Label)).ToList()
+						?? new DataHelperServiceSpecification(_dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(_domId)).FirstOrDefault()?.ServiceItems.Where(i => !String.IsNullOrEmpty(i.Label)).ToList()
+						?? new List<Models.ServiceItem>());
+
+				var workflowPropertyValues = _logger.PerformanceLogger(
+					"Get Workflow Property Values",
+					() =>
+						new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId)
+							.DomInstances
+							.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcPropertiesIds.Definitions.PropertyValues.Id))
+							.Select(p => new PropertyValuesInstance(p))
+							.ToArray());
+
+				var workflowsFilter = serviceItems
+					.Where(item => item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
+					.Select(item => DomInstanceExposers.Name.Equal(item.DefinitionReference))
+					.Aggregate<FilterElement<DomInstance>, FilterElement<DomInstance>>(null, (acc, next) => acc == null ? next : acc.OR(next));
+
+				var workflows = _logger.PerformanceLogger(
+					"Get DOM Workflows",
+					() =>
+						workflowsFilter != null
+							? new DomHelper(_dms.SendMessages, SlcWorkflowIds.ModuleId)
+								.DomInstances
+								.Read(workflowsFilter)
+							: Enumerable.Empty<DomInstance>().ToList());
+
+				var messages = serviceItems
+					.Where(item => item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
+					.Select(item => new GetLiteElementInfo { NameFilter = item.DefinitionReference })
+					.Cast<DMSMessage>()
+					.ToArray();
+
+				LiteElementInfoEvent[] elements = Array.Empty<LiteElementInfoEvent>();
+				PropertyChangeEventMessage[] elementIcons = Array.Empty<PropertyChangeEventMessage>();
+				if (messages.Any())
+				{
+					elements = _logger.PerformanceLogger(
+						"Get Booking Manager Elements",
+						() => _dms.SendMessages(messages)
+							.OfType<LiteElementInfoEvent>()
+							.ToArray());
+
+					if (elements.Any())
+					{
+						var getPropertyMessages = elements
+							.Select(
+								element => new GetPropertyValueMessage
+								{
+									ObjectID = $"{element.DataMinerID}/{element.ElementID}",
+									ObjectType = "Element",
+									PropertyName = "Icon",
+								})
+							.Cast<DMSMessage>()
+							.ToArray();
+
+						elementIcons = _logger.PerformanceLogger(
+							"Get Booking Manager Element Properties",
+							() => _dms.SendMessages(getPropertyMessages)
+								.OfType<PropertyChangeEventMessage>()
+								.ToArray());
+					}
+				}
+
+				var rows = new List<GQIRow>();
+				_logger.PerformanceLogger(
+					"Build Rows",
+					() =>
+					{
+						foreach (var i in serviceItems)
+						{
+							rows.Add(BuildRow(i, GetReferenceId(i, elements, workflows), GetIcon(i, elements, workflows, workflowPropertyValues, elementIcons)));
+						}
+					});
+
+				return new GQIPage(rows.ToArray());
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
+				_logger.Error($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		private string GetIcon(
