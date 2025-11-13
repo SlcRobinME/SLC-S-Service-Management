@@ -74,31 +74,49 @@ namespace Skyline.DataMiner.ProjectApi.ServiceManagement.SDM
 		public static readonly Exposer<Models.ConfigurationParameterValue, Guid> ConfigurationParameterID = new Exposer<Models.ConfigurationParameterValue, Guid>((obj) => obj.ConfigurationParameterId, String.Join(".", nameof(ConfigurationParameterValueExposers), nameof(ConfigurationParameterID)));
 	}
 
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.ReferencedProfileDefinitions"/> instances.
+	/// </summary>
 	public static class ReferencedProfileDefinitionsExposers
 	{
 		public static readonly Exposer<Models.ReferencedProfileDefinitions, Guid> ID = new Exposer<Models.ReferencedProfileDefinitions, Guid>((obj) => obj.ID, String.Join(".", nameof(ReferencedProfileDefinitionsExposers), nameof(ID)));
 	}
 
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.Script"/> instances.
+	/// </summary>
 	public static class ScriptExposers
 	{
 		public static readonly Exposer<Models.Script, Guid> ID = new Exposer<Models.Script, Guid>((obj) => obj.ID, String.Join(".", nameof(ScriptExposers), nameof(ID)));
 	}
 
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.Profile"/> instances.
+	/// </summary>
 	public static class ProfileExposers
 	{
 		public static readonly Exposer<Models.Profile, Guid> ID = new Exposer<Models.Profile, Guid>((obj) => obj.ID, String.Join(".", nameof(ProfileExposers), nameof(ID)));
 	}
 
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.ProfileDefinition"/> instances.
+	/// </summary>
 	public static class ProfileDefinitionExposers
 	{
 		public static readonly Exposer<Models.ProfileDefinition, Guid> ID = new Exposer<Models.ProfileDefinition, Guid>((obj) => obj.ID, String.Join(".", nameof(ProfileDefinitionExposers), nameof(ID)));
 	}
 
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.ReferencedConfigurationParameters"/> instances.
+	/// </summary>
 	public static class ReferencedConfigurationParametersExposers
 	{
 		public static readonly Exposer<Models.ReferencedConfigurationParameters, Guid> ID = new Exposer<Models.ReferencedConfigurationParameters, Guid>((obj) => obj.ID, String.Join(".", nameof(ReferencedConfigurationParametersExposers), nameof(ID)));
 	}
 
+	/// <summary>
+	/// Exposer-methods for the <see cref="Models.ProtocolTest"/> instances.
+	/// </summary>
 	public static class ProtocolTestExposers
 	{
 		public static readonly Exposer<Models.ProtocolTest, Guid> ID = new Exposer<Models.ProtocolTest, Guid>((obj) => obj.ID, String.Join(".", nameof(ProtocolTestExposers), nameof(ID)));
