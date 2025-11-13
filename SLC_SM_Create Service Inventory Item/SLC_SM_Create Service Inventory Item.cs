@@ -75,7 +75,6 @@ namespace SLC_SM_Create_Service_Inventory_Item
 	public class Script
 	{
 		private InteractiveController _controller;
-		private DomHelper _domHelper;
 		private IEngine _engine;
 
 		private enum Action
@@ -107,7 +106,6 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			{
 				_engine = engine;
 				_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
-				InitHelpers();
 
 				RunSafe();
 			}
@@ -280,32 +278,30 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			repo.ServiceOrderItems.CreateOrUpdate(serviceOrderItem);
 
 			// Update state
-			var domInstanceId = new DomInstanceId(serviceOrderItem.ID);
-			if (serviceOrderItem.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.New)
+			if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.New)
 			{
-				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.New_To_Acknowledged);
-				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
+				repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.New_To_Acknowledged);
+				repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 			}
 
-			if (serviceOrderItem.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.Acknowledged)
+			if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.Acknowledged)
 			{
-				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
+				repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 			}
 
 			// Update state of main Service Order as well
 			Models.ServiceOrder order = repo.ServiceOrders.Read(ServiceOrderExposers.ServiceOrderItemsExposers.ServiceOrderItem.Equal(serviceOrderItem)).FirstOrDefault();
 			if (order != null)
 			{
-				var orderId = new DomInstanceId(order.ID);
-				if (order.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.New)
+				if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.New)
 				{
-					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.New_To_Acknowledged);
-					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
+					repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.New_To_Acknowledged);
+					repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 				}
 
-				if (order.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Acknowledged)
+				if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.Acknowledged)
 				{
-					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
+					repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 				}
 			}
 		}
@@ -404,11 +400,6 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			return repo.Services.Read(ServiceExposers.Guid.Equal(domId)).FirstOrDefault()
 				   ?? throw new InvalidOperationException($"No Dom Instance with ID '{domId}' found on the system!");
-		}
-
-		private void InitHelpers()
-		{
-			_domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
 		}
 
 		private void RunSafe()
