@@ -56,7 +56,6 @@ namespace GetServiceItemRelationshipMultisection
 	using DomHelpers.SlcWorkflow;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
@@ -66,9 +65,10 @@ namespace GetServiceItemRelationshipMultisection
 	///     Represents a data source.
 	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
-	[GQIMetaData(Name = "Get Service Item Relationship Multisection")]
+	[GQIMetaData(Name = DataSourceName)]
 	public sealed class GetServiceItemRelationshipMultisection : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
+		private const string DataSourceName = "Get Service Item Relationship Multisection";
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = false };
 		private Guid _specificationId;
 		private Models.Service _serviceInstance;
@@ -76,6 +76,7 @@ namespace GetServiceItemRelationshipMultisection
 		private DomHelper _wfDomHelper;
 		private GQIDMS _dms;
 		private WorkflowsInstance[] _workflows;
+		private IGQILogger _logger;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -103,6 +104,11 @@ namespace GetServiceItemRelationshipMultisection
 		}
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
+		{
+			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
+		}
+
+		private GQIPage BuildupRows()
 		{
 			try
 			{
@@ -134,7 +140,8 @@ namespace GetServiceItemRelationshipMultisection
 			}
 			catch (Exception e)
 			{
-				_dms.GenerateInformationMessage("GQIDMS Relationship Exception: " + e);
+				_dms.GenerateInformationMessage($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
+				_logger.Error($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
 				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
 		}
@@ -152,6 +159,8 @@ namespace GetServiceItemRelationshipMultisection
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
 			_dms = args.DMS;
+			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
 			return default;
 		}
 

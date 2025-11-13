@@ -16,12 +16,15 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 	using SLDataGateway.API.Querying;
 
 	// Required to mark the interface as a GQI data source
-	[GQIMetaData(Name = "Get_ServiceItemsMultipleSections")]
+	[GQIMetaData(Name = DataSourceName)]
 	public class EventManagerGetMultipleSections : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
+		private const string DataSourceName = "Get_ServiceItemsMultipleSections";
+
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = true };
 		private GQIDMS _dms;
+		private IGQILogger _logger;
 
 		// variable where input argument will be stored
 		private Guid instanceDomId;
@@ -59,18 +62,7 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			try
-			{
-				return new GQIPage(GetMultiSection())
-				{
-					HasNextPage = false,
-				};
-			}
-			catch (Exception e)
-			{
-				_dms.GenerateInformationMessage("GQIDS|Get Service Items Exception: " + e);
-				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
-			}
+			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -87,6 +79,8 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
 			_dms = args.DMS;
+			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
 			return default;
 		}
 
@@ -114,6 +108,23 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 					new GQICell { Value = implementationRef.MonServiceState },
 					new GQICell { Value = implementationRef.MonServiceDmaIdSid },
 				});
+		}
+
+		private GQIPage BuildupRows()
+		{
+			try
+			{
+				return new GQIPage(GetMultiSection())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
+				_logger.Error($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		private ImplementationItemInfo GetImplementationRefName(string referenceId, string definitionReference)
@@ -178,16 +189,16 @@ namespace SLC_SM_GQIDS_Get_Service_Items
 				return Array.Empty<GQIRow>();
 			}
 
-			var service = new DataHelperService(_dms.GetConnection()).Read(ServiceExposers.Guid.Equal(instanceDomId)).FirstOrDefault();
+			var service = _logger.PerformanceLogger("Get Service", () => new DataHelperService(_dms.GetConnection()).Read(ServiceExposers.Guid.Equal(instanceDomId)).FirstOrDefault());
 			if (service != null)
 			{
-				return service.ServiceItems.Select(BuildRow).ToArray();
+				return _logger.PerformanceLogger("Build Service Rows", () => service.ServiceItems.Select(BuildRow).ToArray());
 			}
 
-			var spec = new DataHelperServiceSpecification(_dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(instanceDomId)).FirstOrDefault();
+			var spec = _logger.PerformanceLogger("Get Specification", () => new DataHelperServiceSpecification(_dms.GetConnection()).Read(ServiceSpecificationExposers.Guid.Equal(instanceDomId)).FirstOrDefault());
 			if (spec != null)
 			{
-				return spec.ServiceItems.Select(BuildRow).ToArray();
+				return _logger.PerformanceLogger("Build Specification Rows", () => spec.ServiceItems.Select(BuildRow).ToArray());
 			}
 
 			return Array.Empty<GQIRow>();

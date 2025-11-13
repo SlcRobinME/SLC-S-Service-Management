@@ -3,9 +3,6 @@ namespace SLC_SM_GQIDS_Get_Service_Orders
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
-	using DomHelpers.SlcServicemanagement;
-
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganization;
@@ -14,11 +11,14 @@ namespace SLC_SM_GQIDS_Get_Service_Orders
 	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
 
 	// Required to mark the interface as a GQI data source
-	[GQIMetaData(Name = "Get_ServiceOrders")]
+	[GQIMetaData(Name = DataSourceName)]
 	public class GetServiceOrders : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
+		private const string DataSourceName = "Get_ServiceOrders";
+
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
 		private GQIDMS _dms;
+		private IGQILogger _logger;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -41,18 +41,7 @@ namespace SLC_SM_GQIDS_Get_Service_Orders
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			try
-			{
-				return new GQIPage(GetMultiSection())
-				{
-					HasNextPage = false,
-				};
-			}
-			catch (Exception e)
-			{
-				_dms.GenerateInformationMessage("GQIDS|Get Service Orders Exception: " + e);
-				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
-			}
+			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -63,7 +52,8 @@ namespace SLC_SM_GQIDS_Get_Service_Orders
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
 			_dms = args.DMS;
-
+			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
 			return default;
 		}
 
@@ -79,17 +69,38 @@ namespace SLC_SM_GQIDS_Get_Service_Orders
 					new GQICell { Value = item.Priority?.ToString() ?? "Low" },
 					new GQICell { Value = item.ExternalID ?? String.Empty },
 					new GQICell { Value = item.OrganizationId.HasValue ? organizations.Find(x => x.ID == item.OrganizationId)?.Name ?? String.Empty : String.Empty },
-					new GQICell { Value = item.Status.ToString() },
+					new GQICell { Value = item.Status.GetDescription() },
 				});
+		}
+
+		private GQIPage BuildupRows()
+		{
+			try
+			{
+				return new GQIPage(GetMultiSection())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
+				_logger.Error($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		private GQIRow[] GetMultiSection()
 		{
 			IConnection connection = _dms.GetConnection();
-			List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.PeopleAndOrganization.Models.Organization> organizations = new DataHelperOrganization(connection).Read();
+			var organizations = _logger.PerformanceLogger("Get Organizations", () => new DataHelperOrganization(connection).Read());
 
-			var instances = new DataHelperServiceOrder(connection).Read();
-			return instances.Select(item => BuildRow(item, organizations)).ToArray();
+			var instances = _logger.PerformanceLogger("Get Orders", () => new DataHelperServiceOrder(connection).Read());
+			return _logger.PerformanceLogger(
+				"Build Rows",
+				() => instances
+					.Select(item => BuildRow(item, organizations))
+					.ToArray());
 		}
 	}
 }
