@@ -1,5 +1,6 @@
 ﻿namespace SLC_SM_IAS_ManageRelationships.Controller
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using DomHelpers.SlcWorkflow;
@@ -36,6 +37,7 @@
 		{
 			Links.Add(new Models.ServiceItemRelationShip
 			{
+				Id = Guid.NewGuid().ToString(),
 				Type = "Connection",
 				ParentServiceItem = SourceNode.ID.ToString(),
 				ParentServiceItemInterfaceId = sourceInterface,

@@ -17,23 +17,6 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 	[GQIMetaData(Name = "Get_ServiceOrderItems")]
 	public class EventManagerGetMultipleSections : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
-		// TO BE removed when we can easily fetch this using the DOM Code Generated code
-		private static readonly Dictionary<string, string> statusNames = new Dictionary<string, string>
-		{
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.New, "New" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Acknowledged, "Acknowledged" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.InProgress, "In Progress" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Completed, "Completed" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Rejected, "Rejected" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Failed, "Failed" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.PartiallyFailed, "Partially Failed" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Held, "Held" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Pending, "Pending" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.AssessCancellation, "Assess Cancellation" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.PendingCancellation, "Pending Cancellation" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Cancelled, "Cancelled" },
-		};
-
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = false };
 		private GQIDMS _dms;
@@ -143,11 +126,11 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 					},
 					new GQICell
 					{
-						Value = statusNames.ContainsKey(item.ServiceOrderItem.StatusId) ? statusNames[item.ServiceOrderItem.StatusId] : "No status mapping",
+						Value = item.ServiceOrderItem.Status.ToString(),
 					},
 					new GQICell
 					{
-						Value = item.ServiceOrderItem.StatusId ?? "No status mapping",
+						Value = item.ServiceOrderItem.Status.ToString(),
 					},
 				});
 		}

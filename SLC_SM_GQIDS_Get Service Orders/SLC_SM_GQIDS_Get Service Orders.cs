@@ -17,23 +17,6 @@ namespace SLC_SM_GQIDS_Get_Service_Orders
 	[GQIMetaData(Name = "Get_ServiceOrders")]
 	public class GetServiceOrders : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
-		// TO BE removed when we can easily fetch this using the DOM Code Generated code
-		private static readonly Dictionary<string, string> statusNames = new Dictionary<string, string>
-		{
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.New, "New" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Acknowledged, "Acknowledged" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.InProgress, "In Progress" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Completed, "Completed" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Rejected, "Rejected" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Failed, "Failed" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.PartiallyFailed, "Partially Failed" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Held, "Held" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Pending, "Pending" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.AssessCancellation, "Assess Cancellation" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.PendingCancellation, "Pending Cancellation" },
-			{ SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Cancelled, "Cancelled" },
-		};
-
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
 		private GQIDMS _dms;
 
@@ -96,7 +79,7 @@ namespace SLC_SM_GQIDS_Get_Service_Orders
 					new GQICell { Value = item.Priority?.ToString() ?? "Low" },
 					new GQICell { Value = item.ExternalID ?? String.Empty },
 					new GQICell { Value = item.OrganizationId.HasValue ? organizations.Find(x => x.ID == item.OrganizationId)?.Name ?? String.Empty : String.Empty },
-					new GQICell { Value = statusNames.ContainsKey(item.StatusId) ? statusNames[item.StatusId] : "No status mapping" },
+					new GQICell { Value = item.Status.ToString() },
 				});
 		}
 

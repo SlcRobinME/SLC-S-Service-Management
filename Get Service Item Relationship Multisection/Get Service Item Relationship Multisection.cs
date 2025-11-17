@@ -160,7 +160,7 @@ namespace GetServiceItemRelationshipMultisection
 			return new GQIRow(
 				new[]
 				{
-					new GQICell { Value = Guid.NewGuid().ToString() },
+					new GQICell { Value = r.Id },
 					new GQICell { Value = r.Type },
 					new GQICell { Value = r.ChildServiceItem },
 					new GQICell { Value = r.ParentServiceItem },
@@ -188,7 +188,8 @@ namespace GetServiceItemRelationshipMultisection
 
 			if (type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 			{
-				return GetWorkflowInterfaceName(serviceItemId, interfaceId);
+				//return GetWorkflowInterfaceName(serviceItemId, interfaceId);
+				return interfaceId == "1" ? "Default Workflow Output" : "Default Workflow Input";
 			}
 
 			if (type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
