@@ -45,7 +45,6 @@
 						.AND(DomInstanceExposers.StatusId.Equal(SlcWorkflowIds.Behaviors.Workflow_Behavior.Statuses.Complete)))
 				.Select(x => new WorkflowsInstance(x))
 				.ToArray();
-
 		}
 	}
 }

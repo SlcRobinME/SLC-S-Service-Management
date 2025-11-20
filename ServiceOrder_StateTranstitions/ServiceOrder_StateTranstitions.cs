@@ -17,8 +17,7 @@ namespace ServiceOrder_StateTranstitions_1
 		public void OnDomActionMethod(IEngine engine, ExecuteScriptDomActionContext context)
 		{
 			// DO NOT REMOVE
-			// engine.ShowUI();
-
+			//// engine.ShowUI();
 			var instanceId = context.ContextId as DomInstanceId;
 			var previousState = engine.ReadScriptParamFromApp("PreviousState").ToLower();
 			var nextState = engine.ReadScriptParamFromApp("NextState").ToLower();
