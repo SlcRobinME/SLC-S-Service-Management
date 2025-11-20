@@ -18,12 +18,8 @@ namespace SLCSMDSGetServiceButtons
 	public sealed class SLCSMDSGetServiceButtons : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
 		private const string DataSourceName = "SLC-SM-DS-Get Service Buttons";
-		private readonly GQIStringArgument serviceReferenceArg = new GQIStringArgument("ServiceReference") { IsRequired = true };
-		private Guid serviceReference;
-		private GQIDMS _dms;
-		private IGQILogger _logger;
 
-		private readonly List<TransitionsEnum> UnHappyFlows = new List<TransitionsEnum>
+		private static readonly List<TransitionsEnum> UnHappyFlows = new List<TransitionsEnum>
 		{
 			TransitionsEnum.New_To_Retired,
 			TransitionsEnum.Reserved_To_Retired,
@@ -31,7 +27,7 @@ namespace SLCSMDSGetServiceButtons
 			TransitionsEnum.Terminated_To_Active,
 		};
 
-		private readonly Dictionary<TransitionsEnum, string> ButtonNames = new Dictionary<TransitionsEnum, string>
+		private static readonly Dictionary<TransitionsEnum, string> ButtonNames = new Dictionary<TransitionsEnum, string>
 		{
 			{ TransitionsEnum.New_To_Designed, "Design" },
 			{ TransitionsEnum.Designed_To_Reserved, "Reserve" },
@@ -43,6 +39,11 @@ namespace SLCSMDSGetServiceButtons
 			{ TransitionsEnum.Reserved_To_Retired, "Retire" },
 			{ TransitionsEnum.Terminated_To_Active, "Activate" },
 		};
+
+		private readonly GQIStringArgument serviceReferenceArg = new GQIStringArgument("ServiceReference") { IsRequired = true };
+		private Guid serviceReference;
+		private GQIDMS _dms;
+		private IGQILogger _logger;
 
 		public GQIColumn[] GetColumns()
 		{
