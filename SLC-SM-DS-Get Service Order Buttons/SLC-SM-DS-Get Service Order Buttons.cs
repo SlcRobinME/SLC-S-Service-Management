@@ -155,8 +155,8 @@ namespace SLCSMDSGetServiceOrderButtons
 			}
 			catch (Exception e)
 			{
-				_dms.GenerateInformationMessage($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
-				_logger.Error($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
+				_dms.GenerateInformationMessage($"GQIDS|{DataSourceName}|Exception: {e}");
+				_logger.Error($"GQIDS|{DataSourceName}|Exception: {e}");
 				return new GQIPage(Array.Empty<GQIRow>());
 			}
 		}

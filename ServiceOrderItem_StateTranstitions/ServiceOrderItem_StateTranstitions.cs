@@ -26,12 +26,12 @@ namespace ServiceOrderItemStateTranstitions
 				.FirstOrDefault(t => t.ToString().Equals($"{previousState}_to_{nextState}", StringComparison.OrdinalIgnoreCase))
 				?? throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");
 
-			var oderItemHelper = new DataHelperServiceOrderItem(engine.GetUserConnection());
-			var service = oderItemHelper.Read(ServiceOrderItemExposers.Guid.Equal(domInstanceId)).FirstOrDefault()
+			var orderItemHelper = new DataHelperServiceOrderItem(engine.GetUserConnection());
+			var service = orderItemHelper.Read(ServiceOrderItemExposers.Guid.Equal(domInstanceId)).FirstOrDefault()
 						  ?? throw new NotSupportedException($"No Service with ID '{domInstanceId}' exists on the system");
 
 			engine.GenerateInformation($"Service Order Item Status Transition starting: previousState: {previousState}, nextState: {nextState}");
-			oderItemHelper.UpdateState(service, transition);
+			orderItemHelper.UpdateState(service, transition);
 		}
 
 		/// <summary>

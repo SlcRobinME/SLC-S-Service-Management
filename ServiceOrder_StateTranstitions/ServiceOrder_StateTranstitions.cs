@@ -16,9 +16,9 @@ namespace ServiceOrder_StateTranstitions_1
 		[AutomationEntryPoint(AutomationEntryPointType.Types.OnDomAction)]
 		public void OnDomActionMethod(IEngine engine, ExecuteScriptDomActionContext context)
 		{
-			// DO NOT REMOVE
+			//// DO NOT REMOVE
 			//// engine.ShowUI();
-			var instanceId = context.ContextId as DomInstanceId;
+			var instanceId = (DomInstanceId)context.ContextId;
 			var previousState = engine.ReadScriptParamFromApp("PreviousState").ToLower();
 			var nextState = engine.ReadScriptParamFromApp("NextState").ToLower();
 

@@ -48,6 +48,8 @@ DATE		VERSION		AUTHOR			COMMENTS
 11/09/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
+using System;
+
 namespace SLCSMDSGetServiceByServiceType
 {
 	using System;
@@ -94,6 +96,13 @@ namespace SLCSMDSGetServiceByServiceType
 		private IDms _dms;
 		private GQIDMS _gqiDms;
 
+		private Guid configID_ServiceType;
+		private Guid configID_ReceptionType;
+		private Guid configID_ChannelId;
+		private Guid configID_VideoFormat;
+		private Guid configID_DistType;
+		private Guid configID_Region;
+
 		public GQIColumn[] GetColumns()
 		{
 			return new GQIColumn[]
@@ -133,24 +142,31 @@ namespace SLCSMDSGetServiceByServiceType
 				}
 
 				var configurationHelper = new DataHelperConfigurationParameter(_gqiDms.GetConnection());
-				var configurationParameters = configurationHelper.Read(filterConfigParams);
+				var configurationParameters = configurationHelper.Read(filterConfigParams).ToDictionary(p => p.Name, p => p.ID);
+
+				configurationParameters.TryGetValue(configParamNameServiceType, out configID_ServiceType);
+				configurationParameters.TryGetValue(configParamNameReceptionType, out configID_ReceptionType);
+				configurationParameters.TryGetValue(configParamNameChannelId, out configID_ChannelId);
+				configurationParameters.TryGetValue(configParamNameVideoFormat, out configID_VideoFormat);
+				configurationParameters.TryGetValue(configParamNameDistributionType, out configID_DistType);
+				configurationParameters.TryGetValue(configParamNameRegion, out configID_Region);
 
 				var services = new List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service>();
 				var serviceHelper = new DataHelperService(_gqiDms.GetConnection());
 				foreach (var configurationParameter in configurationParameters)
 				{
-					services.AddRange(serviceHelper.GetServicesByCharacteristic(configurationParameter.Name));
+					services.AddRange(serviceHelper.GetServicesByCharacteristic(configurationParameter.Key));
 				}
 
 				return new GQIPage(
 					services
-						.Select(service => BuildRow(service, configurationParameters))
+						.Select(service => BuildRow(service))
 						.ToArray());
 			}
 			catch (Exception e)
 			{
-				_gqiDms.GenerateInformationMessage($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
-				_logger.Error($"GQIDS|{nameof(DataSourceName)}|Exception: {e}");
+				_gqiDms.GenerateInformationMessage($"GQIDS|{DataSourceName}|Exception: {e}");
+				_logger.Error($"GQIDS|{DataSourceName}|Exception: {e}");
 				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
 		}
@@ -172,15 +188,11 @@ namespace SLCSMDSGetServiceByServiceType
 			return new OnInitOutputArgs();
 		}
 
-		private GQIRow BuildRow(Models.Service service, List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> configurationParameters)
+		private GQIRow BuildRow(Models.Service service)
 		{
 			int alarmLevel = _logger.PerformanceLogger("Get Alarm Level", () => (int)TryGetAlarmLevel(service));
-			var serviceType = configurationParameters.Find(x => x.Name == configParamNameServiceType)?.ID;
-			var receptionType = configurationParameters.Find(x => x.Name == configParamNameReceptionType)?.ID;
-			var channelId = configurationParameters.Find(x => x.Name == configParamNameChannelId)?.ID;
-			var videoFormat = configurationParameters.Find(x => x.Name == configParamNameVideoFormat)?.ID;
-			var distType = configurationParameters.Find(x => x.Name == configParamNameDistributionType)?.ID;
-			var region = configurationParameters.Find(x => x.Name == configParamNameRegion)?.ID;
+
+			var configs = service.Configurations.ToDictionary(c => c.ConfigurationParameter.ConfigurationParameterId, c => c.ConfigurationParameter.StringValue);
 
 			return new GQIRow(
 				new[]
@@ -190,12 +202,12 @@ namespace SLCSMDSGetServiceByServiceType
 					new GQICell { Value = service.Icon ?? String.Empty },
 					new GQICell { Value = service.Status.ToString() },
 					new GQICell { Value = alarmLevel },
-					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == serviceType)?.ConfigurationParameter.StringValue ?? String.Empty },
-					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == receptionType)?.ConfigurationParameter.StringValue ?? String.Empty },
-					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == channelId)?.ConfigurationParameter.StringValue ?? String.Empty },
-					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == videoFormat)?.ConfigurationParameter.StringValue ?? String.Empty },
-					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == distType)?.ConfigurationParameter.StringValue ?? String.Empty },
-					new GQICell { Value = service.Configurations.Find(c => c.ConfigurationParameter.ConfigurationParameterId == region)?.ConfigurationParameter.StringValue ?? String.Empty },
+					new GQICell { Value = configs.TryGetValue(configID_ServiceType, out string st) ? st : String.Empty },
+					new GQICell { Value = configs.TryGetValue(configID_ReceptionType, out string rt) ? rt : String.Empty },
+					new GQICell { Value = configs.TryGetValue(configID_ChannelId, out string ci) ? ci : String.Empty },
+					new GQICell { Value = configs.TryGetValue(configID_VideoFormat, out string vf) ? vf : String.Empty },
+					new GQICell { Value = configs.TryGetValue(configID_DistType, out string dt) ? dt : String.Empty },
+					new GQICell { Value = configs.TryGetValue(configID_Region, out string r) ? r : String.Empty },
 				});
 		}
 

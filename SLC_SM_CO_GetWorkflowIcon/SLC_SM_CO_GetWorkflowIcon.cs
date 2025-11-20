@@ -60,14 +60,16 @@ namespace SLCSMCOGetWorkflowIcon
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using SLC_SM_Common.Extensions;
 
 	/// <summary>
 	/// Represents a data source.
 	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
-	[GQIMetaData(Name = "SLC_SM_CO_GetWorkflowIcon")]
+	[GQIMetaData(Name = DataSourceName)]
 	public class SLCSMCOGetWorkflowIcon : IGQIColumnOperator, IGQIRowOperator, IGQIOnInit, IGQIInputArguments
 	{
+		private const string DataSourceName = "SLC_SM_CO_GetWorkflowIcon";
 		private readonly GQIStringColumn _iconColumn = new GQIStringColumn("Icon");
 
 		private readonly GQIStringArgument _argWorkflowIdColumnName = new GQIStringArgument("Workflow ID Column Name") { IsRequired = true };
@@ -104,8 +106,9 @@ namespace SLCSMCOGetWorkflowIcon
 
 				row.SetValue(_iconColumn, icon);
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				_dms.GenerateInformationMessage($"{DataSourceName}|Could not fetch icon for workflow ID '{_workflowIdColumnName}' due to: {ex}");
 				row.SetValue(_iconColumn, String.Empty);
 			}
 		}
