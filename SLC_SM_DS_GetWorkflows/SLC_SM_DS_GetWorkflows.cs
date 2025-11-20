@@ -55,6 +55,7 @@ namespace SLCSMDSGetWorkflows
 	using System.Linq;
 	using DomHelpers.SlcProperties;
 	using DomHelpers.SlcWorkflow;
+	using Library.Dom;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
@@ -107,7 +108,7 @@ namespace SLCSMDSGetWorkflows
 				?.Value ?? "Other";
 		}
 
-		private static string FetchWorkflowCategory(WorkflowsInstance workflow, IEnumerable<PropertyValuesInstance> propertyValues)
+		private static string FetchWorkflowCategory(WorkflowsInstance workflow, ICollection<PropertyValuesInstance> propertyValues)
 		{
 			return propertyValues
 				.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())
@@ -145,27 +146,15 @@ namespace SLCSMDSGetWorkflows
 			{
 				var workflowsResult = _logger.PerformanceLogger(
 					"Get DOM Workflows",
-					() =>
-					{
-						var workflowsDomHelper = new DomHelper(_dms.SendMessages, SlcWorkflowIds.ModuleId);
-						return workflowsDomHelper.DomInstances
-							.Read(
-								DomInstanceExposers.DomDefinitionId.Equal(SlcWorkflowIds.Definitions.Workflows.Id)
-									.AND(DomInstanceExposers.StatusId.Equal(SlcWorkflowIds.Behaviors.Workflow_Behavior.Statuses.Complete)));
-					});
+					() => WorkflowExtensions.GetWorkflows(_dms.SendMessages));
 
 				var workflowPropertyValues = _logger.PerformanceLogger(
 					"Get DOM Workflow Properties",
-					() => new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId)
-						.DomInstances
-						.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcPropertiesIds.Definitions.PropertyValues.Id))
-						.Select(p => new PropertyValuesInstance(p))
-						.ToArray());
+					() => PropertyExtensions.GetCategories(_dms.SendMessages));
 
 				var workflows = _logger.PerformanceLogger(
 					"Build Workflows Rows",
 					() => workflowsResult
-						.Select(w => new WorkflowsInstance(w))
 						.Select(wf => BuildRow(wf, FetchWorkflowCategory(wf, workflowPropertyValues)))
 						.ToArray());
 

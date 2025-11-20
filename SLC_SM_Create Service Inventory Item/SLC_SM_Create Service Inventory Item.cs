@@ -280,13 +280,13 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			// Update state
 			if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.New)
 			{
-				repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.New_To_Acknowledged);
-				repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
+				serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.New_To_Acknowledged);
+				serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 			}
 
 			if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.Acknowledged)
 			{
-				repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
+				serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 			}
 
 			// Update state of main Service Order as well
@@ -295,13 +295,13 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			{
 				if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.New)
 				{
-					repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.New_To_Acknowledged);
-					repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
+					order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.New_To_Acknowledged);
+					order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 				}
 
 				if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.Acknowledged)
 				{
-					repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
+					order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 				}
 			}
 		}
@@ -425,7 +425,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				d.OkButton.Pressed += (sender, args) =>
 				{
 					var serviceOrderItem = repo.ServiceOrderItems.Read(ServiceOrderItemExposers.Guid.Equal(domId)).FirstOrDefault();
-					if (domId != Guid.Empty && serviceOrderItem == null)
+					if (domId == Guid.Empty || serviceOrderItem == null)
 					{
 						throw new InvalidOperationException($"No Service Order Item with ID '{domId}' found on the system!");
 					}

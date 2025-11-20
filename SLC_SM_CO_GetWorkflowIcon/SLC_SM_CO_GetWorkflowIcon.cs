@@ -56,6 +56,7 @@ namespace SLCSMCOGetWorkflowIcon
 	using System.Linq;
 	using DomHelpers.SlcProperties;
 	using DomHelpers.SlcWorkflow;
+	using Library.Dom;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -73,10 +74,9 @@ namespace SLCSMCOGetWorkflowIcon
 		private string _workflowIdColumnName = String.Empty;
 
 		private GQIDMS _dms;
-		private DomHelper _propertiesDomHelper;
 		private DomHelper _wfDomHelper;
 
-		private IEnumerable<PropertyValuesInstance> _propertyValues;
+		private ICollection<PropertyValuesInstance> _propertyValues;
 
 		public GQIArgument[] GetInputArguments()
 		{
@@ -90,18 +90,24 @@ namespace SLCSMCOGetWorkflowIcon
 
 		public void HandleRow(GQIEditableRow row)
 		{
-			var workflowId = Guid.Parse(row.GetValue(_workflowIdColumnName).ToString());
+			try
+			{
+				var workflowId = Guid.Parse(row.GetValue(_workflowIdColumnName).ToString());
 
-			var workflowsResult = _wfDomHelper.DomInstances
-				.Read(DomInstanceExposers.Id.Equal(workflowId));
+				var workflow = _wfDomHelper.DomInstances
+					.Read(DomInstanceExposers.Id.Equal(workflowId))
+					.FirstOrDefault();
 
-			var workflow = workflowsResult.FirstOrDefault();
+				var icon = workflow != null
+					? FetchWorkflowCategory(new WorkflowsInstance(workflow))
+					: String.Empty;
 
-			var icon = workflow != null
-				? FetchWorkflowCategory(new WorkflowsInstance(workflow))
-				: String.Empty;
-
-			row.SetValue(_iconColumn, icon);
+				row.SetValue(_iconColumn, icon);
+			}
+			catch (Exception)
+			{
+				row.SetValue(_iconColumn, String.Empty);
+			}
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -113,12 +119,9 @@ namespace SLCSMCOGetWorkflowIcon
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
 			_dms = args.DMS;
-			_propertiesDomHelper = new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId);
 			_wfDomHelper = new DomHelper(_dms.SendMessages, SlcWorkflowIds.ModuleId);
 
-			_propertyValues = _propertiesDomHelper.DomInstances
-				.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcPropertiesIds.Definitions.PropertyValues.Id))
-				.Select(p => new PropertyValuesInstance(p));
+			_propertyValues = PropertyExtensions.GetIcons(_dms.SendMessages);
 
 			return default;
 		}
