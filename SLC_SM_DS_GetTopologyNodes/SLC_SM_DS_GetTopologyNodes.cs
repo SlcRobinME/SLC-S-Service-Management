@@ -56,10 +56,12 @@ namespace SLCSMDSGetTopologyNodes
 	using DomHelpers.SlcProperties;
 	using DomHelpers.SlcServicemanagement;
 	using DomHelpers.SlcWorkflow;
+	using Library.Dom;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Relationship;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
@@ -74,6 +76,7 @@ namespace SLCSMDSGetTopologyNodes
 	public sealed class SLCSMDSGetTopologyNodes : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
 		private const string DataSourceName = "SLC_SM_DS_GetTopologyNodes";
+		private const string PropertyNameIcon = "Icon";
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = true };
 		private Guid _domId;
 		private GQIDMS _dms;
@@ -153,12 +156,7 @@ namespace SLCSMDSGetTopologyNodes
 
 				var workflowPropertyValues = _logger.PerformanceLogger(
 					"Get Workflow Property Values",
-					() =>
-						new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId)
-							.DomInstances
-							.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcPropertiesIds.Definitions.PropertyValues.Id))
-							.Select(p => new PropertyValuesInstance(p))
-							.ToArray());
+					() => PropertyExtensions.GetIcons(_dms.SendMessages));
 
 				var workflowsFilter = serviceItems
 					.Where(item => item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
@@ -198,7 +196,7 @@ namespace SLCSMDSGetTopologyNodes
 								{
 									ObjectID = $"{element.DataMinerID}/{element.ElementID}",
 									ObjectType = "Element",
-									PropertyName = "Icon",
+									PropertyName = PropertyNameIcon,
 								})
 							.Cast<DMSMessage>()
 							.ToArray();
@@ -236,7 +234,7 @@ namespace SLCSMDSGetTopologyNodes
 			Models.ServiceItem item,
 			LiteElementInfoEvent[] elements,
 			List<DomInstance> workflows,
-			PropertyValuesInstance[] propertyValues,
+			ICollection<PropertyValuesInstance> propertyValues,
 			PropertyChangeEventMessage[] icons)
 		{
 			if (item.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.SRMBooking)
@@ -264,7 +262,7 @@ namespace SLCSMDSGetTopologyNodes
 				return propertyValues
 					.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())
 					?
-					.PropertyValues.FirstOrDefault(v => v.PropertyName == "Icon")
+					.PropertyValues.FirstOrDefault(v => v.PropertyName == PropertyNameIcon)
 					?.Value ?? String.Empty;
 			}
 

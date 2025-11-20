@@ -28,7 +28,7 @@
 			finally
 			{
 				stopwatch.Stop();
-				logger.Debug($"[{methodName}] executed in {stopwatch.ElapsedMilliseconds} ms");
+				logger.Information($"[{methodName}] executed in {stopwatch.ElapsedMilliseconds} ms");
 			}
 		}
 
@@ -48,7 +48,7 @@
 			finally
 			{
 				stopwatch.Stop();
-				logger.Debug($"[{methodName}] executed in {stopwatch.ElapsedMilliseconds} ms");
+				logger.Information($"[{methodName}] executed in {stopwatch.ElapsedMilliseconds} ms");
 			}
 		}
 	}
