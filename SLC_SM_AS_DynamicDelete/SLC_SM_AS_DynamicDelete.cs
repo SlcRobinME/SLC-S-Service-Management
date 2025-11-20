@@ -71,6 +71,7 @@ namespace SLCSMASDynamicDelete
 	{
 		private IList<ServiceItemRelationshipSection> _connections;
 		private IList<ServiceItemsSection> _nodes;
+		private IEngine _engine;
 
 		/// <summary>
 		/// The script entry point.
@@ -111,6 +112,8 @@ namespace SLCSMASDynamicDelete
 
 		private void RunSafe(IEngine engine)
 		{
+			_engine = engine;
+
 			var scriptData = new ScriptData(engine);
 			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
 
@@ -157,7 +160,7 @@ namespace SLCSMASDynamicDelete
 			var connections = _connections.ToList(); // cannot iterate mutable collection
 			foreach (var connectionId in scriptData.ConnectionIds)
 			{
-				var connection = connections.FirstOrDefault(c => c.SectionID.Id == connectionId);
+				var connection = connections.SingleOrDefault(c => c.ID == connectionId.ToString());
 				_connections.Remove(connection);
 			}
 		}

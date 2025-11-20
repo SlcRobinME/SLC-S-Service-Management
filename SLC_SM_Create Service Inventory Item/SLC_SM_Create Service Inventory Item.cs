@@ -281,13 +281,13 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			// Update state
 			var domInstanceId = new DomInstanceId(serviceOrderItem.ID);
-			if (serviceOrderItem.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.New)
+			if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.New)
 			{
 				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.New_To_Acknowledged);
 				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
 			}
 
-			if (serviceOrderItem.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.Acknowledged)
+			if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.Acknowledged)
 			{
 				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
 			}
@@ -297,13 +297,13 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			if (order != null)
 			{
 				var orderId = new DomInstanceId(order.ID);
-				if (order.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.New)
+				if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.New)
 				{
 					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.New_To_Acknowledged);
 					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
 				}
 
-				if (order.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Acknowledged)
+				if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.Acknowledged)
 				{
 					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
 				}
