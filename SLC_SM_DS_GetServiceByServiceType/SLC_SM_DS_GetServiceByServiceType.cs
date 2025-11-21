@@ -48,7 +48,6 @@ DATE		VERSION		AUTHOR			COMMENTS
 11/09/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
-using System;
 
 namespace SLCSMDSGetServiceByServiceType
 {
@@ -74,20 +73,20 @@ namespace SLCSMDSGetServiceByServiceType
 	{
 		private const string DataSourceName = "SLC_SM_DS_GetServiceByServiceType";
 
-		private static readonly string configParamNameServiceType = "Service Type";
-		private static readonly string configParamNameReceptionType = "Reception Type";
-		private static readonly string configParamNameChannelId = "Channel ID";
-		private static readonly string configParamNameVideoFormat = "Video Format";
-		private static readonly string configParamNameDistributionType = "Distribution Type";
-		private static readonly string configParamNameRegion = "Region";
-		private static readonly string[] configurationParameterNames = new[]
+		private static readonly string ConfigParamNameServiceType = "Service Type";
+		private static readonly string ConfigParamNameReceptionType = "Reception Type";
+		private static readonly string ConfigParamNameChannelId = "Channel ID";
+		private static readonly string ConfigParamNameVideoFormat = "Video Format";
+		private static readonly string ConfigParamNameDistributionType = "Distribution Type";
+		private static readonly string ConfigParamNameRegion = "Region";
+		private static readonly string[] ConfigurationParameterNames = new[]
 		{
-			configParamNameServiceType,
-			configParamNameReceptionType,
-			configParamNameChannelId,
-			configParamNameVideoFormat,
-			configParamNameDistributionType,
-			configParamNameRegion,
+			ConfigParamNameServiceType,
+			ConfigParamNameReceptionType,
+			ConfigParamNameChannelId,
+			ConfigParamNameVideoFormat,
+			ConfigParamNameDistributionType,
+			ConfigParamNameRegion,
 		};
 
 		private readonly Arguments _arguments = new Arguments();
@@ -131,12 +130,29 @@ namespace SLCSMDSGetServiceByServiceType
 			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
 		}
 
+		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
+		{
+			return _arguments.OnArgumentsProcessed(args);
+		}
+
+		public OnInitOutputArgs OnInit(OnInitInputArgs args)
+		{
+			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
+
+			_gqiDms = args.DMS;
+			_connection = _gqiDms.GetConnection();
+			_dms = _connection.GetDms();
+
+			return new OnInitOutputArgs();
+		}
+
 		private GQIPage BuildupRows()
 		{
 			try
 			{
 				FilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> filterConfigParams = new ORFilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>();
-				foreach (string configurationParameterName in configurationParameterNames)
+				foreach (string configurationParameterName in ConfigurationParameterNames)
 				{
 					filterConfigParams = filterConfigParams.OR(ConfigurationParameterExposers.Name.Equal(configurationParameterName));
 				}
@@ -144,12 +160,12 @@ namespace SLCSMDSGetServiceByServiceType
 				var configurationHelper = new DataHelperConfigurationParameter(_gqiDms.GetConnection());
 				var configurationParameters = configurationHelper.Read(filterConfigParams).ToDictionary(p => p.Name, p => p.ID);
 
-				configurationParameters.TryGetValue(configParamNameServiceType, out configID_ServiceType);
-				configurationParameters.TryGetValue(configParamNameReceptionType, out configID_ReceptionType);
-				configurationParameters.TryGetValue(configParamNameChannelId, out configID_ChannelId);
-				configurationParameters.TryGetValue(configParamNameVideoFormat, out configID_VideoFormat);
-				configurationParameters.TryGetValue(configParamNameDistributionType, out configID_DistType);
-				configurationParameters.TryGetValue(configParamNameRegion, out configID_Region);
+				configurationParameters.TryGetValue(ConfigParamNameServiceType, out configID_ServiceType);
+				configurationParameters.TryGetValue(ConfigParamNameReceptionType, out configID_ReceptionType);
+				configurationParameters.TryGetValue(ConfigParamNameChannelId, out configID_ChannelId);
+				configurationParameters.TryGetValue(ConfigParamNameVideoFormat, out configID_VideoFormat);
+				configurationParameters.TryGetValue(ConfigParamNameDistributionType, out configID_DistType);
+				configurationParameters.TryGetValue(ConfigParamNameRegion, out configID_Region);
 
 				var services = new List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service>();
 				var serviceHelper = new DataHelperService(_gqiDms.GetConnection());
@@ -169,23 +185,6 @@ namespace SLCSMDSGetServiceByServiceType
 				_logger.Error($"GQIDS|{DataSourceName}|Exception: {e}");
 				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
-		}
-
-		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
-		{
-			return _arguments.OnArgumentsProcessed(args);
-		}
-
-		public OnInitOutputArgs OnInit(OnInitInputArgs args)
-		{
-			_logger = args.Logger;
-			_logger.MinimumLogLevel = GQILogLevel.Debug;
-
-			_gqiDms = args.DMS;
-			_connection = _gqiDms.GetConnection();
-			_dms = _connection.GetDms();
-
-			return new OnInitOutputArgs();
 		}
 
 		private GQIRow BuildRow(Models.Service service)
