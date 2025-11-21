@@ -3,36 +3,68 @@ namespace SLCSMDSGetServiceOrderButtons
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Analytics.GenericInterface;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using SLC_SM_Common.Extensions;
+	using static DomHelpers.SlcServicemanagement.SlcServicemanagementIds.Behaviors.Serviceorder_Behavior;
 
 	/// <summary>
 	///     Represents a data source.
 	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
-	[GQIMetaData(Name = "SLC-SM-DS-Get Service Order Buttons")]
-	public sealed class SLCSMDSGetServiceOrderButtons : IGQIDataSource
-		, IGQIOnInit
-		, IGQIInputArguments
+	[GQIMetaData(Name = DataSourceName)]
+	public sealed class SLCSMDSGetServiceOrderButtons : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
-		private readonly GQIStringArgument serviceOrderReferenceArg = new GQIStringArgument("ServiceOrderReference") { IsRequired = true };
+		private const string DataSourceName = "SLC-SM-DS-Get Service Order Buttons";
 
-		private readonly List<ItemState> itemStateList = new List<ItemState>
+		private static readonly List<TransitionsEnum> UnHappyFlows = new List<TransitionsEnum>
 		{
-			ItemStates.newState, ItemStates.acknowledgedState, ItemStates.inprogressState, ItemStates.rejectState, ItemStates.failedState, ItemStates.partialState, ItemStates.heldState,
-			ItemStates.pendingState, ItemStates.completedState, ItemStates.assesscancellationState, ItemStates.pendingcancellationState, ItemStates.cancelledState,
+			TransitionsEnum.New_To_Rejected,
+			TransitionsEnum.Acknowledged_To_Rejected,
+			TransitionsEnum.Inprogress_To_Failed,
+			TransitionsEnum.Inprogress_To_Partial,
+			TransitionsEnum.Inprogress_To_Held,
+			TransitionsEnum.Inprogress_To_Pending,
+			TransitionsEnum.Pending_To_Assesscancellation,
+			TransitionsEnum.Assesscancellation_To_Pendingcancellation,
+			TransitionsEnum.Pendingcancellation_To_Cancelled,
+			TransitionsEnum.Held_To_Inprogress,
+			TransitionsEnum.Assesscancellation_To_Held,
+			TransitionsEnum.Assesscancellation_To_Pending,
+			TransitionsEnum.Held_To_Assesscancellation,
+			TransitionsEnum.Pending_To_Inprogress,
 		};
 
+		private static readonly Dictionary<TransitionsEnum, string> ButtonNames = new Dictionary<TransitionsEnum, string>
+		{
+			{ TransitionsEnum.New_To_Acknowledged, "Acknowledge" },
+			{ TransitionsEnum.New_To_Rejected, "Reject" },
+			{ TransitionsEnum.Acknowledged_To_Rejected, "Reject" },
+			{ TransitionsEnum.Acknowledged_To_Inprogress, "Initialize" },
+			{ TransitionsEnum.Inprogress_To_Completed, "Complete" },
+			{ TransitionsEnum.Inprogress_To_Failed, "Failed" },
+			{ TransitionsEnum.Inprogress_To_Partial, "Partially Failed" },
+			{ TransitionsEnum.Inprogress_To_Held, "Issue" },
+			{ TransitionsEnum.Inprogress_To_Pending, "Information Missing" },
+			{ TransitionsEnum.Pending_To_Assesscancellation, "Request Cancellation" },
+			{ TransitionsEnum.Assesscancellation_To_Pendingcancellation, "Confirm Cancellation" },
+			{ TransitionsEnum.Pendingcancellation_To_Cancelled, "Cancel" },
+			{ TransitionsEnum.Held_To_Inprogress, "In Progress" },
+			{ TransitionsEnum.Assesscancellation_To_Held, "Issue" },
+			{ TransitionsEnum.Assesscancellation_To_Pending, "Information Missing" },
+			{ TransitionsEnum.Held_To_Assesscancellation, "Request Cancellation" },
+			{ TransitionsEnum.Pending_To_Inprogress, "In Progress" },
+		};
+
+		private readonly GQIStringArgument serviceOrderReferenceArg = new GQIStringArgument("ServiceOrderReference") { IsRequired = true };
 		private Guid serviceOrderReference;
 		private GQIDMS _dms;
+		private IGQILogger _logger;
 
 		public GQIColumn[] GetColumns()
 		{
-			// Define data source columns
-			// See: https://aka.dataminer.services/igqidatasource-getcolumns
 			return new GQIColumn[]
 			{
 				new GQIStringColumn("Button Label"),
@@ -45,8 +77,6 @@ namespace SLCSMDSGetServiceOrderButtons
 
 		public GQIArgument[] GetInputArguments()
 		{
-			// Define data source input arguments
-			// See: https://aka.dataminer.services/igqiinputarguments-getinputarguments
 			return new GQIArgument[]
 			{
 				serviceOrderReferenceArg,
@@ -55,43 +85,11 @@ namespace SLCSMDSGetServiceOrderButtons
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			try
-			{
-				var domHelper = new DomHelper(_dms.SendMessages, SlcServicemanagementIds.ModuleId);
-				var filter = DomInstanceExposers.Id.Equal(serviceOrderReference);
-				var instance = domHelper.DomInstances.Read(filter).FirstOrDefault() ?? throw new Exception($"Could not find service order with id {serviceOrderReference}");
-				ItemState currentState = itemStateList.SingleOrDefault(state => state.Id == instance.StatusId);
-
-				List<ButtonConfig> activeButtons = ButtonCollection.ButtonList.Where(button => button.ApplicableStates.Contains(currentState)).ToList();
-
-				List<GQIRow> rows = activeButtons.Select(
-						button => new GQIRow(
-							new[]
-							{
-								new GQICell { Value = button.Name },
-								new GQICell { Value = button.ScriptToExecute },
-								new GQICell { Value = button.PreviousState.NameId },
-								new GQICell { Value = button.NextState.NameId },
-								new GQICell { Value = button.IsHappyFlow },
-							}))
-					.ToList();
-
-				return new GQIPage(rows.ToArray())
-				{
-					HasNextPage = false,
-				};
-			}
-			catch (Exception e)
-			{
-				_dms.GenerateInformationMessage("GQIDS|Get Service Order Buttons Exception: " + e);
-				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
-			}
+			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
-			// Process input argument values
-			// See: https://aka.dataminer.services/igqiinputarguments-onargumentsprocessed
 			if (!Guid.TryParse(args.GetArgumentValue(serviceOrderReferenceArg), out serviceOrderReference))
 			{
 				serviceOrderReference = Guid.Empty;
@@ -102,191 +100,65 @@ namespace SLCSMDSGetServiceOrderButtons
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			// Initialize the data source
-			// See: https://aka.dataminer.services/igqioninit-oninit
 			_dms = args.DMS;
+			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
 			return default;
 		}
 
-		public static class ButtonCollection
+		private GQIPage BuildupRows()
 		{
-			public static readonly List<ButtonConfig> ButtonList = new List<ButtonConfig>
+			try
 			{
-				new ButtonConfig
+				if (serviceOrderReference == Guid.Empty)
 				{
-					Id = "new_to_acknowledged",
-					Name = "Acknowledge",
-					ApplicableStates = new List<ItemState> { ItemStates.newState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.newState,
-					NextState = ItemStates.acknowledgedState,
-					IsHappyFlow = true,
-				},
+					return new GQIPage(Array.Empty<GQIRow>()) { HasNextPage = false };
+				}
 
-				new ButtonConfig
-				{
-					Id = "new_to_reject",
-					Name = "Reject",
-					ApplicableStates = new List<ItemState> { ItemStates.newState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.newState,
-					NextState = ItemStates.acknowledgedState,
-					IsHappyFlow = false,
-				},
+				var order = _logger.PerformanceLogger(
+					"Get Service Order",
+					() =>
+						new DataHelperServiceOrder(_dms.GetConnection()).Read(ServiceOrderExposers.Guid.Equal(serviceOrderReference)).FirstOrDefault()
+						?? throw new NotSupportedException($"Could not find a service order with ID {serviceOrderReference}"));
+				StatusesEnum currentState = order.Status;
 
-				new ButtonConfig
-				{
-					Id = "acknowledged_to_inprogress",
-					Name = "Initialize",
-					ApplicableStates = new List<ItemState> { ItemStates.acknowledgedState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.acknowledgedState,
-					NextState = ItemStates.inprogressState,
-					IsHappyFlow = true,
-				},
-				new ButtonConfig
-				{
-					Id = "acknowledged_to_reject",
-					Name = "Reject",
-					ApplicableStates = new List<ItemState> { ItemStates.acknowledgedState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.acknowledgedState,
-					NextState = ItemStates.rejectState,
-					IsHappyFlow = false,
-				},
-				new ButtonConfig
-				{
-					Id = "inprogress_to_failed",
-					Name = "Failed",
-					ApplicableStates = new List<ItemState> { ItemStates.inprogressState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.inprogressState,
-					NextState = ItemStates.failedState,
-					IsHappyFlow = false,
-				},
-				new ButtonConfig
-				{
-					Id = "inprogress_to_failed",
-					Name = "Partially Failed",
-					ApplicableStates = new List<ItemState> { ItemStates.inprogressState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.inprogressState,
-					NextState = ItemStates.partialState,
-					IsHappyFlow = false,
-				},
-				new ButtonConfig
-				{
-					Id = "inprogress_to_completed",
-					Name = "Complete",
-					ApplicableStates = new List<ItemState> { ItemStates.inprogressState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.inprogressState,
-					NextState = ItemStates.completedState,
-					IsHappyFlow = true,
-				},
-				new ButtonConfig
-				{
-					Id = "inprogress_to_held",
-					Name = "Issue",
-					ApplicableStates = new List<ItemState> { ItemStates.inprogressState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.inprogressState,
-					NextState = ItemStates.heldState,
-					IsHappyFlow = false,
-				},
-				new ButtonConfig
-				{
-					Id = "inprogress_to_pending",
-					Name = "Information Missing",
-					ApplicableStates = new List<ItemState> { ItemStates.inprogressState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.inprogressState,
-					NextState = ItemStates.pendingState,
-					IsHappyFlow = false,
-				},
-				new ButtonConfig
-				{
-					Id = "pending_to_assesscancellation",
-					Name = "Request Cancellation",
-					ApplicableStates = new List<ItemState> { ItemStates.pendingState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.pendingState,
-					NextState = ItemStates.assesscancellationState,
-					IsHappyFlow = false,
-				},
-				new ButtonConfig
-				{
-					Id = "held_to_assesscancellation",
-					Name = "Request Cancellation",
-					ApplicableStates = new List<ItemState> { ItemStates.heldState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.heldState,
-					NextState = ItemStates.assesscancellationState,
-					IsHappyFlow = false,
-				},
-				new ButtonConfig
-				{
-					Id = "assesscancellation_to_pendingcancellation",
-					Name = "Confirm Cancellation",
-					ApplicableStates = new List<ItemState> { ItemStates.assesscancellationState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.assesscancellationState,
-					NextState = ItemStates.pendingcancellationState,
-					IsHappyFlow = false,
-				},
-				new ButtonConfig
-				{
-					Id = "pendingcancellation_to_cancelled",
-					Name = "Cancel",
-					ApplicableStates = new List<ItemState> { ItemStates.pendingcancellationState },
-					ScriptToExecute = "ServiceOrderItem_StateTransitions",
-					PreviousState = ItemStates.pendingcancellationState,
-					NextState = ItemStates.cancelledState,
-					IsHappyFlow = false,
-				},
-			};
-		}
+				return _logger.PerformanceLogger(
+					"Build Rows",
+					() =>
+					{
+						var transitions = Enum.GetValues(typeof(TransitionsEnum))
+							.Cast<TransitionsEnum>()
+							.Where(t => t.ToString().StartsWith($"{currentState}_to_", StringComparison.OrdinalIgnoreCase))
+							.ToList();
 
-		public static class ItemStates
-		{
-			public static readonly ItemState acknowledgedState = new ItemState { Name = "Acknowledged", NameId = "acknowledged", Id = "d917fc53-2638-4ab9-9ac6-651ec5312bac" };
-			public static readonly ItemState assesscancellationState = new ItemState { Name = "Assess Cancellation", NameId = "assesscancellation", Id = "f7e93ddd-cddf-4755-a3e5-0f6ff885dcf5" };
-			public static readonly ItemState cancelledState = new ItemState { Name = "Cancelled", NameId = "cancelled", Id = "61b80d48-d555-462e-baae-a52b17c85ddb" };
-			public static readonly ItemState completedState = new ItemState { Name = "Completed", NameId = "completed", Id = "f8a8d853-faaf-401c-9865-71e314614023" };
-			public static readonly ItemState failedState = new ItemState { Name = "Failed", NameId = "failed", Id = "6a01a480-4c38-4db7-b545-72ba05742a7e" };
-			public static readonly ItemState heldState = new ItemState { Name = "Held", NameId = "held", Id = "310ea9e9-f65c-4e11-8b1b-e2c34688ef44" };
-			public static readonly ItemState inprogressState = new ItemState { Name = "In Progress", NameId = "inprogress", Id = "331dc1c2-1950-4c00-a4ae-0aba674a30e6" };
-			public static readonly ItemState newState = new ItemState { Name = "New", NameId = "new", Id = "06df5562-cd9b-4b0b-bd45-c58560a8b22a" };
-			public static readonly ItemState partialState = new ItemState { Name = "Partial", NameId = "partial", Id = "7f13d019-29de-43cb-a510-ab2b2a77e785" };
-			public static readonly ItemState pendingcancellationState = new ItemState { Name = "Pending Cancellation", NameId = "pendingcancellation", Id = "15d08c01-fe63-4d5f-8544-e5b4d66439f5" };
-			public static readonly ItemState pendingState = new ItemState { Name = "Pending", NameId = "pending", Id = "23f9fa75-32b8-4e4a-bd65-06a7344d1902" };
-			public static readonly ItemState rejectState = new ItemState { Name = "Rejected", NameId = "rejected", Id = "260a7073-e54e-4482-a8a7-2b4f2e49c42e" };
-		}
+						List<GQIRow> rows = transitions.Select(
+								transition =>
+								{
+									string nextState = transition.ToString().Split('_').Last();
+									return new GQIRow(
+										new[]
+										{
+											new GQICell { Value = ButtonNames.TryGetValue(transition, out string button) ? button : Transitions.ToValue(transition) },
+											new GQICell { Value = "ServiceOrderItem_StateTransitions" },
+											new GQICell { Value = currentState.ToString() },
+											new GQICell { Value = nextState },
+											new GQICell { Value = !UnHappyFlows.Contains(transition) },
+										});
+								})
+							.ToList();
 
-		public class ButtonConfig
-		{
-			public string Id { get; set; }
-
-			public string Name { get; set; }
-
-			public List<ItemState> ApplicableStates { get; set; }
-
-			public string ScriptToExecute { get; set; }
-
-			public ItemState PreviousState { get; set; }
-
-			public ItemState NextState { get; set; }
-
-			public bool IsHappyFlow { get; set; }
-		}
-
-		public class ItemState
-		{
-			public string Name { get; set; }
-
-			public string NameId { get; set; }
-
-			public string Id { get; set; }
+						return new GQIPage(rows.ToArray())
+						{
+							HasNextPage = false,
+						};
+					});
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage($"GQIDS|{DataSourceName}|Exception: {e}");
+				_logger.Error($"GQIDS|{DataSourceName}|Exception: {e}");
+				return new GQIPage(Array.Empty<GQIRow>());
+			}
 		}
 	}
 }

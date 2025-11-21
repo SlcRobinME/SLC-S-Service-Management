@@ -1,10 +1,14 @@
 namespace ServiceStateTransitions
 {
 	using System;
-	using DomHelpers.SlcServicemanagement;
+	using System.Linq;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
+	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
+	using static DomHelpers.SlcServicemanagement.SlcServicemanagementIds.Behaviors.Service_Behavior;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
@@ -50,138 +54,21 @@ namespace ServiceStateTransitions
 
 		private void RunSafe(IEngine engine)
 		{
-			var domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
 			var serviceReference = engine.ReadScriptParamFromApp<Guid>("ServiceReference");
 			var previousState = engine.ReadScriptParamFromApp("PreviousState").ToLower();
 			var nextState = engine.ReadScriptParamFromApp("NextState").ToLower();
 
-			string transitionId = String.Empty;
+			TransitionsEnum transition = Enum.GetValues(typeof(TransitionsEnum))
+				.Cast<TransitionsEnum?>()
+				.FirstOrDefault(t => t.ToString().Equals($"{previousState}_to_{nextState}", StringComparison.OrdinalIgnoreCase))
+				?? throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");
 
-			switch (previousState)
-			{
-				case "new":
-					transitionId = GetTransitionIdNew(previousState, nextState);
-					break;
+			var srvHelper = new DataHelperService(engine.GetUserConnection());
+			var service = srvHelper.Read(ServiceExposers.Guid.Equal(serviceReference)).FirstOrDefault()
+						  ?? throw new NotSupportedException($"No Service with ID '{serviceReference}' exists on the system");
 
-				case "designed":
-					transitionId = GetTransitionIdDesigned(previousState, nextState);
-					break;
-
-				case "reserved":
-					transitionId = GetTransitionIdReserved(previousState, nextState);
-					break;
-
-				case "active":
-					transitionId = GetTransitionIdActive(previousState, nextState);
-					break;
-
-				case "terminated":
-					transitionId = GetTransitionIdTerminated(previousState, nextState);
-					break;
-
-				default:
-					throw new NotSupportedException($"previousState '{previousState}' is not supported");
-			}
-
-			engine.GenerateInformation($"Service Order Status Transition starting: previousState: {previousState}, nextState: {nextState}");
-
-			domHelper.DomInstances.DoStatusTransition(new DomInstanceId(serviceReference), transitionId);
-		}
-
-		private static string GetTransitionIdTerminated(string previousState, string nextState)
-		{
-			string transitionId;
-			switch (nextState)
-			{
-				case "retired":
-					transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Terminated_To_Retired;
-					break;
-
-				case "active":
-					transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Terminated_To_Active;
-					break;
-
-				default:
-					throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");
-			}
-
-			return transitionId;
-		}
-
-		private static string GetTransitionIdActive(string previousState, string nextState)
-		{
-			string transitionId;
-			switch (nextState)
-			{
-				case "terminated":
-					transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Active_To_Terminated;
-					break;
-
-				default:
-					throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");
-			}
-
-			return transitionId;
-		}
-
-		private static string GetTransitionIdReserved(string previousState, string nextState)
-		{
-			string transitionId;
-			switch (nextState)
-			{
-				case "active":
-					transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Reserved_To_Active;
-					break;
-
-				case "retired":
-					transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Reserved_To_Retired;
-					break;
-
-				default:
-					throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");
-			}
-
-			return transitionId;
-		}
-
-		private static string GetTransitionIdDesigned(string previousState, string nextState)
-		{
-			string transitionId;
-			switch (nextState)
-			{
-				case "reserved":
-					transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Designed_To_Reserved;
-					break;
-
-				case "retired":
-					transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.Designed_To_Retired;
-					break;
-
-				default:
-					throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");
-			}
-
-			return transitionId;
-		}
-
-		private static string GetTransitionIdNew(string previousState, string nextState)
-		{
-			string transitionId;
-			switch (nextState)
-			{
-				case "designed":
-					transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.New_To_Designed;
-					break;
-
-				case "retired":
-					transitionId = SlcServicemanagementIds.Behaviors.Service_Behavior.Transitions.New_To_Retired;
-					break;
-
-				default:
-					throw new NotSupportedException($"The provided previousState '{previousState}' is not supported for nextState '{nextState}'");
-			}
-
-			return transitionId;
+			engine.GenerateInformation($"Service Status Transition starting: previousState: {previousState}, nextState: {nextState}");
+			srvHelper.UpdateState(service, transition);
 		}
 	}
 }

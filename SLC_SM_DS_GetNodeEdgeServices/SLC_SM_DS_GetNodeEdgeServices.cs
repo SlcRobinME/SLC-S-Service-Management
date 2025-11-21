@@ -56,9 +56,7 @@ namespace SLCSMDSGetNodeEdgeServices
 	using DomHelpers.SlcConfigurations;
 	using DomHelpers.SlcServicemanagement;
 	using Skyline.DataMiner.Analytics.GenericInterface;
-	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using SLC_SM_Common.Extensions;
 
@@ -66,11 +64,10 @@ namespace SLCSMDSGetNodeEdgeServices
 	///     Represents a data source.
 	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
-	[GQIMetaData(Name = "SLC_SM_DS_GetNodeEdgeServices")]
-	public sealed class SLCSMDSGetNodeEdgeServices : IGQIDataSource
-		, IGQIOnInit
-		, IGQIInputArguments
+	[GQIMetaData(Name = DataSourceName)]
+	public sealed class SLCSMDSGetNodeEdgeServices : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
+		private const string DataSourceName = "SLC_SM_DS_GetNodeEdgeServices";
 		private readonly Arguments _arguments = new Arguments();
 		private IGQILogger _logger;
 		private DomHelper _serviceMangerDomHelper;
@@ -96,12 +93,15 @@ namespace SLCSMDSGetNodeEdgeServices
 
 		public GQIArgument[] GetInputArguments()
 		{
-			// Define data source input arguments
-			// See: https://aka.dataminer.services/igqiinputarguments-getinputarguments
 			return _arguments.GetInputArguments();
 		}
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
+		{
+			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
+		}
+
+		private GQIPage BuildupRows()
 		{
 			try
 			{
@@ -117,24 +117,22 @@ namespace SLCSMDSGetNodeEdgeServices
 			}
 			catch (Exception e)
 			{
-				_dms.GenerateInformationMessage("Topology Nodes Exception: " + e);
+				_dms.GenerateInformationMessage($"GQIDS|{DataSourceName}|Exception: {e}");
+				_logger.Error($"GQIDS|{DataSourceName}|Exception: {e}");
 				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
-			// Process input argument values
-			// See: https://aka.dataminer.services/igqiinputarguments-onargumentsprocessed
 			return _arguments.OnArgumentsProcessed(args);
 		}
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
-			// Initialize the data source
-			// See: https://aka.dataminer.services/igqioninit-oninit
 			_dms = args.DMS;
 			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
 			_serviceMangerDomHelper = new DomHelper(args.DMS.SendMessages, SlcServicemanagementIds.ModuleId);
 			_configurationDomHelper = new DomHelper(args.DMS.SendMessages, SlcConfigurationsIds.ModuleId);
 			return new OnInitOutputArgs();

@@ -3,23 +3,25 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
-	using DomHelpers.SlcServicemanagement;
-
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using SLC_SM_Common.Extensions;
+	using static DomHelpers.SlcServicemanagement.SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior;
 
 	// Required to mark the interface as a GQI data source
-	[GQIMetaData(Name = "Get_ServiceOrderItems")]
+	[GQIMetaData(Name = DataSourceName)]
 	public class EventManagerGetMultipleSections : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
+		private const string DataSourceName = "Get_ServiceOrderItems";
+
 		// defining input argument, will be converted to guid by OnArgumentsProcessed
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = false };
 		private GQIDMS _dms;
+		private IGQILogger _logger;
 
 		// variable where input argument will be stored
 		private Guid _instanceDomId;
@@ -51,18 +53,7 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			try
-			{
-				return new GQIPage(GetMultiSection())
-				{
-					HasNextPage = false,
-				};
-			}
-			catch (Exception e)
-			{
-				_dms.GenerateInformationMessage("GQIDS|Get Service Order Items Exception: " + e);
-				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
-			}
+			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -79,7 +70,8 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
 			_dms = args.DMS;
-
+			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
 			return default;
 		}
 
@@ -126,13 +118,30 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 					},
 					new GQICell
 					{
-						Value = item.ServiceOrderItem.Status.ToString(),
+						Value = item.ServiceOrderItem.Status.GetDescription(),
 					},
 					new GQICell
 					{
-						Value = item.ServiceOrderItem.Status.ToString(),
+						Value = Statuses.ToValue(item.ServiceOrderItem.Status),
 					},
 				});
+		}
+
+		private GQIPage BuildupRows()
+		{
+			try
+			{
+				return new GQIPage(GetMultiSection())
+				{
+					HasNextPage = false,
+				};
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage($"GQIDS|{DataSourceName}|Exception: {e}");
+				_logger.Error($"GQIDS|{DataSourceName}|Exception: {e}");
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 
 		private GQIRow[] GetMultiSection()
@@ -144,7 +153,7 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 			}
 
 			IConnection connection = _dms.GetConnection();
-			var order = new DataHelperServiceOrder(connection).Read(ServiceOrderExposers.Guid.Equal(_instanceDomId)).FirstOrDefault();
+			var order = _logger.PerformanceLogger("Get Order", () => new DataHelperServiceOrder(connection).Read(ServiceOrderExposers.Guid.Equal(_instanceDomId)).FirstOrDefault());
 			if (order == null)
 			{
 				return Array.Empty<GQIRow>();
@@ -173,11 +182,21 @@ namespace SLC_SM_GQIDS_Get_Service_Order_Items_1
 				}
 			}
 
-			var categories = !filterCategory.isEmpty() ? new DataHelperServiceCategory(connection).Read(filterCategory) : new List<Models.ServiceCategory>();
-			var specifications = !filterSpecification.isEmpty() ? new DataHelperServiceSpecification(connection).Read(filterSpecification) : new List<Models.ServiceSpecification>();
-			var services = !filterService.isEmpty() ? new DataHelperService(connection).Read(filterService) : new List<Models.Service>();
+			var categories = _logger.PerformanceLogger("Get Categories", () => !filterCategory.isEmpty()
+				? new DataHelperServiceCategory(connection).Read(filterCategory)
+				: new List<Models.ServiceCategory>());
+			var specifications = _logger.PerformanceLogger("Get Specifications", () => !filterSpecification.isEmpty()
+				? new DataHelperServiceSpecification(connection).Read(filterSpecification)
+				: new List<Models.ServiceSpecification>());
+			var services = _logger.PerformanceLogger("Get Services", () => !filterService.isEmpty()
+				? new DataHelperService(connection).Read(filterService)
+				: new List<Models.Service>());
 
-			return serviceOrderItems.Select(item => BuildRow(item, categories, specifications, services)).ToArray();
+			return _logger.PerformanceLogger(
+				"Build Rows",
+				() => serviceOrderItems
+					.Select(item => BuildRow(item, categories, specifications, services))
+					.ToArray());
 		}
 	}
 }
