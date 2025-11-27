@@ -81,6 +81,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 		{
 			Add,
 			AddItem,
+			AddItemSilent,
 			Edit,
 		}
 
@@ -424,16 +425,13 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				var d = new MessageDialog(_engine, "Create Service Inventory Item from the selected service order item?") { Title = "Create Service Inventory Item From Order Item" };
 				d.OkButton.Pressed += (sender, args) =>
 				{
-					var serviceOrderItem = repo.ServiceOrderItems.Read(ServiceOrderItemExposers.Guid.Equal(domId)).FirstOrDefault();
-					if (domId == Guid.Empty || serviceOrderItem == null)
-					{
-						throw new InvalidOperationException($"No Service Order Item with ID '{domId}' found on the system!");
-					}
-
-					CreateNewServiceAndLinkItToServiceOrder(repo, serviceOrderItem);
-					throw new ScriptAbortException("OK");
+					AddServiceItemForOrder(domId, repo);
 				};
 				_controller.ShowDialog(d);
+			}
+			else if (action == Action.AddItemSilent)
+			{
+				AddServiceItemForOrder(domId, repo);
 			}
 			else if (action == Action.Add)
 			{
@@ -467,6 +465,18 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			// Run interactive
 			_controller.ShowDialog(view);
+		}
+
+		private void AddServiceItemForOrder(Guid domId, DataHelpersServiceManagement repo)
+		{
+			var serviceOrderItem = repo.ServiceOrderItems.Read(ServiceOrderItemExposers.Guid.Equal(domId)).FirstOrDefault();
+			if (domId == Guid.Empty || serviceOrderItem == null)
+			{
+				throw new InvalidOperationException($"No Service Order Item with ID '{domId}' found on the system!");
+			}
+
+			CreateNewServiceAndLinkItToServiceOrder(repo, serviceOrderItem);
+			throw new ScriptAbortException("OK");
 		}
 	}
 }
