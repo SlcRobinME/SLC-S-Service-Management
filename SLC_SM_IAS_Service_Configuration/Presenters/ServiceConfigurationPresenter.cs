@@ -176,7 +176,7 @@
 
 			int originalSectionRow = row;
 			int sectionRow = 0;
-			foreach (var configuration in configurations.Where(x => x.State != State.Delete))
+			foreach (var configuration in configurations.Where(x => x.State != State.Delete).OrderBy(x => x.ConfigurationParam?.Name))
 			{
 				BuildUIRow(configuration, ++row, ++sectionRow);
 			}
