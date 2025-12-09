@@ -162,7 +162,22 @@ namespace SLC_SM_Create_Service_Inventory_Item
 								ConfigurationParameter = x.ConfigurationParameter,
 								Mandatory = x.MandatoryAtService,
 							};
-							scv.ConfigurationParameter.ID = Guid.Empty;
+							scv.ConfigurationParameter.ID = Guid.NewGuid();
+							if (scv.ConfigurationParameter.NumberOptions != null)
+							{
+								scv.ConfigurationParameter.NumberOptions.ID = Guid.NewGuid();
+							}
+
+							if (scv.ConfigurationParameter.DiscreteOptions != null)
+							{
+								scv.ConfigurationParameter.DiscreteOptions.ID = Guid.NewGuid();
+							}
+
+							if (scv.ConfigurationParameter.TextOptions != null)
+							{
+								scv.ConfigurationParameter.TextOptions.ID = Guid.NewGuid();
+							}
+
 							return scv;
 						})
 					.ToList();
@@ -272,39 +287,45 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			}
 
 			// Create new service item based on order
-			Guid newServiceId = CreateServiceItemFromOrderItem(repo, serviceOrderItem);
+			Guid newServiceId = _engine.PerformanceLogger("Create Service Inventory Item", () => CreateServiceItemFromOrderItem(repo, serviceOrderItem));
 
 			// Provide link on Service Order
 			serviceOrderItem.ServiceId = newServiceId;
-			repo.ServiceOrderItems.CreateOrUpdate(serviceOrderItem);
+			_engine.PerformanceLogger("Update Order", () => repo.ServiceOrderItems.CreateOrUpdate(serviceOrderItem));
 
 			// Update state
-			if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.New)
+			_engine.PerformanceLogger("Update Order Item State", () =>
 			{
-				serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.New_To_Acknowledged);
-				serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
-			}
+				if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.New)
+				{
+					serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.New_To_Acknowledged);
+					serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
+				}
 
-			if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.Acknowledged)
-			{
-				serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
-			}
+				if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.Acknowledged)
+				{
+					serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
+				}
+			});
 
 			// Update state of main Service Order as well
-			Models.ServiceOrder order = repo.ServiceOrders.Read(ServiceOrderExposers.ServiceOrderItemsExposers.ServiceOrderItem.Equal(serviceOrderItem)).FirstOrDefault();
-			if (order != null)
+			_engine.PerformanceLogger("Update Order State", () =>
 			{
-				if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.New)
+				Models.ServiceOrder order = repo.ServiceOrders.Read(ServiceOrderExposers.ServiceOrderItemsExposers.ServiceOrderItem.Equal(serviceOrderItem)).FirstOrDefault();
+				if (order != null)
 				{
-					order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.New_To_Acknowledged);
-					order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
-				}
+					if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.New)
+					{
+						order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.New_To_Acknowledged);
+						order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
+					}
 
-				if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.Acknowledged)
-				{
-					order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
+					if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.Acknowledged)
+					{
+						order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
+					}
 				}
-			}
+			});
 		}
 
 		private static Guid CreateServiceItemFromOrderItem(DataHelpersServiceManagement repo, Models.ServiceOrderItem serviceOrderItem)
@@ -335,7 +356,22 @@ namespace SLC_SM_Create_Service_Inventory_Item
 								ConfigurationParameter = x.ConfigurationParameter,
 								Mandatory = x.Mandatory,
 							};
-							scv.ConfigurationParameter.ID = Guid.Empty;
+							scv.ConfigurationParameter.ID = Guid.NewGuid();
+							if (scv.ConfigurationParameter.NumberOptions != null)
+							{
+								scv.ConfigurationParameter.NumberOptions.ID = Guid.NewGuid();
+							}
+
+							if (scv.ConfigurationParameter.DiscreteOptions != null)
+							{
+								scv.ConfigurationParameter.DiscreteOptions.ID = Guid.NewGuid();
+							}
+
+							if (scv.ConfigurationParameter.TextOptions != null)
+							{
+								scv.ConfigurationParameter.TextOptions.ID = Guid.NewGuid();
+							}
+
 							return scv;
 						})
 					.ToList();
@@ -360,30 +396,27 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				{
 					foreach (var item in spec.ServiceItems)
 					{
-						if (!newService.ServiceItems.Contains(item))
+						if (newService.ServiceItems.Any(x => x.ID == item.ID))
 						{
-							if (newService.ServiceItems.Any(x => x.ID == item.ID))
-							{
-								item.ID = newService.ServiceItems.Max(x => x.ID) + 1;
-							}
-
-							if (String.IsNullOrEmpty(item.Label))
-							{
-								item.Label = $"Service Item #{item.ID:000}";
-							}
-
-							if (String.IsNullOrEmpty(item.DefinitionReference))
-							{
-								item.DefinitionReference = String.Empty;
-							}
-
-							if (String.IsNullOrEmpty(item.Script))
-							{
-								item.Script = String.Empty;
-							}
-
-							newService.ServiceItems.Add(item);
+							item.ID = newService.ServiceItems.Max(x => x.ID) + 1;
 						}
+
+						if (String.IsNullOrEmpty(item.Label))
+						{
+							item.Label = $"Service Item #{item.ID:000}";
+						}
+
+						if (String.IsNullOrEmpty(item.DefinitionReference))
+						{
+							item.DefinitionReference = String.Empty;
+						}
+
+						if (String.IsNullOrEmpty(item.Script))
+						{
+							item.Script = String.Empty;
+						}
+
+						newService.ServiceItems.Add(item);
 					}
 				}
 			}
@@ -475,7 +508,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				throw new InvalidOperationException($"No Service Order Item with ID '{domId}' found on the system!");
 			}
 
-			CreateNewServiceAndLinkItToServiceOrder(repo, serviceOrderItem);
+			_engine.PerformanceLogger("Create New Service Inventory Item + Link to Order", () => CreateNewServiceAndLinkItToServiceOrder(repo, serviceOrderItem));
 			throw new ScriptAbortException("OK");
 		}
 	}
