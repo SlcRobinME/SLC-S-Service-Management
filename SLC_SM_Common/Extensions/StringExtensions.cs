@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Text;
+	using System.Text.RegularExpressions;
 
 	public static class StringExtensions
 	{
@@ -48,6 +49,12 @@
 			}
 
 			return sb.ToString().TrimEnd(); // remove trailing newline
+		}
+
+		public static string ReplaceTrailingParentesisContent(this string input, string newContent)
+		{
+			// Captures the last (...) at the end and replaces only what's inside
+			return Regex.Replace(input, @"\(([^()]*)\)\s*$", $"({newContent})");
 		}
 	}
 }
