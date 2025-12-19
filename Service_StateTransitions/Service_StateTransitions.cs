@@ -9,7 +9,6 @@ namespace ServiceStateTransitions
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
-	using SLDataGateway.API.Querying;
 	using static DomHelpers.SlcServicemanagement.SlcServicemanagementIds.Behaviors.Service_Behavior;
 
 	/// <summary>
