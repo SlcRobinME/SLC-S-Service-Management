@@ -17,7 +17,7 @@
 			// Arrange
 			var engine = Mock.Of<IEngine>();
 			var view = new ServiceConfigurationView(engine);
-			var serviceSpecification = new Models.ServiceSpecification { Configurations = new List<Models.ServiceSpecificationConfigurationValue>() };
+			var serviceSpecification = new Models.ServiceSpecification { ConfigurationParameters = new List<Models.ServiceSpecificationConfigurationValue>() };
 			var presenter = new ServiceConfigurationPresenter(engine, new InteractiveController(engine), view, serviceSpecification);
 
 			var param = new Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter
@@ -28,12 +28,12 @@
 
 			// Act
 			var addConfigModelMethod = typeof(ServiceConfigurationPresenter)
-				.GetMethod("AddConfigModel", BindingFlags.NonPublic | BindingFlags.Instance);
+				.GetMethod("AddStandaloneParameterConfigModel", BindingFlags.NonPublic | BindingFlags.Instance);
 			addConfigModelMethod.Invoke(presenter, new object[] { param });
 
 			// Assert
-			Assert.AreEqual(1, serviceSpecification.Configurations.Count);
-			Assert.AreEqual(param.ID, serviceSpecification.Configurations[0].ConfigurationParameter.ConfigurationParameterId);
+			Assert.AreEqual(1, serviceSpecification.ConfigurationParameters.Count);
+			Assert.AreEqual(param.ID, serviceSpecification.ConfigurationParameters[0].ConfigurationParameter.ConfigurationParameterId);
 		}
 	}
 }
