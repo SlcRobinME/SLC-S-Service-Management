@@ -176,7 +176,7 @@
 			int row = 0;
 			BuildHeaderRow(++row);
 
-			foreach (var configuration in configurations.Where(x => x.State != State.Delete))
+			foreach (var configuration in configurations.Where(x => x.State != State.Delete).OrderBy(x => x.ConfigurationParam?.Name))
 			{
 				BuildUIRow(configuration, ++row);
 			}
