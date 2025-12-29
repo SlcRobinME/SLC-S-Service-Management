@@ -53,8 +53,14 @@
 
 		public static string ReplaceTrailingParentesisContent(this string input, string newContent)
 		{
-			// Captures the last (...) at the end and replaces only what's inside
-			return Regex.Replace(input, @"\(([^()]*)\)\s*$", $"({newContent})");
+			// If input ends with (...), replace content inside the last parenthesis
+			if (Regex.IsMatch(input, @"\(([^()]*)\)\s*$"))
+			{
+				return Regex.Replace(input, @"\(([^()]*)\)\s*$", $"({newContent})");
+			}
+
+			// If input does not end with (...), append (newContent)
+			return $"{input} ({newContent})";
 		}
 	}
 }

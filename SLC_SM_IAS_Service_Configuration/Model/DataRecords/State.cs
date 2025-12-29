@@ -4,6 +4,7 @@
 	{
 		internal enum State
 		{
+			Create,
 			Update,
 			Delete,
 		}

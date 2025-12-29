@@ -14,11 +14,11 @@
 
 			public Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter ConfigurationParam { get; set; }
 
-			internal static StandaloneParameterDataRecord BuildParameterDataRecord(Models.ServiceConfigurationValue currentConfig, Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter configParam)
+			internal static StandaloneParameterDataRecord BuildParameterDataRecord(Models.ServiceConfigurationValue currentConfig, Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter configParam, State state = State.Update)
 			{
 				var dataRecord = new StandaloneParameterDataRecord
 				{
-					State = State.Update,
+					State = state,
 					ServiceParameterConfig = currentConfig,
 					ConfigurationParamValue = currentConfig.ConfigurationParameter,
 					ConfigurationParam = configParam,

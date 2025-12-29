@@ -1,5 +1,6 @@
 ﻿namespace SLC_SM_IAS_Service_Configuration.Presenters
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 
@@ -12,24 +13,25 @@
 		{
 			public State State { get; set; }
 
-			public Models.Configurations ServiceConfig { get; set; }
+			public Models.ServiceConfigurationVersion ServiceConfigurationVersion { get; set; }
 
 			public List<StandaloneParameterDataRecord> ServiceParameterConfigs { get; set; }
 
 			public List<ProfileDataRecord> ServiceProfileConfigs { get; set; }
 
 			internal static ConfigurationDataRecord BuildConfigurationDataRecordRecord(
-				Models.Configurations currentConfig,
+				Models.ServiceConfigurationVersion currentConfig,
 				List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> configParams,
+				List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ReferencedConfigurationParameters> referencedConfigParams,
 				Models.ServiceSpecification serviceSpecifivation,
-				IEngine engine)
+				State state = State.Update)
 			{
 				var dataRecord = new ConfigurationDataRecord
 				{
-					State = State.Update,
-					ServiceConfig = currentConfig,
+					State = state,
+					ServiceConfigurationVersion = currentConfig,
 					ServiceParameterConfigs = new List<StandaloneParameterDataRecord>(),
-					ServiceProfileConfigs = currentConfig.Profiles.Select(profile => ProfileDataRecord.BuildProfileRecord(profile, configParams, serviceSpecifivation, engine)).ToList(),
+					ServiceProfileConfigs = currentConfig.Profiles.Select(profile => ProfileDataRecord.BuildProfileRecord(profile, configParams, referencedConfigParams, state)).ToList(),
 				};
 
 				foreach (var currentParameterConfig in currentConfig.Parameters)
@@ -40,7 +42,7 @@
 						continue;
 					}
 
-					StandaloneParameterDataRecord dataParameterRecord = StandaloneParameterDataRecord.BuildParameterDataRecord(currentParameterConfig, configParam);
+					StandaloneParameterDataRecord dataParameterRecord = StandaloneParameterDataRecord.BuildParameterDataRecord(currentParameterConfig, configParam, state);
 					dataRecord.ServiceParameterConfigs.Add(dataParameterRecord);
 				}
 
