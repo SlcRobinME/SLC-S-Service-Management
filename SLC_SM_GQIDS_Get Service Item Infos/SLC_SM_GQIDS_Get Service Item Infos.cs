@@ -40,6 +40,7 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 				new GQIDateTimeColumn("Start Time"),
 				new GQIDateTimeColumn("End Time"),
 				new GQIIntColumn("Alarm Level"),
+				new GQIStringColumn("Configuration Version"),
 			};
 		}
 
@@ -144,6 +145,7 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 						new GQICell { Value = service.StartTime?.ToUniversalTime() },
 						new GQICell { Value = service.EndTime?.ToUniversalTime() },
 						new GQICell { Value = alarmLevel },
+						new GQICell { Value = service.ServiceConfiguration?.VersionName ?? String.Empty },
 					}),
 			};
 		}

@@ -63,6 +63,7 @@
 				instanceToReturn.ServiceSpecificationId = view.Specs.Selected?.ID;
 				instanceToReturn.OrganizationId = view.Organizations.Selected?.ID;
 				instanceToReturn.Icon = view.ServiceCategory?.Selected?.Icon ?? String.Empty;
+				instanceToReturn.ServiceConfiguration = view.ConfigurationVersions.Selected;
 
 				return instanceToReturn;
 			}
@@ -110,6 +111,17 @@
 			// Load correct types
 			LoadFromModel();
 
+			if (instance.ConfigurationVersions != null && instance.ConfigurationVersions.Count > 0)
+			{
+				var specs = instance.ConfigurationVersions.OrderBy(x => x.VersionName).Select(x => new Option<Models.ServiceConfigurationVersion>(x.VersionName, x)).ToList();
+				specs.Insert(0, new Option<Models.ServiceConfigurationVersion>("-None-", null));
+				view.ConfigurationVersions.SetOptions(specs);
+			}
+			else
+			{
+				view.ConfigurationVersions.SetOptions(new List<Option<Models.ServiceConfigurationVersion>> { new Option<Models.ServiceConfigurationVersion>("-None-", null) });
+			}
+
 			view.BtnAdd.Text = "Save";
 			view.TboxName.Text = instance.Name;
 			if (!String.IsNullOrEmpty(instance.ServiceID))
@@ -147,6 +159,11 @@
 				view.Specs.IsEnabled = false;
 			}
 
+			if (instance.ServiceConfiguration != null && view.ConfigurationVersions.Options.Any(x => x.Value?.ID == instance.ServiceConfiguration.ID))
+			{
+				view.ConfigurationVersions.SelectedOption = view.ConfigurationVersions.Options.First(x => x.Value?.ID == instance.ServiceConfiguration.ID);
+			}
+
 			if (instance.OrganizationId.HasValue && view.Organizations.Options.Any(o => o.Value?.ID == instance.OrganizationId))
 			{
 				view.Organizations.SelectedOption = view.Organizations.Options.First(x => x.Value?.ID == instance.OrganizationId);
@@ -175,6 +192,16 @@
 			else
 			{
 				view.ErrorStart.Text = String.Empty;
+			}
+
+			if (isEdit && view.ConfigurationVersions.Selected == null && view.ConfigurationVersions.Options.Count() > 1)
+			{
+				ok = false;
+				view.ErrorConfigurationVersion.Text = "Please select an available configuration version.";
+			}
+			else
+			{
+				view.ErrorConfigurationVersion.Text = String.Empty;
 			}
 
 			return ok;

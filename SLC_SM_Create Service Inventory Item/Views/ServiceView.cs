@@ -8,9 +8,11 @@
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
+	using SLC_SM_Create_Service_Inventory_Item;
+
 	public class ServiceView : Dialog
 	{
-		public ServiceView(IEngine engine) : base(engine)
+		public ServiceView(IEngine engine, Script.Action action) : base(engine)
 		{
 			Title = "Manage Service";
 
@@ -26,6 +28,13 @@
 
 			AddWidget(LblSpecification, ++row, 0);
 			AddWidget(Specs, row, 1, 1, 2);
+
+			if (action == Script.Action.Edit)
+			{
+				AddWidget(LblServiceConfigurationVersion, ++row, 0);
+				AddWidget(ConfigurationVersions, row, 1, 1, 2);
+				AddWidget(ErrorConfigurationVersion, row, 3);
+			}
 
 			AddWidget(LblOrganization, ++row, 0);
 			AddWidget(Organizations, row, 1, 1, 2);
@@ -99,5 +108,11 @@
 		public CheckBox GenerateMonitoringService { get; set; } = new CheckBox("Generate DataMiner Monitoring Service") { IsChecked = false, IsEnabled = false };
 
 		public Button BtnAdd { get; } = new Button("Create") { Style = ButtonStyle.CallToAction };
+
+		public Label LblServiceConfigurationVersion { get; } = new Label("Configuration Version");
+
+		public DropDown<Models.ServiceConfigurationVersion> ConfigurationVersions { get; } = new DropDown<Models.ServiceConfigurationVersion> { Width = Defaults.WidgetWidth };
+
+		public Label ErrorConfigurationVersion { get; } = new Label(String.Empty);
 	}
 }
