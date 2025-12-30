@@ -22,7 +22,6 @@
 			internal static ConfigurationDataRecord BuildConfigurationDataRecordRecord(
 				Models.ServiceConfigurationVersion currentConfig,
 				List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> configParams,
-				List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ReferencedConfigurationParameters> referencedConfigParams,
 				Models.ServiceSpecification serviceSpecifivation,
 				State state = State.Update)
 			{
@@ -31,7 +30,7 @@
 					State = state,
 					ServiceConfigurationVersion = currentConfig,
 					ServiceParameterConfigs = new List<StandaloneParameterDataRecord>(),
-					ServiceProfileConfigs = currentConfig.Profiles.Select(profile => ProfileDataRecord.BuildProfileRecord(profile, configParams, referencedConfigParams, state)).ToList(),
+					ServiceProfileConfigs = currentConfig.Profiles.Select(profile => ProfileDataRecord.BuildProfileRecord(profile, configParams, state)).ToList(),
 				};
 
 				foreach (var currentParameterConfig in currentConfig.Parameters)

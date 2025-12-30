@@ -23,7 +23,7 @@
 
 			public Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ProfileDefinition ProfileDefinition { get; set; }
 
-			internal static ProfileDataRecord BuildProfileRecord(Models.ServiceProfile currentConfig, List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> configParams, List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ReferencedConfigurationParameters> referencedConfigParams, State state = State.Update)
+			internal static ProfileDataRecord BuildProfileRecord(Models.ServiceProfile currentConfig, List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> configParams, State state = State.Update)
 			{
 				var dataRecord = new ProfileDataRecord
 				{
@@ -34,8 +34,6 @@
 					ProfileDefinition = currentConfig.ProfileDefinition,
 				};
 
-				var profileDefinitionRefConfigParams = referencedConfigParams.Where(x => currentConfig.ProfileDefinition.ConfigurationParameters.Contains(x.ID)).ToList();
-
 				foreach (var currentParameterConfig in currentConfig.Profile.ConfigurationParameterValues)
 				{
 					var configParam = configParams.Find(x => x.ID == currentParameterConfig?.ConfigurationParameterId);
@@ -44,7 +42,7 @@
 						continue;
 					}
 
-					var referencedParam = profileDefinitionRefConfigParams.Find(x => x.ConfigurationParameter == configParam.ID);
+					var referencedParam = currentConfig.ProfileDefinition.ConfigurationParameters.Find(x => x.ConfigurationParameter == configParam.ID);
 
 					ProfileParameterDataRecord dataParameterRecord = ProfileParameterDataRecord.BuildParameterDataRecord(currentParameterConfig, configParam, referencedParam, state);
 					dataRecord.ProfileParameterConfigs.Add(dataParameterRecord);
@@ -55,10 +53,10 @@
 
 			internal List<Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>> GetAvailableProfileParameters(DataHelpersConfigurations repoConfig)
 			{
-				var refConfigParams = HelperMethods.GetReferencedConfigParameters(repoConfig, ProfileDefinition);
-				var configParams = HelperMethods.GetConfigParameters(repoConfig, refConfigParams);
+				// var refConfigParams = HelperMethods.GetReferencedConfigParameters(repoConfig, ProfileDefinition);
+				var configParams = HelperMethods.GetConfigParameters(repoConfig, ProfileDefinition.ConfigurationParameters);
 
-				var parameterOptions = refConfigParams
+				var parameterOptions = ProfileDefinition.ConfigurationParameters
 				.Select(refConfigParam =>
 				{
 					var configParam = configParams.FirstOrDefault(cp => cp.ID == refConfigParam.ConfigurationParameter);

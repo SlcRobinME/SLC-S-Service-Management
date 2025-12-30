@@ -80,9 +80,8 @@
 			repoConfig = new DataHelpersConfigurations(engine.GetUserConnection());
 
 			var configParams = repoConfig.ConfigurationParameters.Read();
-			var refConfigParams = repoConfig.ReferencedConfigurationParameters.Read();
 
-			BuildDataRecords(configParams, refConfigParams);
+			BuildDataRecords(configParams);
 
 			var parameterOptions = configParams.Select(x => new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>(x.Name, x)).OrderBy(x => x.DisplayValue).ToList();
 			parameterOptions.Insert(0, new Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>("- Parameter -", null));
@@ -219,19 +218,12 @@
 		private void AddProfileConfigModel(Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ProfileDefinition selectedProfile)
 		{
 			var profileDefinitionInstance = selectedProfile ?? new Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ProfileDefinition();
-			var refConfigParams = DomExtensions.GetReferencedConfigParameters(repoConfig, profileDefinitionInstance);
-			var configParams = DomExtensions.GetConfigParameters(repoConfig, refConfigParams);
+			var configParams = DomExtensions.GetConfigParameters(repoConfig, profileDefinitionInstance.ConfigurationParameters);
 
 			var parameterValues = new List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameterValue>();
 
-			foreach (var refConfigParamId in profileDefinitionInstance.ConfigurationParameters)
+			foreach (var refConfigParam in profileDefinitionInstance.ConfigurationParameters)
 			{
-				var refConfigParam = refConfigParams.FirstOrDefault(p => p.ID == refConfigParamId);
-				if (refConfigParam == null)
-				{
-					continue;
-				}
-
 				var configParam = configParams.FirstOrDefault(p => p.ID == refConfigParam.ConfigurationParameter);
 				if (configParam == null)
 				{
@@ -257,7 +249,7 @@
 			};
 
 			instance.ConfigurationProfiles.Add(config);
-			profileConfigurations.Add(ProfileDataRecord.BuildProfileRecord(config, configParams, refConfigParams));
+			profileConfigurations.Add(ProfileDataRecord.BuildProfileRecord(config, configParams));
 		}
 
 		private void AddProfileParameterConfigModel(ProfileDataRecord profile, Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter selected)
@@ -274,7 +266,7 @@
 			profile.ProfileParameterConfigs.Add(ProfileParameterDataRecord.BuildParameterDataRecord(
 				configParamValue,
 				configurationParameterInstance,
-				DomExtensions.GetReferencedConfigParameters(repoConfig, profile.ProfileDefinition).FirstOrDefault(p => p.ConfigurationParameter == configurationParameterInstance.ID)));
+				profile.ProfileDefinition.ConfigurationParameters.FirstOrDefault(p => p.ConfigurationParameter == configurationParameterInstance.ID)));
 
 			instance.ConfigurationProfiles.Find(p => p.ID == profile.ServiceProfileConfig.ID).Profile.ConfigurationParameterValues.Add(configParamValue);
 		}
@@ -903,7 +895,7 @@
 			return units;
 		}
 
-		private void BuildDataRecords(List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> configParams, List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ReferencedConfigurationParameters> refConfigParams)
+		private void BuildDataRecords(List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> configParams)
 		{
 			if (instance.ConfigurationParameters != null)
 			{
@@ -923,7 +915,7 @@
 			{
 				foreach (var currentConfig in instance.ConfigurationProfiles)
 				{
-					profileConfigurations.Add(ProfileDataRecord.BuildProfileRecord(currentConfig, configParams, refConfigParams));
+					profileConfigurations.Add(ProfileDataRecord.BuildProfileRecord(currentConfig, configParams));
 				}
 			}
 		}

@@ -44,6 +44,10 @@
 
 		public DropDown<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ProfileDefinition> ProfileDefintionToAdd { get; set; }
 
-		public DropDown<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceConfigurationVersion> ConfigurationVersions { get; set; }
+		public DropDown<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceConfigurationVersion> ConfigurationVersions { get; } = new DropDown<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceConfigurationVersion>();
+
+		public CheckBox ConfirmExceedNumberOfVersions { get; } = new CheckBox { MaxWidth = 25};
+
+		public Label ConfirmExceedNumberOfVersionsLabel { get; } = new Label();
 	}
 }

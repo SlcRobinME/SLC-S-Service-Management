@@ -21,7 +21,7 @@
 
 			public Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ProfileDefinition ProfileDefinition { get; set; }
 
-			internal static ProfileDataRecord BuildProfileRecord(Models.ServiceSpecificationProfile currentConfig, List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> configParams, List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ReferencedConfigurationParameters> refConfigParams)
+			internal static ProfileDataRecord BuildProfileRecord(Models.ServiceSpecificationProfile currentConfig, List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> configParams)
 			{
 				var dataRecord = new ProfileDataRecord
 				{
@@ -40,7 +40,7 @@
 						continue;
 					}
 
-					var refConfigParam = refConfigParams.Find(x => x.ConfigurationParameter == currentParameterConfig?.ConfigurationParameterId);
+					var refConfigParam = currentConfig.ProfileDefinition.ConfigurationParameters.Find(x => x.ConfigurationParameter == currentParameterConfig?.ConfigurationParameterId);
 
 					if (refConfigParam == null)
 					{
@@ -56,10 +56,9 @@
 
 			internal List<Option<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>> GetAvailableProfileParameters(DataHelpersConfigurations repoConfig)
 			{
-				var refConfigParams = DomExtensions.GetReferencedConfigParameters(repoConfig, ProfileDefinition);
-				var configParams = DomExtensions.GetConfigParameters(repoConfig, refConfigParams);
+				var configParams = DomExtensions.GetConfigParameters(repoConfig, ProfileDefinition.ConfigurationParameters);
 
-				var parameterOptions = refConfigParams
+				var parameterOptions = ProfileDefinition.ConfigurationParameters
 				.Select(refConfigParam =>
 				{
 					var configParam = configParams.FirstOrDefault(cp => cp.ID == refConfigParam.ConfigurationParameter);

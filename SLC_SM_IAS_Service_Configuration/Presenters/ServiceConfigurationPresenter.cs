@@ -3,12 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Security.Cryptography;
 	using System.Text.RegularExpressions;
 
 	using DomHelpers.SlcConfigurations;
-
-	using Newtonsoft.Json;
 
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -82,6 +79,46 @@
 					ShowHideStandaloneParametersDetails(showDetails, view.Details[collapseButton.Tooltip]);
 				}
 			};
+
+			view.BtnCopyConfiguration.Pressed += (sender, args) =>
+			{
+				var newConfigurationVersion = HelperMethods.CreateNewServiceConfigurationVersionFromExisting(configuration.ServiceConfigurationVersion);
+				configuration = ConfigurationDataRecord.BuildConfigurationDataRecordRecord(
+					newConfigurationVersion,
+					repoConfig.ConfigurationParameters.Read(),
+					serviceSpecifivation,
+					State.Create);
+				BuildUI(this.showDetails);
+			};
+
+			view.ConfigurationVersions.Changed += (sender, args) =>
+			{
+				if (args.Selected == null)
+				{
+					view.GeneralSettings.IsCollapsed = true;
+					view.StandaloneParameters.IsCollapsed = true;
+					view.Details.Clear();
+					configuration = ConfigurationDataRecord.BuildConfigurationDataRecordRecord(
+						HelperMethods.CreateNewServiceConfigurationVersion(serviceSpecifivation, instanceService),
+						repoConfig.ConfigurationParameters.Read(),
+						serviceSpecifivation,
+						State.Create);
+				}
+				else
+				{
+					configuration = ConfigurationDataRecord.BuildConfigurationDataRecordRecord(
+						args.Selected,
+						repoConfig.ConfigurationParameters.Read(),
+						serviceSpecifivation);
+				}
+
+				BuildUI(this.showDetails);
+			};
+
+			view.ConfirmExceedNumberOfVersions.Changed += (sender, args) =>
+			{
+				view.BtnUpdate.IsEnabled = args.IsChecked;
+			};
 		}
 
 		public void LoadFromModel()
@@ -97,7 +134,7 @@
 
 			if (instanceService.ServiceConfiguration != null)
 			{
-				configuration = ConfigurationDataRecord.BuildConfigurationDataRecordRecord(instanceService.ServiceConfiguration, configParams, refConfigParams, serviceSpecifivation);
+				configuration = ConfigurationDataRecord.BuildConfigurationDataRecordRecord(instanceService.ServiceConfiguration, configParams, serviceSpecifivation);
 			}
 
 			BuildUI(false);
@@ -164,19 +201,12 @@
 		private void AddProfileConfigModel(Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ProfileDefinition profileDefinition)
 		{
 			var profileDefinitionInstance = profileDefinition ?? new Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ProfileDefinition();
-			var refConfigParams = HelperMethods.GetReferencedConfigParameters(repoConfig, profileDefinitionInstance);
-			var configParams = HelperMethods.GetConfigParameters(repoConfig, refConfigParams);
+			var configParams = HelperMethods.GetConfigParameters(repoConfig, profileDefinitionInstance.ConfigurationParameters);
 
 			var parameterValues = new List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameterValue>();
 
-			foreach (var refConfigParamId in profileDefinitionInstance.ConfigurationParameters)
+			foreach (var refConfigParam in profileDefinitionInstance.ConfigurationParameters)
 			{
-				var refConfigParam = refConfigParams.FirstOrDefault(p => p.ID == refConfigParamId);
-				if (refConfigParam == null)
-				{
-					continue;
-				}
-
 				var configParam = configParams.FirstOrDefault(p => p.ID == refConfigParam.ConfigurationParameter);
 				if (configParam == null)
 				{
@@ -205,7 +235,7 @@
 			}
 
 			configuration.ServiceConfigurationVersion.Profiles.Add(profileConfig);
-			configuration.ServiceProfileConfigs.Add(ProfileDataRecord.BuildProfileRecord(profileConfig, configParams, refConfigParams, State.Create));
+			configuration.ServiceProfileConfigs.Add(ProfileDataRecord.BuildProfileRecord(profileConfig, configParams, State.Create));
 		}
 
 		private void AddProfileParameterConfigModel(ProfileDataRecord profile, Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter selected)
@@ -222,7 +252,7 @@
 			profile.ProfileParameterConfigs.Add(ProfileParameterDataRecord.BuildParameterDataRecord(
 				configParamValue,
 				configurationParameterInstance,
-				HelperMethods.GetReferencedConfigParameters(repoConfig, profile.ProfileDefinition).FirstOrDefault(p => p.ConfigurationParameter == configurationParameterInstance.ID),
+				profile.ProfileDefinition.ConfigurationParameters.FirstOrDefault(p => p.ConfigurationParameter == configurationParameterInstance.ID),
 				State.Create));
 
 			configuration.ServiceConfigurationVersion.Profiles.Find(p => p.ID == profile.ServiceProfileConfig.ID).Profile.ConfigurationParameterValues.Add(configParamValue);
@@ -252,7 +282,7 @@
 			view.AddWidget(lblUnit, row, 4);
 			collapseButton.LinkedWidgets.Add(lblUnit);
 
-			view.Details[collapseButton.Tooltip].AddWidget(lblStart, 0, 0, HorizontalAlignment.Center);
+			view.Details[collapseButton.Tooltip].AddWidget(lblStart, 0, 0, HorizontalAlignment.Left);
 			view.Details[collapseButton.Tooltip].AddWidget(lblEnd, 0, 1);
 			view.Details[collapseButton.Tooltip].AddWidget(lblStop, 0, 2);
 			view.Details[collapseButton.Tooltip].AddWidget(lblDecimals, 0, 3);
@@ -298,8 +328,24 @@
 			row = BuildProfilesUI(showDetails, row);
 
 			view.AddWidget(new WhiteSpace(), ++row, 0);
+
+			if (configuration.State == State.Create && view.ConfigurationVersions.Options.Count() > 3) // Only 2 versions allowed per service
+			{
+				row = BuildExceedNumberOfVersionUI(row);
+			}
+			view.AddWidget(new WhiteSpace(), ++row, 0);
 			view.AddWidget(view.BtnUpdate, ++row, 0, HorizontalAlignment.Center);
 			view.AddWidget(view.BtnCancel, row, 1);
+		}
+
+		private int BuildExceedNumberOfVersionUI(int row)
+		{
+			var versionToBeDelete = instanceService.ConfigurationVersions.Find(cv => cv.ID != instanceService.ServiceConfiguration?.ID);
+			view.AddWidget(view.ConfirmExceedNumberOfVersions, ++row, 0, HorizontalAlignment.Right);
+			view.ConfirmExceedNumberOfVersionsLabel.Text = $"You have reached the maximum number of allowed versions.\nProceeding will delete the version '{versionToBeDelete?.VersionName}'.";
+			view.AddWidget(view.ConfirmExceedNumberOfVersionsLabel, row, 1, 1, 10);
+			view.BtnUpdate.IsEnabled = false;
+			return row;
 		}
 
 		private int BuildConfigurationVersionsSelectionUI(int row)
@@ -313,45 +359,7 @@
 			view.AddWidget(view.BtnCopyConfiguration, row, 2);
 
 			view.AddWidget(lblCreateAt, row, 3, HorizontalAlignment.Center);
-			view.AddWidget(createdAt, row, 4);
-
-			view.ConfigurationVersions.Changed += (sender, args) =>
-			{
-				if (args.Selected == null)
-				{
-					view.GeneralSettings.IsCollapsed = true;
-					view.StandaloneParameters.IsCollapsed = true;
-					view.Details.Clear();
-					configuration = ConfigurationDataRecord.BuildConfigurationDataRecordRecord(
-						HelperMethods.CreateNewServiceConfigurationVersion(serviceSpecifivation, instanceService),
-						repoConfig.ConfigurationParameters.Read(),
-						repoConfig.ReferencedConfigurationParameters.Read(),
-						serviceSpecifivation,
-						State.Create);
-				}
-				else
-				{
-					configuration = ConfigurationDataRecord.BuildConfigurationDataRecordRecord(
-						args.Selected,
-						repoConfig.ConfigurationParameters.Read(),
-						repoConfig.ReferencedConfigurationParameters.Read(),
-						serviceSpecifivation);
-				}
-
-				BuildUI(this.showDetails);
-			};
-
-			view.BtnCopyConfiguration.Pressed += (sender, args) =>
-			{
-				var newConfigurationVersion = HelperMethods.CreateNewServiceConfigurationVersionFromExisting(configuration.ServiceConfigurationVersion);
-				configuration = ConfigurationDataRecord.BuildConfigurationDataRecordRecord(
-					newConfigurationVersion,
-					repoConfig.ConfigurationParameters.Read(),
-					repoConfig.ReferencedConfigurationParameters.Read(),
-					serviceSpecifivation,
-					State.Create);
-				BuildUI(this.showDetails);
-			};
+			view.AddWidget(createdAt, row, 4, 1, 2);
 
 			return row;
 		}
@@ -366,7 +374,7 @@
 
 			if (view.ConfigurationVersions == null)
 			{
-				view.ConfigurationVersions = new DropDown<Models.ServiceConfigurationVersion>(configurationVersionOptions);
+				view.ConfigurationVersions.SetOptions(configurationVersionOptions);
 			}
 			else
 			{
@@ -390,6 +398,7 @@
 		{
 			view.GeneralSettings.MaxWidth = collapeButtonWidth;
 			view.GeneralSettings.LinkedWidgets.Clear();
+			view.GeneralSettings.IsCollapsed = configuration.State != State.Create;
 			view.AddWidget(new Label(ServiceConfigurationView.GeneralSettingsCollapseButtonTitle) { Style = TextStyle.Bold, MaxWidth = 250 }, ++row, 1, 1, 5);
 			view.AddWidget(view.GeneralSettings, row, 0, HorizontalAlignment.Center);
 			BuildGeneralSettingsHeaderRow(++row, view.GeneralSettings);
@@ -712,7 +721,7 @@
 			view.AddWidget(unit, row, 4);
 			collapseButtom.LinkedWidgets.Add(unit);
 
-			view.Details[collapseButtom.Tooltip].AddWidget(start, sectionRow, 0, HorizontalAlignment.Right);
+			view.Details[collapseButtom.Tooltip].AddWidget(start, sectionRow, 0, HorizontalAlignment.Left);
 			view.Details[collapseButtom.Tooltip].AddWidget(end, sectionRow, 1);
 			view.Details[collapseButtom.Tooltip].AddWidget(step, sectionRow, 2);
 			view.Details[collapseButtom.Tooltip].AddWidget(decimals, sectionRow, 3);

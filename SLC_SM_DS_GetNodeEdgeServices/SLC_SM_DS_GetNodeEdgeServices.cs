@@ -228,7 +228,7 @@ namespace SLCSMDSGetNodeEdgeServices
 
 		private IEnumerable<ServicesInstance> GetChannelDistributionRelatedServices(ServicesInstance service)
 		{
-			var serviceItems = service.ServiceItemses
+			var serviceItems = service.ServiceItems
 				.Where(si => si.ServiceItemType == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Service);
 
 			var filters = serviceItems
@@ -269,7 +269,16 @@ namespace SLCSMDSGetNodeEdgeServices
 
 		private IEnumerable<ConfigurationParameterValueInstance> GetConfigurationParameterValuesForService(ServicesInstance service)
 		{
-			var paramIds = service.ServiceInfo.ServiceConfigurationParameters;
+			var configurationVersionID = service.ServiceInfo.ServiceConfiguration;
+
+			if (configurationVersionID == null)
+			{
+				return Enumerable.Empty<ConfigurationParameterValueInstance>();
+			}
+
+			var configurationVersion = GetServiceConfigurationVersion(configurationVersionID.Value);
+
+			var paramIds = configurationVersion.ServiceConfigurationInfo?.ServiceConfigurationParameters;
 			if (paramIds == null || !paramIds.Any())
 			{
 				return Enumerable.Empty<ConfigurationParameterValueInstance>();
@@ -326,6 +335,19 @@ namespace SLCSMDSGetNodeEdgeServices
 			var filter = BuildOrFilter(parameterIds.Select(id => DomInstanceExposers.Id.Equal(id)));
 			var domInstances = _serviceMangerDomHelper.DomInstances.Read(filter);
 			return domInstances.Select(cp => new ServiceConfigurationValueInstance(cp));
+		}
+
+		private ServiceConfigurationVersionInstance GetServiceConfigurationVersion(Guid configurationVersionId)
+		{
+			var filter = DomInstanceExposers.Id.Equal(configurationVersionId);
+			var domInstances = _serviceMangerDomHelper.DomInstances.Read(filter);
+
+			if (domInstances != null || domInstances.Count > 0)
+			{
+				return new ServiceConfigurationVersionInstance(domInstances[0]);
+			}
+
+			return new ServiceConfigurationVersionInstance(configurationVersionId);
 		}
 
 		private string GetServiceType(ServicesInstance service)

@@ -190,12 +190,12 @@ namespace SLCSMASDynamicDelete
 		{
 			if (domInstance is ServicesInstance services)
 			{
-				_nodes = services.ServiceItemses;
+				_nodes = services.ServiceItems;
 				_connections = services.ServiceItemRelationships;
 			}
 			else if (domInstance is ServiceSpecificationsInstance specs)
 			{
-				_nodes = specs.ServiceItemses;
+				_nodes = specs.ServiceItems;
 				_connections = specs.ServiceItemRelationships;
 			}
 			else

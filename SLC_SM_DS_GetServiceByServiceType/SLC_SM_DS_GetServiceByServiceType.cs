@@ -191,7 +191,7 @@ namespace SLCSMDSGetServiceByServiceType
 		{
 			int alarmLevel = _logger.PerformanceLogger("Get Alarm Level", () => (int)TryGetAlarmLevel(service));
 
-			var configs = service.Configurations.ToDictionary(c => c.ConfigurationParameter.ConfigurationParameterId, c => c.ConfigurationParameter.StringValue);
+			var configs = service.ServiceConfiguration?.Parameters.ToDictionary(c => c.ConfigurationParameter.ConfigurationParameterId, c => c.ConfigurationParameter.StringValue);
 
 			return new GQIRow(
 				new[]
