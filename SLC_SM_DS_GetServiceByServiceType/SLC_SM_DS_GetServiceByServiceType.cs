@@ -57,6 +57,7 @@ namespace SLCSMDSGetServiceByServiceType
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Helper;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
@@ -69,7 +70,7 @@ namespace SLCSMDSGetServiceByServiceType
 	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
 	[GQIMetaData(Name = DataSourceName)]
-	public sealed class SLCSMDSGetServiceByServiceType : IGQIDataSource, IGQIOnInit, IGQIInputArguments
+	public sealed class SLCSMDSGetServiceByServiceType : IGQIDataSource, IGQIOnInit
 	{
 		private const string DataSourceName = "SLC_SM_DS_GetServiceByServiceType";
 
@@ -89,7 +90,6 @@ namespace SLCSMDSGetServiceByServiceType
 			ConfigParamNameRegion,
 		};
 
-		private readonly Arguments _arguments = new Arguments();
 		private IGQILogger _logger;
 		private Skyline.DataMiner.Net.IConnection _connection;
 		private IDms _dms;
@@ -120,19 +120,10 @@ namespace SLCSMDSGetServiceByServiceType
 			};
 		}
 
-		public GQIArgument[] GetInputArguments()
-		{
-			return _arguments.GetInputArguments();
-		}
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
 			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
-		}
-
-		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
-		{
-			return _arguments.OnArgumentsProcessed(args);
 		}
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
@@ -167,12 +158,12 @@ namespace SLCSMDSGetServiceByServiceType
 				configurationParameters.TryGetValue(ConfigParamNameDistributionType, out configID_DistType);
 				configurationParameters.TryGetValue(ConfigParamNameRegion, out configID_Region);
 
-				var services = new List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.Service>();
 				var serviceHelper = new DataHelperService(_gqiDms.GetConnection());
-				foreach (var configurationParameter in configurationParameters)
-				{
-					services.AddRange(serviceHelper.GetServicesByCharacteristic(configurationParameter.Key));
-				}
+				var services = configurationParameters
+					.SelectMany(cp => serviceHelper.GetServicesByCharacteristic(cp.Key))
+					.GroupBy(s => s.ID)
+					.Select(g => g.First())
+					.ToList();
 
 				return new GQIPage(
 					services
@@ -191,7 +182,11 @@ namespace SLCSMDSGetServiceByServiceType
 		{
 			int alarmLevel = _logger.PerformanceLogger("Get Alarm Level", () => (int)TryGetAlarmLevel(service));
 
-			var configs = service.Configurations.ToDictionary(c => c.ConfigurationParameter.ConfigurationParameterId, c => c.ConfigurationParameter.StringValue);
+			var configs = service.ServiceConfiguration.Parameters
+				.GroupBy(p => p.ConfigurationParameter.ConfigurationParameterId)
+				.ToDictionary(
+					g => g.Key,
+					g => g.First().ConfigurationParameter.StringValue); // If multiples of same parameter found, assume the first.
 
 			return new GQIRow(
 				new[]
