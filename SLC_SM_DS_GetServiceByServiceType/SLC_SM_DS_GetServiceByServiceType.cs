@@ -135,7 +135,8 @@ namespace SLCSMDSGetServiceByServiceType
 				var configurationaParameterInfos = GetConfigurationParameterInfos();
 				var configurationParametersValues = GetConfigurationParameterValues(configurationaParameterInfos);
 				var serviceConfigurationValues = GetServiceConfigurationValues(configurationParametersValues);
-				var services = GetServices(serviceConfigurationValues)
+				var serviceConfigurationVersions = GetServiceConfigurationVersions(serviceConfigurationValues);
+				var services = GetServices(serviceConfigurationVersions)
 					.Select(s => new ServiceRow(s))
 					.ToList();
 
@@ -152,6 +153,7 @@ namespace SLCSMDSGetServiceByServiceType
 				{
 					Compose(
 						serviceRow,
+						serviceConfigurationVersions,
 						serviceConfigurationValues,
 						configurationParametersValues,
 						configurationaParameterInfos,
@@ -171,19 +173,25 @@ namespace SLCSMDSGetServiceByServiceType
 
 		private void Compose(
 			ServiceRow serviceRow,
+			List<ServiceConfigurationVersionInstance> allServiceConfigurationVersions,
 			List<ServiceConfigurationValueInstance> allServiceConfigurationValues,
 			List<ConfigurationParameterValueInstance> allConfigurationParametersValues,
 			List<ConfigurationParametersInstance> allConfigurationParameterInfos,
 			string[] targetParameterNames)
 		{
 			// Pre-index for performance
+			var scverLookup = allServiceConfigurationVersions.ToDictionary(sver => sver.ID.Id);
 			var scvLookup = allServiceConfigurationValues.ToDictionary(scv => scv.ID.Id);
 			var cvLookup = allConfigurationParametersValues.ToDictionary(cv => cv.ID.Id);
 			var infoLookup = allConfigurationParameterInfos
 				.Where(info => targetParameterNames.Contains(info.ConfigurationParameterInfo.ParameterName))
 				.ToDictionary(info => info.ID.Id, info => info.ConfigurationParameterInfo.ParameterName);
 
-			foreach (var scvid in serviceRow.Service.ServiceInfo.ServiceConfigurationParameters)
+			var currentServiceConfigurationId = serviceRow.Service.ServiceInfo.ServiceConfiguration;
+			if (!currentServiceConfigurationId.HasValue || !scverLookup.TryGetValue(serviceRow.Service.ServiceInfo.ServiceConfiguration.Value, out var currentServiceConfiguration))
+				return;
+
+			foreach (var scvid in currentServiceConfiguration.ServiceConfigurationInfo.ServiceConfigurationParameters)
 			{
 				if (!scvLookup.TryGetValue(scvid, out var serviceConfig))
 					continue;
@@ -305,13 +313,13 @@ namespace SLCSMDSGetServiceByServiceType
 		}
 
 		private IEnumerable<ServicesInstance> GetServices(
-			IEnumerable<ServiceConfigurationValueInstance> serviceConfigurationValues)
+			IEnumerable<ServiceConfigurationVersionInstance> serviceConfigurationVersions)
 		{
-			var filters = serviceConfigurationValues
-				.Select(serviceConfigValue =>
+			var filters = serviceConfigurationVersions
+				.Select(serviceConfigVersion =>
 					(FilterElement<DomInstance>)DomInstanceExposers.FieldValues
-						.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfigurationParameters)
-						.Contains(serviceConfigValue.ID.Id))
+						.DomInstanceField(SlcServicemanagementIds.Sections.ServiceInfo.ServiceConfiguration)
+						.Contains(serviceConfigVersion.ID.Id))
 				.ToList();
 
 			var filter = filters.Any()
@@ -320,6 +328,24 @@ namespace SLCSMDSGetServiceByServiceType
 
 			var result = _serviceMangerDomHelper.DomInstances.Read(filter);
 			return result.Select(r => new ServicesInstance(r));
+		}
+
+		private List<ServiceConfigurationVersionInstance> GetServiceConfigurationVersions(
+			IEnumerable<ServiceConfigurationValueInstance> serviceConfigurationValues)
+		{
+			var filters = serviceConfigurationValues
+				.Select(serviceConfigValue =>
+					(FilterElement<DomInstance>)DomInstanceExposers.FieldValues
+						.DomInstanceField(SlcServicemanagementIds.Sections.ServiceConfigurationInfo.ServiceConfigurationParameters)
+						.Contains(serviceConfigValue.ID.Id))
+				.ToList();
+
+			var filter = filters.Any()
+				? filters.Aggregate((f1, f2) => f1.OR(f2))
+				: new FALSEFilterElement<DomInstance>();
+
+			var result = _serviceMangerDomHelper.DomInstances.Read(filter);
+			return result.Select(r => new ServiceConfigurationVersionInstance(r)).ToList();
 		}
 
 		private AlarmLevel TryGetAlarmLevel(ServiceRow service)
