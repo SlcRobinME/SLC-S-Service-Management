@@ -55,6 +55,7 @@ namespace SLCSMDemo
 	using System.Collections.Generic;
 	using System.Linq;
 	using DomHelpers.SlcConfigurations;
+	using DomHelpers.SlcPeople_Organizations;
 	using DomHelpers.SlcServicemanagement;
 	using Newtonsoft.Json;
 	using Skyline.DataMiner.Analytics.GenericInterface.QueryBuilder;
@@ -121,7 +122,30 @@ namespace SLCSMDemo
 			//FilterServiceOnCharacteristic(engine);
 
 			//CreateServiceInventoryItemsPerOrder(engine);
-			UpdateAllFixedValueParams(engine);
+			//UpdateAllFixedValueParams(engine);
+			AddFieldDescriptor(engine);
+		}
+
+		private static void AddFieldDescriptor(IEngine engine)
+		{
+			DomHelper domHelper = new DomHelper(engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
+
+			var ownerField = new DomInstanceFieldDescriptor
+			{
+				ID = new FieldDescriptorID(new Guid("1856aa22-c48b-4cfa-9418-2e4aa1ced47b")),
+				Name = "Owner",
+				FieldType = typeof(Guid),
+				IsOptional = true,
+				IsHidden = false,
+				IsReadonly = false,
+				IsSoftDeleted = false,
+				DomDefinitionIds = { new DomDefinitionId(SlcPeople_OrganizationsIds.Definitions.People.Id) }
+			};
+
+			var section = domHelper.SectionDefinitions.Read(SectionDefinitionExposers.ID.Equal(SlcServicemanagementIds.Sections.ServiceOrderInfo.Id))[0] as CustomSectionDefinition;
+			section.AddOrReplaceFieldDescriptor(ownerField);
+
+			domHelper.SectionDefinitions.Update(section);
 		}
 
 		private static void FilterServiceOnCategory(IEngine engine)
