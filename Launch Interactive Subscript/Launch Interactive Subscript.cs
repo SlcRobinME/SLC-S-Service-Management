@@ -104,7 +104,7 @@ namespace Launch_Interactive_Subscript
 
 				var configurationParameters = GetFilteredConfigurationParameters(engine, service);
 
-				List<ServiceCharacteristic> serviceCharacteristics = service.Configurations.Select(
+				List<ServiceCharacteristic> serviceCharacteristics = service.ServiceConfiguration.Parameters.Select(
 						x => new ServiceCharacteristic
 						{
 							Id = x.ConfigurationParameter.ConfigurationParameterId,
@@ -169,7 +169,7 @@ namespace Launch_Interactive_Subscript
 		{
 			FilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> filterConfigParams =
 				new ORFilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>();
-			foreach (Guid? guid in service.Configurations.Select(x => x.ConfigurationParameter?.ConfigurationParameterId))
+			foreach (Guid? guid in service.ServiceConfiguration?.Parameters.Select(x => x.ConfigurationParameter?.ConfigurationParameterId))
 			{
 				if (!guid.HasValue)
 				{

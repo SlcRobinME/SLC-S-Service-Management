@@ -77,7 +77,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 		private InteractiveController _controller;
 		private IEngine _engine;
 
-		private enum Action
+		public enum Action
 		{
 			Add,
 			AddItem,
@@ -149,9 +149,17 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				instance.Description = serviceSpecificationInstance.Description;
 			}
 
-			if (serviceSpecificationInstance?.Configurations != null)
+			instance.ServiceConfiguration = new Models.ServiceConfigurationVersion
 			{
-				instance.Configurations = serviceSpecificationInstance.Configurations
+				VersionName = serviceSpecificationInstance?.Name,
+				CreatedAt = DateTime.UtcNow,
+				Parameters = new List<Models.ServiceConfigurationValue>(),
+				Profiles = new List<Models.ServiceProfile>(),
+			};
+
+			if (serviceSpecificationInstance?.ConfigurationParameters != null)
+			{
+				instance.ServiceConfiguration.Parameters = serviceSpecificationInstance.ConfigurationParameters
 					.Where(x => x?.ConfigurationParameter != null)
 					.Select(
 						x =>
@@ -162,7 +170,35 @@ namespace SLC_SM_Create_Service_Inventory_Item
 								Mandatory = x.MandatoryAtService,
 							};
 							scv.ConfigurationParameter.ID = Guid.Empty;
+							RemoveServiceParameterOptionsLinks(scv);
 							return scv;
+						})
+					.ToList();
+			}
+
+			if (serviceSpecificationInstance?.ConfigurationProfiles != null)
+			{
+				instance.ServiceConfiguration.Profiles = serviceSpecificationInstance.ConfigurationProfiles
+					.Where(x => x?.Profile != null)
+					.Select(
+						x =>
+						{
+							var sp = new Models.ServiceProfile
+							{
+								ProfileDefinition = x.ProfileDefinition,
+								Profile = x.Profile,
+								Mandatory = x.MandatoryAtService,
+							};
+							sp.Profile.ID = Guid.Empty;
+							sp.Profile.ConfigurationParameterValues = sp.Profile.ConfigurationParameterValues
+								.Select(cpv =>
+								{
+									cpv.ID = Guid.Empty;
+									RemoveParameterOptionsLinks(cpv);
+									return cpv;
+								})
+								.ToList();
+							return sp;
 						})
 					.ToList();
 			}
@@ -324,7 +360,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			if (serviceOrderItem.Configurations != null)
 			{
-				newService.Configurations = serviceOrderItem.Configurations
+				newService.ServiceConfiguration.Parameters = serviceOrderItem.Configurations
 					.Where(x => x?.ConfigurationParameter != null)
 					.Select(
 						x =>
@@ -335,6 +371,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 								Mandatory = x.Mandatory,
 							};
 							scv.ConfigurationParameter.ID = Guid.Empty;
+							RemoveServiceParameterOptionsLinks(scv);
 							return scv;
 						})
 					.ToList();
@@ -402,6 +439,42 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				   ?? throw new InvalidOperationException($"No Dom Instance with ID '{domId}' found on the system!");
 		}
 
+		private static void RemoveServiceParameterOptionsLinks(Models.ServiceConfigurationValue config)
+		{
+			if (config.ConfigurationParameter.NumberOptions != null)
+			{
+				config.ConfigurationParameter.NumberOptions.ID = Guid.NewGuid();
+			}
+
+			if (config.ConfigurationParameter.DiscreteOptions != null)
+			{
+				config.ConfigurationParameter.DiscreteOptions.ID = Guid.NewGuid();
+			}
+
+			if (config.ConfigurationParameter.TextOptions != null)
+			{
+				config.ConfigurationParameter.TextOptions.ID = Guid.NewGuid();
+			}
+		}
+
+		private static void RemoveParameterOptionsLinks(Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameterValue config)
+		{
+			if (config.NumberOptions != null)
+			{
+				config.NumberOptions.ID = Guid.NewGuid();
+			}
+
+			if (config.DiscreteOptions != null)
+			{
+				config.DiscreteOptions.ID = Guid.NewGuid();
+			}
+
+			if (config.TextOptions != null)
+			{
+				config.TextOptions.ID = Guid.NewGuid();
+			}
+		}
+
 		private void RunSafe()
 		{
 			string actionRaw = _engine.ReadScriptParamFromApp("Action");
@@ -416,7 +489,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			var repo = new DataHelpersServiceManagement(_engine.GetUserConnection());
 
 			// Init views
-			var view = new ServiceView(_engine);
+			var view = new ServiceView(_engine, action);
 			var presenter = new ServicePresenter(_engine, repo, view);
 
 			if (action == Action.AddItem)

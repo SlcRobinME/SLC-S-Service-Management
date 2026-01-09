@@ -27,7 +27,7 @@
 
 		public static bool ShowPopupDialog(this IEngine engine, string title, string message, string buttonText)
 		{
-			return ShowPopupDialog(engine, new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways }, title, message, buttonText);
+			return ShowPopupDialog(engine, new InteractiveController(engine) { /*ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways*/ }, title, message, buttonText);
 		}
 
 		public static bool ShowPopupDialog(this IEngine engine, InteractiveController controller, string title, string message, string buttonText)
@@ -55,7 +55,7 @@
 
 			presenter.LoadFromModel();
 
-			new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways }.ShowDialog(view);
+			new InteractiveController(engine) { /*ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways*/ }.ShowDialog(view);
 		}
 
 		public static YesNoCancelOption ShowYesNoCancelDialog(this IEngine engine, string message)

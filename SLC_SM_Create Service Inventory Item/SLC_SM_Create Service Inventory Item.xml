@@ -1,4 +1,4 @@
-<DMSScript options="272" xmlns="http://www.skyline.be/automation">
+﻿<DMSScript options="272" xmlns="http://www.skyline.be/automation">
 	<Name>SLC_SM_Create Service Inventory Item</Name>
 	<Description />
 	<Type>Automation</Type>

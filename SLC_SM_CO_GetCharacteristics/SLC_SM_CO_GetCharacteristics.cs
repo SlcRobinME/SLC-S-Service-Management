@@ -111,7 +111,7 @@ namespace SLCSMCOGetWorkflowIcon
 				return;
 			}
 
-			var configs = service.Configurations;
+			var configs = service.ServiceConfiguration?.Parameters;
 
 			var configValues = configs.Select(c => c.ConfigurationParameter);
 
