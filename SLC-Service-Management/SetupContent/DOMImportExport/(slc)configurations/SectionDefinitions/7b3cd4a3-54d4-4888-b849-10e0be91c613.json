@@ -9,13 +9,13 @@
         "FieldType": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
         "ID": {
           "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptorID, SLNetTypes",
-          "Id": "c42c343d-f8b5-4fe6-a55b-18076b91c5fe"
+          "Id": "8c74f022-67aa-4f50-bcf7-14bb1908f14a"
         },
-        "IsHidden": true,
-        "IsOptional": true,
+        "IsHidden": false,
+        "IsOptional": false,
         "IsReadonly": false,
         "IsSoftDeleted": false,
-        "Name": "ID",
+        "Name": "Script Name",
         "Tooltip": "",
         "Validators": {
           "$type": "System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.IFieldValidator, SLNetTypes]], mscorlib",
@@ -28,13 +28,13 @@
         "FieldType": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
         "ID": {
           "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptorID, SLNetTypes",
-          "Id": "0b00add5-1d5d-41b5-a3f9-98bb8219085b"
+          "Id": "9bb9a67c-68c6-4d4b-9016-545dd9eafa1b"
         },
-        "IsHidden": true,
-        "IsOptional": true,
+        "IsHidden": false,
+        "IsOptional": false,
         "IsReadonly": false,
         "IsSoftDeleted": false,
-        "Name": "Type",
+        "Name": "Protocol",
         "Tooltip": "",
         "Validators": {
           "$type": "System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.IFieldValidator, SLNetTypes]], mscorlib",
@@ -47,14 +47,14 @@
         "FieldType": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
         "ID": {
           "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptorID, SLNetTypes",
-          "Id": "33c36905-b227-4fcd-8866-a523c61fd5d9"
+          "Id": "a5847bd0-6cff-47d2-a7be-e04469b5f151"
         },
-        "IsHidden": true,
-        "IsOptional": true,
+        "IsHidden": false,
+        "IsOptional": false,
         "IsReadonly": false,
         "IsSoftDeleted": false,
-        "Name": "Parent Service Item",
-        "Tooltip": "Parent for the defined relationship",
+        "Name": "Protocol Version",
+        "Tooltip": "",
         "Validators": {
           "$type": "System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.IFieldValidator, SLNetTypes]], mscorlib",
           "$values": []
@@ -62,56 +62,21 @@
       },
       {
         "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptor, SLNetTypes",
-        "DefaultValue": null,
-        "FieldType": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+        "DefaultValue": {
+          "$type": "Skyline.DataMiner.Net.Sections.ValueWrapper`1[[System.Boolean, mscorlib]], SLNetTypes",
+          "Value": false
+        },
+        "FieldType": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
         "ID": {
           "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptorID, SLNetTypes",
-          "Id": "32a96c4e-7553-464a-822b-b8ab2620bfef"
+          "Id": "03476628-cefa-42a2-b3f3-6d799cd4ca1a"
         },
-        "IsHidden": true,
-        "IsOptional": true,
+        "IsHidden": false,
+        "IsOptional": false,
         "IsReadonly": false,
         "IsSoftDeleted": false,
-        "Name": "Child Service Item",
-        "Tooltip": "Child for the defined relationship",
-        "Validators": {
-          "$type": "System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.IFieldValidator, SLNetTypes]], mscorlib",
-          "$values": []
-        }
-      },
-      {
-        "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptor, SLNetTypes",
-        "DefaultValue": null,
-        "FieldType": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
-        "ID": {
-          "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptorID, SLNetTypes",
-          "Id": "f205a562-cbb7-416c-a04d-dd0d99e90d1a"
-        },
-        "IsHidden": true,
-        "IsOptional": true,
-        "IsReadonly": false,
-        "IsSoftDeleted": false,
-        "Name": "Parent Service Item Interface ID",
-        "Tooltip": "Parent for the defined relationship",
-        "Validators": {
-          "$type": "System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.IFieldValidator, SLNetTypes]], mscorlib",
-          "$values": []
-        }
-      },
-      {
-        "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptor, SLNetTypes",
-        "DefaultValue": null,
-        "FieldType": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
-        "ID": {
-          "$type": "Skyline.DataMiner.Net.Sections.FieldDescriptorID, SLNetTypes",
-          "Id": "2c4ba097-9481-41e9-bf03-8bee166fc589"
-        },
-        "IsHidden": true,
-        "IsOptional": true,
-        "IsReadonly": false,
-        "IsSoftDeleted": false,
-        "Name": "Child Service Item Interface ID",
-        "Tooltip": "Child for the defined relationship",
+        "Name": "Present",
+        "Tooltip": "",
         "Validators": {
           "$type": "System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.IFieldValidator, SLNetTypes]], mscorlib",
           "$values": []
@@ -121,11 +86,11 @@
   },
   "ID": {
     "$type": "Skyline.DataMiner.Net.Sections.SectionDefinitionID, SLNetTypes",
-    "Id": "e1ccbd9b-fffb-448f-a6c5-de47e842be9b",
-    "ModuleId": "(slc)servicemanagement"
+    "Id": "7b3cd4a3-54d4-4888-b849-10e0be91c613",
+    "ModuleId": "(slc)configurations"
   },
   "IsHidden": false,
-  "Name": "Service Item Relationship",
+  "Name": "Script Info",
   "ReservationLinkInfo": null,
   "SectionValidators": {
     "$type": "System.Collections.Generic.List`1[[Skyline.DataMiner.Net.Sections.ISectionValidator, SLNetTypes]], mscorlib",
