@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Runtime.CompilerServices;
 	using System.Text.RegularExpressions;
 
 	using DomHelpers.SlcConfigurations;
@@ -670,6 +671,7 @@
 			var decimals = new Numeric { StepSize = 1, Minimum = 0, Maximum = 6, IsEnabled = false, MaxWidth = 80, IsVisible = !collapseButtom.IsCollapsed };
 			var values = new Button("...") { IsEnabled = false, IsVisible = !collapseButtom.IsCollapsed };
 			var delete = new Button("🚫") { IsEnabled = !mandatory, IsVisible = !collapseButtom.IsCollapsed };
+			bool isFixed = record.ConfigurationParamValue.ValueFixed;
 
 			label.Changed += (sender, args) => record.ConfigurationParamValue.Label = args.Value;
 
