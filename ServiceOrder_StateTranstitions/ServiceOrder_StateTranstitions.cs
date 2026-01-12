@@ -105,14 +105,14 @@ namespace ServiceOrder_StateTranstitions_1
 					var itemHelper = new DataHelperServiceOrderItem(engine.GetUserConnection());
 					foreach (var item in order.OrderItems.Where(x => x.ServiceOrderItem.Status == DomHelpers.SlcServicemanagement.SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.Acknowledged))
 					{
-						RunScriptInitServiceInventoryItem(engine, item.ServiceOrderItem); // Init inventory item automatically
-
 						var updatedItem = itemHelper.Read(ServiceOrderItemExposers.Guid.Equal(item.ServiceOrderItem.ID)).FirstOrDefault() ?? throw new InvalidOperationException($"Service Order Item with ID '{item.ServiceOrderItem.ID}' no longer exists.");
 						if (updatedItem.Status == DomHelpers.SlcServicemanagement.SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.Acknowledged)
 						{
 							engine.GenerateInformation($" - Transitioning Service Order Item '{item.ServiceOrderItem.Name}' to In Progress");
 							itemHelper.UpdateState(updatedItem, DomHelpers.SlcServicemanagement.SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 						}
+
+						RunScriptInitServiceInventoryItem(engine, item.ServiceOrderItem); // Init inventory item automatically
 					}
 				}
 			}

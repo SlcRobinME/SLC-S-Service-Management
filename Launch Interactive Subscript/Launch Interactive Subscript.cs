@@ -63,6 +63,7 @@ namespace Launch_Interactive_Subscript
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
+	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
 	using static DomHelpers.SlcServicemanagement.SlcServicemanagementIds.Behaviors.Service_Behavior;
 	using Models = Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models;
 
@@ -104,7 +105,7 @@ namespace Launch_Interactive_Subscript
 
 				var configurationParameters = GetFilteredConfigurationParameters(engine, service);
 
-				List<ServiceCharacteristic> serviceCharacteristics = service.ServiceConfiguration.Parameters.Select(
+				List<ServiceCharacteristic> serviceCharacteristics = service.ServiceConfiguration?.Parameters.Select(
 						x => new ServiceCharacteristic
 						{
 							Id = x.ConfigurationParameter.ConfigurationParameterId,
@@ -114,7 +115,8 @@ namespace Launch_Interactive_Subscript
 							StringValue = x.ConfigurationParameter.StringValue,
 							DoubleValue = x.ConfigurationParameter.DoubleValue,
 						})
-					.ToList();
+					.ToList()
+					?? new List<ServiceCharacteristic>();
 
 				List<ServiceCharacteristic> serviceItemCharacteristics = new List<ServiceCharacteristic>();
 
@@ -150,7 +152,7 @@ namespace Launch_Interactive_Subscript
 			}
 			catch (Exception e)
 			{
-				engine.ExitFail(e.Message);
+				engine.ShowErrorDialog(e);
 			}
 		}
 
@@ -182,10 +184,11 @@ namespace Launch_Interactive_Subscript
 		{
 			FilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> filterConfigParams =
 				new ORFilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>();
-			var usedConfigurationParameterIds = service.ServiceConfiguration.Parameters
+			var usedConfigurationParameterIds = service.ServiceConfiguration?.Parameters
 				.Where(x => x?.ConfigurationParameter?.ConfigurationParameterId != null && x.ConfigurationParameter.ConfigurationParameterId != Guid.Empty)
 				.Select(x => x.ConfigurationParameter.ConfigurationParameterId)
-				.ToList();
+				.ToList()
+												?? new List<Guid>();
 			foreach (Guid guid in usedConfigurationParameterIds)
 			{
 				filterConfigParams = filterConfigParams.OR(ConfigurationParameterExposers.Guid.Equal(guid));

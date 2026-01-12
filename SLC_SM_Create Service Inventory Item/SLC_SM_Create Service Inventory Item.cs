@@ -293,7 +293,9 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			while (_engine.FindServiceByKey(serviceId.Value) == null)
 			{
 				if (sw.ElapsedMilliseconds > timeout)
+				{
 					throw new TimeoutException($"Service {serviceId} was not created within {timeout} ms.");
+				}
 
 				Thread.Sleep(250);
 			}
@@ -363,6 +365,15 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				Category = serviceOrderItem.ServiceCategoryId.HasValue ? repo.ServiceCategories.Read(ServiceCategoryExposers.Guid.Equal(serviceOrderItem.ServiceCategoryId.Value)).FirstOrDefault() : null,
 				ServiceItems = new List<Models.ServiceItem>(),
 				ServiceItemsRelationships = new List<Models.ServiceItemRelationShip>(),
+				ServiceConfiguration = new Models.ServiceConfigurationVersion
+				{
+					ID = Guid.NewGuid(),
+					CreatedAt = DateTime.UtcNow,
+					VersionName = "Default",
+					Description = "Default",
+					Parameters = new List<Models.ServiceConfigurationValue>(),
+					Profiles = new List<Models.ServiceProfile>(),
+				},
 			};
 
 			if (serviceOrderItem.Configurations != null)
@@ -392,7 +403,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				{
 					foreach (var relationship in spec.ServiceItemsRelationships)
 					{
-						if (!newService.ServiceItemsRelationships.Contains(relationship))
+						if (newService.ServiceItemsRelationships.All(r => r.Id != relationship.Id))
 						{
 							newService.ServiceItemsRelationships.Add(relationship);
 						}
