@@ -14,14 +14,16 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 	///     Represents a data source.
 	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
-	[GQIMetaData(Name = "SLC_SM_GQIDS_Get Service Item Infos")]
+	[GQIMetaData(Name = DataSourceName)]
 	public sealed class SLCSMGQIDSGetServiceItemInfos : IGQIDataSource, IGQIInputArguments, IGQIOnInit
 	{
+		private const string DataSourceName = "SLC_SM_GQIDS_Get Service Item Infos";
 		private readonly GQIStringArgument domIdArg = new GQIStringArgument("DOM ID") { IsRequired = false };
 		private GQIDMS _dms;
 
 		// variable where input argument will be stored
 		private Guid instanceDomId;
+		private IGQILogger _logger;
 
 		public GQIColumn[] GetColumns()
 		{
@@ -38,6 +40,7 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 				new GQIDateTimeColumn("Start Time"),
 				new GQIDateTimeColumn("End Time"),
 				new GQIIntColumn("Alarm Level"),
+				new GQIStringColumn("Configuration Version"),
 			};
 		}
 
@@ -51,6 +54,11 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
+			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
+		}
+
+		private GQIPage BuildupRows()
+		{
 			try
 			{
 				return new GQIPage(GetRows())
@@ -60,7 +68,8 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 			}
 			catch (Exception e)
 			{
-				_dms.GenerateInformationMessage("GQIDS|Get Service Item Info Exception: " + e);
+				_dms.GenerateInformationMessage($"GQIDS|{DataSourceName}|Exception: {e}");
+				_logger.Error($"GQIDS|{DataSourceName}|Exception: {e}");
 				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
 			}
 		}
@@ -79,6 +88,8 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
 			_dms = args.DMS;
+			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
 			return default;
 		}
 
@@ -134,6 +145,7 @@ namespace SLC_SM_GQIDS_Get_Service_Item_Infos
 						new GQICell { Value = service.StartTime?.ToUniversalTime() },
 						new GQICell { Value = service.EndTime?.ToUniversalTime() },
 						new GQICell { Value = alarmLevel },
+						new GQICell { Value = service.ServiceConfiguration?.VersionName ?? String.Empty },
 					}),
 			};
 		}

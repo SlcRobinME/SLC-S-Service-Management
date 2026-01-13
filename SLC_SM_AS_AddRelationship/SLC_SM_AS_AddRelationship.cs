@@ -68,7 +68,6 @@ namespace SLCSMASAddRelationship
 	{
 		private const string ADD = "add";
 		private const string DELETE = "delete";
-
 		private Guid _domId;
 		private string _sourceId;
 		private string _destinationId;
@@ -87,7 +86,8 @@ namespace SLCSMASAddRelationship
 		{
 			try
 			{
-				RunSafe(engine);
+				//ATTENTION: THIS SCRIPT IS CURRENTLY NOT BEING USED.
+				//RunSafe(engine);
 			}
 			catch (Exception e)
 			{
@@ -126,6 +126,7 @@ namespace SLCSMASAddRelationship
 			{
 				var section = new ServiceItemRelationshipSection
 				{
+					ID = Guid.NewGuid().ToString(),
 					ParentServiceItem = _sourceId,
 					ParentServiceItemInterfaceID = _sourceInterfaceId,
 					ChildServiceItem = _destinationId,
@@ -184,8 +185,12 @@ namespace SLCSMASAddRelationship
 			}
 		}
 
-		private ServiceItemRelationshipSection FindMatchingRelationship(IList<ServiceItemRelationshipSection> relationships,
-			string parentId, string parentInterfaceId, string childId, string childInterfaceId)
+		private ServiceItemRelationshipSection FindMatchingRelationship(
+			IList<ServiceItemRelationshipSection> relationships,
+			string parentId,
+			string parentInterfaceId,
+			string childId,
+			string childInterfaceId)
 		{
 			return relationships.FirstOrDefault(x =>
 				x.ParentServiceItem == parentId &&

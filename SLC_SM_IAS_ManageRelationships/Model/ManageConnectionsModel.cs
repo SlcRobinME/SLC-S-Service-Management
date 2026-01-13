@@ -48,7 +48,7 @@
 		/// </summary>
 		/// <param name="source">A list of Service Items to be connected in sequence.</param>
 		/// <returns>A list of Service Item pairs between which a relationship will be built. </returns>
-		public IEnumerable<(Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem, Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem)> ToSequentialPairs(IEnumerable<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem> source)
+		public IEnumerable<(Models.ServiceItem, Models.ServiceItem)> ToSequentialPairs(IEnumerable<Models.ServiceItem> source)
 		{
 			using (var enumerator = source.GetEnumerator())
 			{
@@ -64,9 +64,9 @@
 			}
 		}
 
-		public List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItemRelationShip> FindRelationshipsBetweenPair(
+		public List<Models.ServiceItemRelationShip> FindRelationshipsBetweenPair(
 			IServiceItem instance,
-			(Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem, Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem) pair)
+			(Models.ServiceItem, Models.ServiceItem) pair)
 		{
 			var relationships = instance.ServiceItemRelationShips;
 			var parentId = pair.Item1.ID.ToString();
@@ -104,7 +104,7 @@
 			throw new InvalidOperationException($"Could not find the DOM instance with id {domId}");
 		}
 
-		public IEnumerable<Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem> GetServiceItems(
+		public IEnumerable<Models.ServiceItem> GetServiceItems(
 			IServiceItem instance,
 			IEnumerable<string> serviceItemIds)
 		{
@@ -130,7 +130,7 @@
 			}
 
 			var dataHelperService = new DataHelperService(_engine.GetUserConnection());
-			Models.Service service = dataHelperService.Read(ServiceExposers.Guid.Equal(instance.Guid)).FirstOrDefault();
+			Models.Service service = dataHelperService.Read(ServiceExposers.Guid.Equal(instance.Guid)).SingleOrDefault();
 			if (service != null)
 			{
 				service.ServiceItemsRelationships = relationships;
@@ -139,7 +139,7 @@
 			}
 
 			var dataHelperServiceSpecification = new DataHelperServiceSpecification(_engine.GetUserConnection());
-			Models.ServiceSpecification spec = dataHelperServiceSpecification.Read(ServiceSpecificationExposers.Guid.Equal(instance.Guid)).FirstOrDefault();
+			Models.ServiceSpecification spec = dataHelperServiceSpecification.Read(ServiceSpecificationExposers.Guid.Equal(instance.Guid)).SingleOrDefault();
 			if (spec != null)
 			{
 				spec.ServiceItemsRelationships = relationships;
@@ -163,7 +163,7 @@
 			return _engine.GetScriptOutput("ServiceItemId");
 		}
 
-		public IDefinitionObject ResolveDefinitionReference(IServiceItem instance, Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement.Models.ServiceItem serviceItem)
+		public IDefinitionObject ResolveDefinitionReference(IServiceItem instance, Models.ServiceItem serviceItem)
 		{
 			if (serviceItem.Type == SlcServicemanagementIds.Enums.ServiceitemtypesEnum.Workflow)
 			{

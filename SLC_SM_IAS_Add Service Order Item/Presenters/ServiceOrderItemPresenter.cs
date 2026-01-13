@@ -65,7 +65,7 @@
 
 				if (!isEdit && view.Specification.Selected != null)
 				{
-					instanceToReturn.ServiceOrderItem.Configurations = view.Specification.Selected.Configurations.Where(x => x?.ConfigurationParameter != null).Select(x => new Models.ServiceOrderItemConfigurationValue
+					instanceToReturn.ServiceOrderItem.Configurations = view.Specification.Selected.ConfigurationParameters.Where(x => x?.ConfigurationParameter != null).Select(x => new Models.ServiceOrderItemConfigurationValue
 					{
 						ConfigurationParameter = x.ConfigurationParameter,
 						Mandatory = x.MandatoryAtServiceOrder,

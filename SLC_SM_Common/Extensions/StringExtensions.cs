@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Text;
+	using System.Text.RegularExpressions;
 
 	public static class StringExtensions
 	{
@@ -48,6 +49,18 @@
 			}
 
 			return sb.ToString().TrimEnd(); // remove trailing newline
+		}
+
+		public static string ReplaceTrailingParentesisContent(this string input, string newContent)
+		{
+			// If input ends with (...), replace content inside the last parenthesis
+			if (Regex.IsMatch(input, @"\(([^()]*)\)\s*$"))
+			{
+				return Regex.Replace(input, @"\(([^()]*)\)\s*$", $"({newContent})");
+			}
+
+			// If input does not end with (...), append (newContent)
+			return $"{input} ({newContent})";
 		}
 	}
 }

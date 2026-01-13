@@ -48,7 +48,6 @@ DATE		VERSION		AUTHOR			COMMENTS
 16/06/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
-
 namespace SLCSMDSGetWorkflows
 {
 	using System;
@@ -56,35 +55,26 @@ namespace SLCSMDSGetWorkflows
 	using System.Linq;
 	using DomHelpers.SlcProperties;
 	using DomHelpers.SlcWorkflow;
+	using Library.Dom;
 	using Skyline.DataMiner.Analytics.GenericInterface;
-	using Skyline.DataMiner.Core.DataMinerSystem.Common;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using SLC_SM_Common.Extensions;
 
 	/// <summary>
-	/// Represents a data source.
-	/// See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
+	///     Represents a data source.
+	///     See: https://aka.dataminer.services/gqi-external-data-source for a complete example.
 	/// </summary>
-	[GQIMetaData(Name = "SLC_SM_DS_GetWorkflows")]
+	[GQIMetaData(Name = DataSourceName)]
 	public sealed class SLCSMDSGetWorkflows : IGQIDataSource, IGQIOnInit
 	{
+		private const string DataSourceName = "SLC_SM_DS_GetWorkflows";
 		private GQIDMS _dms;
-
-		public OnInitOutputArgs OnInit(OnInitInputArgs args)
-		{
-			// Initialize the data source
-			// See: https://aka.dataminer.services/igqioninit-oninit
-			_dms = args.DMS;
-
-			return default;
-		}
+		private IGQILogger _logger;
 
 		public GQIColumn[] GetColumns()
 		{
-			// Define data source columns
-			// See: https://aka.dataminer.services/igqidatasource-getcolumns
 			return new GQIColumn[]
 			{
 				new GQIStringColumn("ID"),
@@ -96,68 +86,34 @@ namespace SLCSMDSGetWorkflows
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			try
-			{
-				var workflowsDomHelper = new DomHelper(_dms.SendMessages, SlcWorkflowIds.ModuleId);
-				var workflowsResult = workflowsDomHelper.DomInstances
-					.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcWorkflowIds.Definitions.Workflows.Id)
-						.AND(DomInstanceExposers.StatusId.Equal(SlcWorkflowIds.Behaviors.Workflow_Behavior.Statuses.Complete)));
-
-				var workflowPropertyValues = new DomHelper(_dms.SendMessages, SlcPropertiesIds.ModuleId)
-					.DomInstances
-					.Read(DomInstanceExposers.DomDefinitionId.Equal(SlcPropertiesIds.Definitions.PropertyValues.Id))
-					.Select(p => new PropertyValuesInstance(p))
-					.ToArray();
-
-				var workflows = workflowsResult
-					.Select(w => new WorkflowsInstance(w))
-					.Select(wf => BuildRow(wf, FetchWorkflowCategory(wf, workflowPropertyValues)))
-					.ToArray();
-
-				var bookings = _dms.SendMessages(new GetLiteElementInfo { ProtocolName = "Skyline Booking Manager" })
-					.OfType<LiteElementInfoEvent>()
-					.ToArray();
-
-				var getPropertyMessages = bookings
-					.Select(b => new GetPropertyValueMessage
-					{
-						ObjectID = $"{b.DataMinerID}/{b.ElementID}",
-						ObjectType = "Element",
-						PropertyName = "Category",
-					})
-					.Cast<DMSMessage>()
-					.ToArray();
-
-				var bookingPropertyValues = _dms.SendMessages(getPropertyMessages)
-					.OfType<PropertyChangeEventMessage>()
-					.ToArray();
-
-				var bookingRows = bookings
-					.Select(b => BuildRow(b, FetchBookingCategory(b, bookingPropertyValues)))
-					.ToArray();
-
-				return new GQIPage(workflows.Concat(bookingRows).ToArray());
-			}
-			catch (Exception e)
-			{
-				_dms.GenerateInformationMessage("GQIDS|Get Workflows Exception: " + e);
-				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
-			}
+			return _logger.PerformanceLogger(nameof(GetNextPage), BuildupRows);
 		}
 
-		private string FetchBookingCategory(LiteElementInfoEvent liteElementInfoEvent, IEnumerable<PropertyChangeEventMessage> properties)
+		public OnInitOutputArgs OnInit(OnInitInputArgs args)
+		{
+			_dms = args.DMS;
+			_logger = args.Logger;
+			_logger.MinimumLogLevel = GQILogLevel.Debug;
+
+			return default;
+		}
+
+		private static string FetchBookingCategory(LiteElementInfoEvent liteElementInfoEvent, IEnumerable<PropertyChangeEventMessage> properties)
 		{
 			return properties
-				.FirstOrDefault(p =>
-					p.DataMinerID == liteElementInfoEvent.DataMinerID &&
-					p.ElementID == liteElementInfoEvent.ElementID)?.Value ?? "Other";
+				.FirstOrDefault(
+					p =>
+						p.DataMinerID == liteElementInfoEvent.DataMinerID &&
+						p.ElementID == liteElementInfoEvent.ElementID)
+				?.Value ?? "Other";
 		}
 
-		private string FetchWorkflowCategory(WorkflowsInstance workflow, IEnumerable<PropertyValuesInstance> propertyValues)
+		private static string FetchWorkflowCategory(WorkflowsInstance workflow, ICollection<PropertyValuesInstance> propertyValues)
 		{
 			return propertyValues
-				.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())?
-				.PropertyValues.FirstOrDefault(v => v.PropertyName == "Category")?.Value ?? "Other";
+				.FirstOrDefault(p => p.PropertyValueInfo.LinkedObjectID == workflow.ID.Id.ToString())
+				?.PropertyValues.FirstOrDefault(v => v.PropertyName == "Category")
+				?.Value ?? "Other";
 		}
 
 		private GQIRow BuildRow(WorkflowsInstance workflow, string category)
@@ -182,6 +138,65 @@ namespace SLCSMDSGetWorkflows
 					new GQICell { Value = category },
 					new GQICell { Value = "SRMBooking" },
 				});
+		}
+
+		private GQIPage BuildupRows()
+		{
+			try
+			{
+				var workflowsResult = _logger.PerformanceLogger(
+					"Get DOM Workflows",
+					() => WorkflowExtensions.GetWorkflows(_dms.SendMessages));
+
+				var workflowPropertyValues = _logger.PerformanceLogger(
+					"Get DOM Workflow Properties",
+					() => PropertyExtensions.GetCategories(_dms.SendMessages));
+
+				var workflows = _logger.PerformanceLogger(
+					"Build Workflows Rows",
+					() => workflowsResult
+						.Select(wf => BuildRow(wf, FetchWorkflowCategory(wf, workflowPropertyValues)))
+						.ToArray());
+
+				var bookings = _logger.PerformanceLogger(
+					"Get Booking Managers",
+					() => _dms.SendMessages(new GetLiteElementInfo { ProtocolName = "Skyline Booking Manager" })
+						.OfType<LiteElementInfoEvent>()
+						.ToArray());
+
+				var bookingPropertyValues = _logger.PerformanceLogger(
+					"Get Booking Properties",
+					() =>
+					{
+						var getPropertyMessages = bookings
+							.Select(
+								b => new GetPropertyValueMessage
+								{
+									ObjectID = $"{b.DataMinerID}/{b.ElementID}",
+									ObjectType = "Element",
+									PropertyName = "Category",
+								})
+							.Cast<DMSMessage>()
+							.ToArray();
+						return _dms.SendMessages(getPropertyMessages)
+							.OfType<PropertyChangeEventMessage>()
+							.ToArray();
+					});
+
+				var bookingRows = _logger.PerformanceLogger(
+					"Build Booking Rows",
+					() => bookings
+						.Select(b => BuildRow(b, FetchBookingCategory(b, bookingPropertyValues)))
+						.ToArray());
+
+				return new GQIPage(workflows.Concat(bookingRows).ToArray());
+			}
+			catch (Exception e)
+			{
+				_dms.GenerateInformationMessage($"GQIDS|{DataSourceName}|Exception: {e}");
+				_logger.Error($"GQIDS|{DataSourceName}|Exception: {e}");
+				return new GQIPage(Enumerable.Empty<GQIRow>().ToArray());
+			}
 		}
 	}
 }

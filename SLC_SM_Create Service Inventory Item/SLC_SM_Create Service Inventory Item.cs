@@ -75,10 +75,9 @@ namespace SLC_SM_Create_Service_Inventory_Item
 	public class Script
 	{
 		private InteractiveController _controller;
-		private DomHelper _domHelper;
 		private IEngine _engine;
 
-		private enum Action
+		public enum Action
 		{
 			Add,
 			AddItem,
@@ -107,7 +106,6 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			{
 				_engine = engine;
 				_controller = new InteractiveController(engine) { ScriptAbortPopupBehavior = ScriptAbortPopupBehavior.HideAlways };
-				InitHelpers();
 
 				RunSafe();
 			}
@@ -151,9 +149,17 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				instance.Description = serviceSpecificationInstance.Description;
 			}
 
-			if (serviceSpecificationInstance?.Configurations != null)
+			instance.ServiceConfiguration = new Models.ServiceConfigurationVersion
 			{
-				instance.Configurations = serviceSpecificationInstance.Configurations
+				VersionName = serviceSpecificationInstance?.Name,
+				CreatedAt = DateTime.UtcNow,
+				Parameters = new List<Models.ServiceConfigurationValue>(),
+				Profiles = new List<Models.ServiceProfile>(),
+			};
+
+			if (serviceSpecificationInstance?.ConfigurationParameters != null)
+			{
+				instance.ServiceConfiguration.Parameters = serviceSpecificationInstance.ConfigurationParameters
 					.Where(x => x?.ConfigurationParameter != null)
 					.Select(
 						x =>
@@ -164,7 +170,35 @@ namespace SLC_SM_Create_Service_Inventory_Item
 								Mandatory = x.MandatoryAtService,
 							};
 							scv.ConfigurationParameter.ID = Guid.Empty;
+							RemoveServiceParameterOptionsLinks(scv);
 							return scv;
+						})
+					.ToList();
+			}
+
+			if (serviceSpecificationInstance?.ConfigurationProfiles != null)
+			{
+				instance.ServiceConfiguration.Profiles = serviceSpecificationInstance.ConfigurationProfiles
+					.Where(x => x?.Profile != null)
+					.Select(
+						x =>
+						{
+							var sp = new Models.ServiceProfile
+							{
+								ProfileDefinition = x.ProfileDefinition,
+								Profile = x.Profile,
+								Mandatory = x.MandatoryAtService,
+							};
+							sp.Profile.ID = Guid.Empty;
+							sp.Profile.ConfigurationParameterValues = sp.Profile.ConfigurationParameterValues
+								.Select(cpv =>
+								{
+									cpv.ID = Guid.Empty;
+									RemoveParameterOptionsLinks(cpv);
+									return cpv;
+								})
+								.ToList();
+							return sp;
 						})
 					.ToList();
 			}
@@ -280,32 +314,30 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			repo.ServiceOrderItems.CreateOrUpdate(serviceOrderItem);
 
 			// Update state
-			var domInstanceId = new DomInstanceId(serviceOrderItem.ID);
-			if (serviceOrderItem.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.New)
+			if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.New)
 			{
-				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.New_To_Acknowledged);
-				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
+				serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.New_To_Acknowledged);
+				serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 			}
 
-			if (serviceOrderItem.StatusId == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Statuses.Acknowledged)
+			if (serviceOrderItem.Status == SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.StatusesEnum.Acknowledged)
 			{
-				_domHelper.DomInstances.DoStatusTransition(domInstanceId, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.Transitions.Acknowledged_To_Inprogress);
+				serviceOrderItem = repo.ServiceOrderItems.UpdateState(serviceOrderItem, SlcServicemanagementIds.Behaviors.Serviceorderitem_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 			}
 
 			// Update state of main Service Order as well
 			Models.ServiceOrder order = repo.ServiceOrders.Read(ServiceOrderExposers.ServiceOrderItemsExposers.ServiceOrderItem.Equal(serviceOrderItem)).FirstOrDefault();
 			if (order != null)
 			{
-				var orderId = new DomInstanceId(order.ID);
-				if (order.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.New)
+				if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.New)
 				{
-					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.New_To_Acknowledged);
-					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
+					order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.New_To_Acknowledged);
+					order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 				}
 
-				if (order.StatusId == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Statuses.Acknowledged)
+				if (order.Status == SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.StatusesEnum.Acknowledged)
 				{
-					_domHelper.DomInstances.DoStatusTransition(orderId, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.Transitions.Acknowledged_To_Inprogress);
+					order = repo.ServiceOrders.UpdateState(order, SlcServicemanagementIds.Behaviors.Serviceorder_Behavior.TransitionsEnum.Acknowledged_To_Inprogress);
 				}
 			}
 		}
@@ -328,7 +360,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 
 			if (serviceOrderItem.Configurations != null)
 			{
-				newService.Configurations = serviceOrderItem.Configurations
+				newService.ServiceConfiguration.Parameters = serviceOrderItem.Configurations
 					.Where(x => x?.ConfigurationParameter != null)
 					.Select(
 						x =>
@@ -339,6 +371,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 								Mandatory = x.Mandatory,
 							};
 							scv.ConfigurationParameter.ID = Guid.Empty;
+							RemoveServiceParameterOptionsLinks(scv);
 							return scv;
 						})
 					.ToList();
@@ -406,9 +439,40 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				   ?? throw new InvalidOperationException($"No Dom Instance with ID '{domId}' found on the system!");
 		}
 
-		private void InitHelpers()
+		private static void RemoveServiceParameterOptionsLinks(Models.ServiceConfigurationValue config)
 		{
-			_domHelper = new DomHelper(_engine.SendSLNetMessages, SlcServicemanagementIds.ModuleId);
+			if (config.ConfigurationParameter.NumberOptions != null)
+			{
+				config.ConfigurationParameter.NumberOptions.ID = Guid.NewGuid();
+			}
+
+			if (config.ConfigurationParameter.DiscreteOptions != null)
+			{
+				config.ConfigurationParameter.DiscreteOptions.ID = Guid.NewGuid();
+			}
+
+			if (config.ConfigurationParameter.TextOptions != null)
+			{
+				config.ConfigurationParameter.TextOptions.ID = Guid.NewGuid();
+			}
+		}
+
+		private static void RemoveParameterOptionsLinks(Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameterValue config)
+		{
+			if (config.NumberOptions != null)
+			{
+				config.NumberOptions.ID = Guid.NewGuid();
+			}
+
+			if (config.DiscreteOptions != null)
+			{
+				config.DiscreteOptions.ID = Guid.NewGuid();
+			}
+
+			if (config.TextOptions != null)
+			{
+				config.TextOptions.ID = Guid.NewGuid();
+			}
 		}
 
 		private void RunSafe()
@@ -425,7 +489,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 			var repo = new DataHelpersServiceManagement(_engine.GetUserConnection());
 
 			// Init views
-			var view = new ServiceView(_engine);
+			var view = new ServiceView(_engine, action);
 			var presenter = new ServicePresenter(_engine, repo, view);
 
 			if (action == Action.AddItem)
@@ -434,7 +498,7 @@ namespace SLC_SM_Create_Service_Inventory_Item
 				d.OkButton.Pressed += (sender, args) =>
 				{
 					var serviceOrderItem = repo.ServiceOrderItems.Read(ServiceOrderItemExposers.Guid.Equal(domId)).FirstOrDefault();
-					if (domId != Guid.Empty && serviceOrderItem == null)
+					if (domId == Guid.Empty || serviceOrderItem == null)
 					{
 						throw new InvalidOperationException($"No Service Order Item with ID '{domId}' found on the system!");
 					}

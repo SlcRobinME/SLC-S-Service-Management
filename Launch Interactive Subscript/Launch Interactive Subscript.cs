@@ -48,7 +48,7 @@ DATE        VERSION        AUTHOR            COMMENTS
 dd/mm/2025    1.0.0.1        XXX, Skyline    Initial version
 ****************************************************************************
 */
-namespace Launch_Interactive_Subscript_1
+namespace Launch_Interactive_Subscript
 {
 	using System;
 	using System.Collections.Generic;
@@ -63,12 +63,15 @@ namespace Launch_Interactive_Subscript_1
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.ServiceManagement;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.SDM;
 	using Skyline.DataMiner.Utils.ServiceManagement.Common.Extensions;
+	using static DomHelpers.SlcServicemanagement.SlcServicemanagementIds.Behaviors.Service_Behavior;
 
 	/// <summary>
 	///     Represents a DataMiner Automation script.
 	/// </summary>
 	public class Script
 	{
+		private const string ReferenceUnknown = "Reference Unknown";
+
 		/// <summary>
 		///     The script entry point.
 		/// </summary>
@@ -101,7 +104,7 @@ namespace Launch_Interactive_Subscript_1
 
 				var configurationParameters = GetFilteredConfigurationParameters(engine, service);
 
-				List<ServiceCharacteristic> serviceCharacteristics = service.Configurations.Select(
+				List<ServiceCharacteristic> serviceCharacteristics = service.ServiceConfiguration.Parameters.Select(
 						x => new ServiceCharacteristic
 						{
 							Id = x.ConfigurationParameter.ConfigurationParameterId,
@@ -123,8 +126,14 @@ namespace Launch_Interactive_Subscript_1
 
 				string scriptOutput = RunScript(engine, serviceItem.Script, serviceItem.DefinitionReference, serviceItemDetails);
 
-				serviceItem.ImplementationReference = !String.IsNullOrEmpty(scriptOutput) ? scriptOutput : "Reference Unknown";
+				serviceItem.ImplementationReference = !String.IsNullOrEmpty(scriptOutput) ? scriptOutput : ReferenceUnknown;
 				srvHelper.Services.CreateOrUpdate(service);
+
+				// Update Service Item to active (if applicable)
+				if (!String.IsNullOrEmpty(scriptOutput))
+				{
+					UpdateState(srvHelper, service);
+				}
 			}
 			catch (Exception e)
 			{
@@ -132,11 +141,35 @@ namespace Launch_Interactive_Subscript_1
 			}
 		}
 
+		private static void UpdateState(DataHelpersServiceManagement srvHelper, Models.Service service)
+		{
+			// If all items are in progress -> move to In Progress
+			if (!service.ServiceItems.All(x => !String.IsNullOrEmpty(x.ImplementationReference) && x.ImplementationReference != ReferenceUnknown))
+			{
+				return;
+			}
+
+			if (service.Status == StatusesEnum.New)
+			{
+				service = srvHelper.Services.UpdateState(service, TransitionsEnum.New_To_Designed);
+			}
+
+			if (service.Status == StatusesEnum.Designed)
+			{
+				service = srvHelper.Services.UpdateState(service, TransitionsEnum.Designed_To_Reserved);
+			}
+
+			if (service.Status == StatusesEnum.Reserved)
+			{
+				service = srvHelper.Services.UpdateState(service, TransitionsEnum.Reserved_To_Active);
+			}
+		}
+
 		private static List<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> GetFilteredConfigurationParameters(IEngine engine, Models.Service service)
 		{
 			FilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter> filterConfigParams =
 				new ORFilterElement<Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations.Models.ConfigurationParameter>();
-			foreach (Guid? guid in service.Configurations.Select(x => x.ConfigurationParameter?.ConfigurationParameterId))
+			foreach (Guid? guid in service.ServiceConfiguration?.Parameters.Select(x => x.ConfigurationParameter?.ConfigurationParameterId))
 			{
 				if (!guid.HasValue)
 				{
