@@ -40,9 +40,11 @@
 				&& !Regex.IsMatch(newValue, record.ConfigurationParameterValue.TextOptions.Regex))
 			{
 				textBox.ValidationState = UIValidationState.Invalid;
-				textBox.ValidationText = $"Input did not match Regex '{record.ConfigurationParameterValue.TextOptions.Regex}' - reverted to previous value";
+				textBox.ValidationText = string.IsNullOrEmpty(record.ConfigurationParameterValue.TextOptions.UserMessage) ?
+					$"Input did not match Regex '{record.ConfigurationParameterValue.TextOptions.Regex}' - reverted to previous value" :
+					record.ConfigurationParameterValue.TextOptions.UserMessage;
 				textBox.Text = string.Empty;
-				return true;
+				return false;
 			}
 
 			textBox.ValidationState = UIValidationState.Valid;
