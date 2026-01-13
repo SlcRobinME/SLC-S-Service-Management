@@ -1,4 +1,4 @@
-﻿namespace SLC_SM_IAS_Configurations.Views
+﻿namespace SLC_SM_IAS_Profiles.Views
 {
 	using System;
 
@@ -16,12 +16,12 @@
 
 		public Label ErrorValue { get; } = new Label(String.Empty);
 
-		public Button BtnAddOption { get; } = new Button("Add Option");
+		public Button BtnAddOption { get; } = new Button("Add Option") { Width = 100 };
 
 		public Section Options { get; } = new Section();
 
-		public Button BtnApply { get; } = new Button("Apply Updates") { Style = ButtonStyle.CallToAction };
+		public Button BtnApply { get; } = new Button("Apply") { Width = 100, Style = ButtonStyle.CallToAction };
 
-		public Button BtnReturn { get; } = new Button("Return");
+		public Button BtnReturn { get; } = new Button("Return") { Width = 100 };
 	}
 }
