@@ -7,18 +7,6 @@
 
 	public abstract class RowData
 	{
-		//protected RowData(
-		//	DataRecordPage page,
-		//	IEnumerable<Option<Models.ConfigurationUnit>> cachedUnits,
-		//	EventHandlers callbacks,
-		//	int rowIndex)
-		//{
-		//	Page = page;
-		//	CachedUnits = cachedUnits;
-		//	Callbacks = callbacks;
-		//	RowIndex = rowIndex;
-		//}
-
 		public DataRecordPage Page { get; set; }
 
 		public DataRecord Record { get; set; }
@@ -34,19 +22,6 @@
 
 	public class ProfileRowData : RowData
 	{
-		//public ProfileRowData(
-		//	ProfileDataRecord record,
-		//	DataRecordPage page,
-		//	IEnumerable<Option<Models.ConfigurationUnit>> cachedUnits,
-		//	IEnumerable<Models.ProfileDefinition> referenceOptions,
-		//	EventHandlers callbacks,
-		//	int rowIndex)
-		//	: base(page, cachedUnits, callbacks, rowIndex)
-		//{
-		//	base.Record = record;
-		//	ReferenceOptions = referenceOptions;
-		//}
-
 		public new ProfileDataRecord Record
 		{
 			get => base.Record as ProfileDataRecord;
@@ -58,19 +33,6 @@
 
 	public class ConfigurationRowData : RowData
 	{
-		//public ConfigurationRowData(
-		//	ConfigurationDataRecord record,
-		//	DataRecordPage page,
-		//	IEnumerable<Option<Models.ConfigurationUnit>> cachedUnits,
-		//	IEnumerable<Models.ConfigurationParameter> referenceOptions,
-		//	EventHandlers callbacks,
-		//	int rowIndex)
-		//	: base(page, cachedUnits, callbacks, rowIndex)
-		//{
-		//	base.Record = record;
-		//	ReferenceOptions = referenceOptions;
-		//}
-
 		public new ConfigurationDataRecord Record
 		{
 			get => base.Record as ConfigurationDataRecord;

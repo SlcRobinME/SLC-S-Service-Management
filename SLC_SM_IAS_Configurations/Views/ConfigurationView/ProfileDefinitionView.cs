@@ -119,13 +119,15 @@
 					.DistinctBy(p => p.ID);
 			}
 
-			return new ProfileDefinitionRowData(
-				record,
-				context.GetCurrentPage(),
-				CachedUnits,
-				options,
-				Callbacks,
-				row);
+			return new ProfileDefinitionRowData
+			{
+				Record = record,
+				Page = context.GetCurrentPage(),
+				CachedUnits = CachedUnits,
+				ReferenceOptions = options,
+				Callbacks = Callbacks,
+				RowIndex = row,
+			};
 		}
 
 		private Dictionary<Guid, List<Models.ProfileDefinition>> BuildParentMap(

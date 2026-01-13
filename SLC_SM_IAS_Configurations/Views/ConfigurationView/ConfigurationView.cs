@@ -107,7 +107,7 @@
 		{
 			var lblName = new Label("NAME");
 			var lblReference = new Label("CONFIGURATION PARAMETER");
-			var lblMultipleAllowed = new Label("ALLOW MULPTIPLE");
+			var lblMultipleAllowed = new Label("ALLOW MULTIPLE");
 			var lblMandatory = new Label("MANDATORY");
 			var lblType = new Label("TYPE");
 			var lblUnit = new Label("UNIT");
@@ -157,13 +157,15 @@
 					.DistinctBy(c => c.ID);
 			}
 
-			return new ConfigurationRowData(
-				record,
-				context.GetCurrentPage(),
-				CachedUnits,
-				options,
-				Callbacks,
-				row);
+			return new ConfigurationRowData
+			{
+				Record = record,
+				Page = context.GetCurrentPage(),
+				CachedUnits = CachedUnits,
+				ReferenceOptions = options,
+				Callbacks = Callbacks,
+				RowIndex = row,
+			};
 		}
 
 		protected int AddConfigurationParameterButton(int row)
