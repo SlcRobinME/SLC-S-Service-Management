@@ -1,11 +1,11 @@
-﻿namespace SLC_SM_IAS_Configurations.Presenters
+﻿namespace SLC_SM_IAS_Profiles.Presenters
 {
 	using System;
 	using System.Linq;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.ProjectApi.ServiceManagement.API.Configurations;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
-	using SLC_SM_IAS_Configurations.Views;
+	using SLC_SM_IAS_Profiles.Views;
 
 	public class DiscreteValuesPresenter
 	{
@@ -92,8 +92,17 @@
 			row += options.DiscreteValues.Count;
 
 			view.AddWidget(new WhiteSpace(), ++row, 0);
-			view.AddWidget(view.BtnApply, ++row, 2);
-			view.AddWidget(view.BtnReturn, row, 3);
+			view.AddWidget(view.BtnReturn, ++row, 0);
+			view.AddWidget(view.BtnApply, row, 1);
+			view.AddWidget(new WhiteSpace() { Width = 150 }, row, 2);
+			view.AddWidget(new WhiteSpace() { Width = 150 }, row, 3);
+			view.AddWidget(new WhiteSpace() { Width = 150 }, row, 4);
+			view.AddWidget(new WhiteSpace() { Width = 150 }, row, 5);
+			view.AddWidget(new WhiteSpace() { Width = 150 }, row, 6);
+			view.AddWidget(new WhiteSpace() { Width = 150 }, row, 7);
+			view.AddWidget(new WhiteSpace() { Width = 150 }, row, 8);
+			view.AddWidget(new WhiteSpace() { Width = 150 }, row, 9);
+			view.AddWidget(new WhiteSpace() { Width = 150 }, row, 10);
 		}
 	}
 }

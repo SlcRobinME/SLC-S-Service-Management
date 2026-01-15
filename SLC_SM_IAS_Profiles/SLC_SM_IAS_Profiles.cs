@@ -45,16 +45,14 @@ Revision History:
 
 DATE		VERSION		AUTHOR			COMMENTS
 
-28/05/2025	1.0.0.1		RME, Skyline	Initial version
+10/12/2025	1.0.0.1		RCA, Skyline	Initial version
 ****************************************************************************
 */
 
-namespace SLC_SM_IAS_Profiles
+namespace SLCSMIASProfiles
 {
 	using System;
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Utils.ServiceManagement.Common.IAS;
-	using SLC_SM_IAS_Profiles.Data;
 	using SLC_SM_IAS_Profiles.Presenters;
 
 	/// <summary>
@@ -62,8 +60,6 @@ namespace SLC_SM_IAS_Profiles
 	/// </summary>
 	public class Script
 	{
-		private IEngine _engine;
-
 		/// <summary>
 		/// The script entry point.
 		/// </summary>
@@ -80,42 +76,44 @@ namespace SLC_SM_IAS_Profiles
 
 			try
 			{
-				_engine = engine;
-				RunSafe();
+				RunSafe(engine);
 			}
 			catch (ScriptAbortException)
 			{
 				// Catch normal abort exceptions (engine.ExitFail or engine.ExitSuccess)
+				throw; // Comment if it should be treated as a normal exit of the script.
 			}
 			catch (ScriptForceAbortException)
 			{
 				// Catch forced abort exceptions, caused via external maintenance messages.
+				throw;
 			}
 			catch (ScriptTimeoutException)
 			{
 				// Catch timeout exceptions for when a script has been running for too long.
+				throw;
 			}
 			catch (InteractiveUserDetachedException)
 			{
 				// Catch a user detaching from the interactive script by closing the window.
 				// Only applicable for interactive scripts, can be removed for non-interactive scripts.
+				throw;
 			}
 			catch (Exception e)
 			{
-				engine.GenerateInformation(e.ToString());
-				engine.ShowErrorDialog(e);
+				engine.ExitFail("Run|Something went wrong: " + e);
 			}
 		}
 
-		private void RunSafe()
+		private void RunSafe(IEngine engine)
 		{
-			_engine.SetFlag(RunTimeFlags.NoCheckingSets);
-			_engine.SetFlag(RunTimeFlags.NoKeyCaching);
-			_engine.Timeout = TimeSpan.FromHours(1);
+			//engine.WebUIVersion = WebUIVersion.V2;
 
-			// Model-View-Presenter
-			var scriptData = new ScriptData(_engine);
-			var presenter = new ConfigurationPresenter(_engine, scriptData);
+			engine.SetFlag(RunTimeFlags.NoCheckingSets);
+			engine.SetFlag(RunTimeFlags.NoKeyCaching);
+			engine.Timeout = TimeSpan.FromHours(1);
+
+			var presenter = new ProfilePresenter(engine);
 			presenter.LoadFromModel();
 			presenter.ShowDialog();
 		}
